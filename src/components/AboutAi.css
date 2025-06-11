@@ -1,0 +1,138 @@
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.about-ai-container {
+  min-height: 100vh;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  position: relative;
+  margin-top: -5vh;
+}
+
+.about-ai-wrapper {
+  max-width: 1200px;
+  width: 100%;
+  position: relative;
+  
+}
+
+.about-ai-layout {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+}
+
+/* Completely standalone iframe - break out of flex layout */
+iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  outline: none !important;
+  display: block !important;
+  position: absolute !important;
+  left: -30% !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: -1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  flex: none !important;
+}
+
+/* Adjust content section to make room for absolute positioned iframe */
+.about-ai-content-section {
+  margin-left: 550px;
+
+}
+
+ .hidespline{    
+     position: absolute; 
+    height: 40px;     
+    width: 150px;     
+    background-color: black;     
+    top:690px;     
+    margin-left:310px;     
+    z-index: 1; } 
+
+/* Content section styling */
+.about-ai-content-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.about-ai-main-title {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin: 0 0 2rem 0;
+  line-height: 1.1;
+  text-align: left;
+  text-shadow: 0 0 25px rgba(138, 43, 226, 0.4);
+  letter-spacing: 2px;
+  opacity: 0.95;
+}
+
+.about-ai-main-description {
+  color: #b0b0b0;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin: 0 0 3rem 0;
+  text-align: left;
+  opacity: 0.9;
+}
+
+.about-ai-features-section {
+  padding: 1.5rem 0;
+  background: transparent;
+  z-index:999;
+}
+
+.about-ai-features-text {
+  color: #d0d0d0;
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: left;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .about-ai-layout {
+    flex-direction: column;
+    gap: 3rem;
+    text-align: center;
+  }
+  
+  iframe {
+    width: 100%;
+    max-width: 400px;
+    height: 400px;
+  }
+  
+  .about-ai-main-title {
+    font-size: 2.5rem;
+    text-align: center;
+  }
+  
+  .about-ai-main-description {
+    text-align: center;
+  }
+  
+  .about-ai-features-text {
+    text-align: center;
+  }
+}
