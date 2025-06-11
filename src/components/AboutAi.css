@@ -31,18 +31,20 @@
   gap: 4rem;
 }
 
-/* Completely standalone iframe - break out of flex layout */
+/* Spline iframe styling */
 iframe {
+
   width: 100% !important;
   height: 100% !important;
   border: none !important;
   outline: none !important;
   display: block !important;
+  flex-shrink: 0;
   position: absolute !important;
-  left: -30% !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  z-index: -1 !important;
+  left: -45% !important;
+  background: transparent;
+  
+  z-index: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
   border-radius: 0 !important;
@@ -61,9 +63,9 @@ iframe {
      position: absolute; 
     height: 40px;     
     width: 150px;     
-    background-color: black;     
-    top:690px;     
-    margin-left:310px;     
+    background-color:black;     
+    top:685px;     
+    margin-left:-45px;     
     z-index: 1; } 
 
 /* Content section styling */
