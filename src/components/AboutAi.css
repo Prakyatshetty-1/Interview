@@ -6,30 +6,25 @@
     transform: rotate(360deg);
   }
 }
-body {
-  margin: 0;
-  padding: 0;
-  background: radial-gradient(
-      circle at 30% 30%,
-      rgba(4, 48, 89, 0.2),
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 50% 20%,
-      rgba(23, 4, 85, 0.15),
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 70% 70%,
-      rgba(255, 165, 0, 0.1),
-      transparent 60%
-    ),
-    #000;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
-  min-height: 100vh;
-  overflow-x: hidden;
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
 }
 
 .about-ai-container {
@@ -41,6 +36,7 @@ body {
   padding: 4rem 2rem;
   position: relative;
   margin-top: -5vh;
+  overflow: hidden;
 }
 
 .about-ai-wrapper {
@@ -49,26 +45,127 @@ body {
   position: relative;
 }
 
-
-
 .about-ai-layout {
   display: flex;
   align-items: center;
   gap: 4rem;
 }
-.gradient-background {
+
+/* Gradient spots background */
+.about-ai-container::before,
+.about-ai-container::after {
+  content: '';
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 60%;
-  height: 100%;
-  background-size: cover;
-  z-index: 0;
-  filter: blur(60px);
-  opacity: 0.7;
+  border-radius: 50%;
   pointer-events: none;
+  z-index: 0;
 }
 
+/* Large gradient spot */
+.about-ai-container::before {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255, 107, 0, 0.15) 0%, rgba(255, 165, 0, 0.1) 30%, rgba(138, 43, 226, 0.05) 70%, transparent 100%);
+  top: 20%;
+  right: 15%;
+  animation: float 6s ease-in-out infinite, pulse 4s ease-in-out infinite;
+}
+
+/* Medium gradient spot */
+.about-ai-container::after {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(138, 43, 226, 0.2) 0%, rgba(255, 20, 147, 0.1) 40%, rgba(0, 191, 255, 0.05) 80%, transparent 100%);
+  bottom: 25%;
+  right: 25%;
+  animation: float 8s ease-in-out infinite reverse, pulse 5s ease-in-out infinite;
+}
+
+/* Additional gradient spots using pseudo-elements on wrapper */
+.about-ai-wrapper::before,
+.about-ai-wrapper::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.about-ai-wrapper::before {
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(0, 255, 255, 0.12) 0%, rgba(138, 43, 226, 0.08) 50%, transparent 100%);
+  top: 10%;
+  right: 5%;
+  animation: pulse 7s ease-in-out infinite, float 9s ease-in-out infinite;
+}
+
+.about-ai-wrapper::after {
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(255, 69, 0, 0.15) 0%, rgba(255, 140, 0, 0.1) 60%, transparent 100%);
+  top: 60%;
+  right: 8%;
+  animation: float 5s ease-in-out infinite, pulse 6s ease-in-out infinite;
+}
+
+/* Top left corner gradient spots */
+.about-ai-layout::before,
+.about-ai-layout::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.about-ai-layout::before {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(138, 43, 226, 0.15) 0%, rgba(255, 20, 147, 0.1) 40%, rgba(0, 191, 255, 0.05) 80%, transparent 100%);
+  top: -10%;
+  left: -5%;
+  animation: float 8s ease-in-out infinite, pulse 6s ease-in-out infinite;
+  z-index: 50;
+}
+
+.about-ai-layout::after {
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(255, 165, 0, 0.18) 0%, rgba(255, 69, 0, 0.12) 50%, rgba(138, 43, 226, 0.06) 80%, transparent 100%);
+  top: 5%;
+  left: 10%;
+  animation: pulse 5s ease-in-out infinite, float 7s ease-in-out infinite reverse;
+  z-index: 50;
+}
+
+/* Small floating gradient spots */
+.about-ai-content-section::before,
+.about-ai-content-section::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.about-ai-content-section::before {
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, rgba(255, 20, 147, 0.18) 0%, rgba(138, 43, 226, 0.1) 70%, transparent 100%);
+  top: -10%;
+  right: -15%;
+  animation: pulse 4s ease-in-out infinite, float 7s ease-in-out infinite reverse;
+}
+
+.about-ai-content-section::after {
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, rgba(0, 191, 255, 0.2) 0%, rgba(138, 43, 226, 0.08) 80%, transparent 100%);
+  bottom: 10%;
+  right: -20%;
+  animation: float 6s ease-in-out infinite, pulse 5s ease-in-out infinite;
+}
 
 /* Spline iframe styling */
 iframe {
@@ -93,18 +190,19 @@ iframe {
 /* Adjust content section to make room for absolute positioned iframe */
 .about-ai-content-section {
   margin-left: 550px;
-  z-index: 999;
-
+  position: relative;
+  z-index: 2;
 }
 
- .hidespline{    
-     position: absolute; 
-    height: 40px;     
-    width: 150px;     
-    background-color:black;     
-    top:685px;     
-    margin-left:-45px;     
-    z-index: 1; } 
+.hidespline {    
+  position: absolute; 
+  height: 40px;     
+  width: 150px;     
+  background-color: black;     
+  top: 685px;     
+  margin-left: -45px;     
+  z-index: 1; 
+} 
 
 /* Content section styling */
 .about-ai-content-section {
@@ -125,21 +223,26 @@ iframe {
   text-shadow: 0 0 25px rgba(138, 43, 226, 0.4);
   letter-spacing: 2px;
   opacity: 0.95;
+  position: relative;
+  z-index: 3;
 }
 
 .about-ai-main-description {
   color: #b0b0b0;
   font-size: 1.1rem;
   line-height: 1.8;
-  margin: 0 0 3rem 0;
+  margin: 0 0 1rem 0;
   text-align: left;
   opacity: 0.9;
+  position: relative;
+  z-index: 3;
 }
 
 .about-ai-features-section {
   padding: 1.5rem 0;
   background: transparent;
-  z-index:999;
+  z-index: 3;
+  position: relative;
 }
 
 .about-ai-features-text {
@@ -147,6 +250,8 @@ iframe {
   font-size: 1rem;
   line-height: 1.6;
   text-align: left;
+  position: relative;
+  z-index: 3;
 }
 
 /* Responsive design */
@@ -161,6 +266,12 @@ iframe {
     width: 100%;
     max-width: 400px;
     height: 400px;
+    position: relative !important;
+    left: 0 !important;
+  }
+  
+  .about-ai-content-section {
+    margin-left: 0;
   }
   
   .about-ai-main-title {
@@ -174,5 +285,41 @@ iframe {
   
   .about-ai-features-text {
     text-align: center;
+  }
+  
+  /* Adjust gradient spots for mobile */
+  .about-ai-container::before {
+    width: 200px;
+    height: 200px;
+    top: 10%;
+    right: 5%;
+  }
+  
+  .about-ai-container::after {
+    width: 150px;
+    height: 150px;
+    bottom: 15%;
+    right: 10%;
+  }
+  
+  .about-ai-layout::before {
+    width: 180px;
+    height: 180px;
+    top: 5%;
+    left: -10%;
+  }
+  
+  .about-ai-layout::after {
+    width: 80px;
+    height: 80px;
+    top: 15%;
+    left: 5%;
+  }
+  
+  .about-ai-wrapper::before,
+  .about-ai-wrapper::after,
+  .about-ai-content-section::before,
+  .about-ai-content-section::after {
+    display: none;
   }
 }
