@@ -6,6 +6,31 @@
     transform: rotate(360deg);
   }
 }
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(
+      circle at 30% 30%,
+      rgba(4, 48, 89, 0.2),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 20%,
+      rgba(23, 4, 85, 0.15),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 70% 70%,
+      rgba(255, 165, 0, 0.1),
+      transparent 60%
+    ),
+    #000;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
 .about-ai-container {
   min-height: 100vh;
@@ -22,27 +47,41 @@
   max-width: 1200px;
   width: 100%;
   position: relative;
-  
 }
+
+
 
 .about-ai-layout {
   display: flex;
   align-items: center;
   gap: 4rem;
 }
+.gradient-background {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 60%;
+  height: 100%;
+  background-size: cover;
+  z-index: 0;
+  filter: blur(60px);
+  opacity: 0.7;
+  pointer-events: none;
+}
 
-/* Completely standalone iframe - break out of flex layout */
+
+/* Spline iframe styling */
 iframe {
   width: 100% !important;
   height: 100% !important;
   border: none !important;
   outline: none !important;
   display: block !important;
+  flex-shrink: 0;
   position: absolute !important;
-  left: -30% !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  z-index: -1 !important;
+  left: -45% !important;
+  background: transparent;
+  z-index: 1 !important;
   margin: 0 !important;
   padding: 0 !important;
   border-radius: 0 !important;
@@ -54,6 +93,7 @@ iframe {
 /* Adjust content section to make room for absolute positioned iframe */
 .about-ai-content-section {
   margin-left: 550px;
+  z-index: 999;
 
 }
 
@@ -61,9 +101,9 @@ iframe {
      position: absolute; 
     height: 40px;     
     width: 150px;     
-    background-color: black;     
-    top:690px;     
-    margin-left:310px;     
+    background-color:black;     
+    top:685px;     
+    margin-left:-45px;     
     z-index: 1; } 
 
 /* Content section styling */
