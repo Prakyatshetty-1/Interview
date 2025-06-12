@@ -12,9 +12,7 @@ function App() {
       <NavBar/>
       <div id="home"><LandingPage/></div>
       <div id="about-ai"><AboutAi/></div>
-      <div id="pricing"><PricingPage/></div>
-      
-      
+      {/* <div id="pricing"><PricingPage/></div> */}
     </>
   )
 }
