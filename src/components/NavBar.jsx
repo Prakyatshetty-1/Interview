@@ -18,17 +18,20 @@ export default function NavBar(){
             <header>
             <h1 className="logo">Askora</h1>
             <nav>
-                <a href="home" onClick={(e) => handleSmoothScroll(e, "home")}>
+                <a href="#home" onClick={(e) => handleSmoothScroll(e, "home")}>
                 Home
                 </a>
                 <a href="#about-ai" onClick={(e) => handleSmoothScroll(e, "about-ai")}>
                 About AI
                 </a>
-                <a href="#features" onClick={(e) => handleSmoothScroll(e, "features")}>
+                <a href="#Features" onClick={(e) => handleSmoothScroll(e, "Features")}>
                 Features
                 </a>
                 <a href="#pricing" onClick={(e) => handleSmoothScroll(e, "pricing")}>
                 Pricing
+                </a>
+                <a href="#reviews" onClick={(e) => handleSmoothScroll(e, "reviews")}>
+                Reviews
                 </a>
             </nav>
             <div className="buttons">

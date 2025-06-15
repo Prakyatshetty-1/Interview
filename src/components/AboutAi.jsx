@@ -13,27 +13,29 @@ const AboutAi = () => {
             frameBorder='0' 
             width='100%' 
             height='100%'
-            allow="fullscreen"
           />
-         
+
           {/* Content Section */}
           <div className="about-ai-content-section">
             {/* Main Title */}
             <h1 className="about-ai-main-title">
-              MASTER THROUGH
+              INTRODUCING 
               <br />
-              ASKORA AI
+              ASKORA
             </h1>
-                         
+
             {/* Description */}
             <p className="about-ai-main-description">
-              Experience AI-driven learning simulations with advanced machine learning algorithms
-              <br />
-              and intelligent tutoring systems designed for optimal knowledge acquisition.
-              <br />
-              Practice smart. Learn better.
+              Experience realistic mock interviews with an intelligent voice bot that speaks, listens, and responds — just like a real interviewer.
+              <br/>
+              <br/>
+              Askora creates a high-pressure, real-world interview atmosphere using advanced speech synthesis, natural language understanding,
+              and context-aware questioning.
+
+
+
             </p>
-             
+
             {/* Features Section */}
             <div className="about-ai-features-section">
               <div className="about-ai-features-text">
