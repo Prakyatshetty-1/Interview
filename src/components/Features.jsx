@@ -12,15 +12,19 @@ export default function Features() {
 
   return (
     <div className={`gradient-grid ${isLoaded ? "loaded" : ""}`}>
+      <div className="pricing-bg-orbss">
+        <div className="pricing-orbb pricing-orbs1"></div>
+        
+      </div>
+      <h1 className="Title">Key Features of Askora</h1>
       <div className="grid-container">
         {/* Top left block */}
         <div className="grid-item top-left">
           <div className="content">
             <div className="text-container horizontal">
               <div className="text primary">
-                <h1>WEB DEVELOPMENT</h1>
+                <h1>Webflow Development</h1>
                 <p>Create stunning, responsive websites that engage your audience and drive results.</p>
-                <div className="seemore">See more</div>
               </div>
               <div className="text secondary right-align">
                 Professional web solutions tailored to your business needs and goals.
@@ -36,7 +40,6 @@ export default function Features() {
               <div className="text primary">
                 <h1>MOBILE APPS</h1>
                 <p>Build powerful mobile applications that connect with users on any device.</p>
-                <div className="seemore">See more</div>
               </div>
               <div className="text secondary">Native and cross-platform solutions for iOS and Android.</div>
             </div>
@@ -50,14 +53,13 @@ export default function Features() {
               <div className="text primary">
                 <h1>UI/UX DESIGN</h1>
                 <p>Design beautiful interfaces that provide exceptional user experiences.</p>
-                <div className="seemore">See more</div>
               </div>
               <div className="text secondary">User-centered design that converts visitors into customers.</div>
             </div>
           </div>
         </div>
 
-        {/* Middle block (blue) */}
+        {/* Middle block (blue accent) */}
         <div className="grid-item middle">
           <div className="content">
             <div className="text-container vertical">
@@ -75,7 +77,6 @@ export default function Features() {
               <div className="text primary">
                 <h1>E-COMMERCE</h1>
                 <p>Build powerful online stores that drive sales and grow your business.</p>
-                <div className="seemore">See more</div>
               </div>
               <div className="text secondary right-align">
                 Complete e-commerce solutions with secure payment processing.

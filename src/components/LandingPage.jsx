@@ -69,7 +69,7 @@ function LandingPage() {
                 </p>
 
                 <div className="button-group">
-                    <button className="primary-button">GET STARTED  </button>
+                    <button className="primary-button">GET STARTED &rarr;</button>
                     <button className="secondary-button">PRICING</button>
                 </div>
             </div>
