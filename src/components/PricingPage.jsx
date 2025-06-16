@@ -1,113 +1,180 @@
 import "./PricingPage.css"
 
-function PricingPage() {
-  const pricingPlans = [
-    {
-      name: "Starter",
-      price: "$9",
-      period: "/month",
-      description: "Perfect for beginners getting started with AI interviews",
-      features: [
-        "5 AI interview sessions per month",
-        "Basic feedback and scoring",
-        "Standard question library",
-        "Email support",
-        "Progress tracking",
-      ],
-      buttonText: "Get Started",
-      popular: false,
-    },
-    {
-      name: "Professional",
-      price: "$29",
-      period: "/month",
-      description: "Ideal for serious job seekers and career advancement",
-      features: [
-        "Unlimited AI interview sessions",
-        "Advanced feedback and analytics",
-        "Premium question library",
-        "Industry-specific scenarios",
-        "Priority support",
-        "Custom interview recordings",
-        "Performance insights dashboard",
-      ],
-      buttonText: "Start Free Trial",
-      popular: true,
-    },
-    {
-      name: "Enterprise",
-      price: "$99",
-      period: "/month",
-      description: "Comprehensive solution for teams and organizations",
-      features: [
-        "Everything in Professional",
-        "Team management dashboard",
-        "Custom branding",
-        "API access",
-        "Dedicated account manager",
-        "Advanced reporting",
-        "SSO integration",
-        "Custom integrations",
-      ],
-      buttonText: "Contact Sales",
-      popular: false,
-    },
-  ]
-
+export default function Pricing() {
   return (
-    <div className="pricing-container">
-      {/* <div className="stars"></div> */}
-      <div className="glow-effect"></div>
-      <main className="main-content">
-        <div className="pricing-header">
-          <h1 className="pricing-title">Choose Your Plan</h1>
-          <p className="pricing-subtitle">
-          </p>
+    <section className="pricing-section">
+      {/* Animated Background Elements - Only for this section */}
+      <div className="pricing-bg-orbs">
+        <div className="pricing-or1 pricing-orb1"></div>
+        <div className="pricing-orb pricing-orb2"></div>
+        <div className="pricing-orb pricing-orb3"></div>
+        <div className="pricing-orb pricing-orb4"></div>
+        <div className="pricing-orb pricing-orb5"></div>
+      </div>
+
+      {/* Geometric Grid Pattern */}
+      <div className="pricing-bg-grid"></div>
+
+      {/* Floating Particles */}
+      <div className="pricing-particles">
+        {[...Array(12)].map((_, i) => (
+          <div 
+            key={i} 
+            className="pricing-particle" 
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 15}s`,
+              animationDuration: `${15 + Math.random() * 10}s`
+            }}
+          ></div>
+        ))}
+      </div>
+
+      <div className="container">
+        <div className="header">
+          <h2 className="title">A plan for every need</h2>
+          <p className="subtitle">Satisfy leads, start & become digital success with top-tier security.</p>
         </div>
 
         <div className="pricing-grid">
-          {pricingPlans.map((plan, index) => (
-            <div key={index} className={`pricing-card ${plan.popular ? "popular" : ""}`}>
-              {plan.popular && <div className="popular-badge">Most Popular</div>}
-
-              <div className="plan-header">
-                <h3 className="plan-name">{plan.name}</h3>
-                <div className="plan-price">
-                  <span className="price">{plan.price}</span>
-                  <span className="period">{plan.period}</span>
+          {/* Basic Plan */}
+          <div className="pricing-card">
+            <div className="upper">
+              <div className="card-header">
+                <h3 className="plan-name">Basic plan</h3>
+                <div className="price-container">
+                  <span className="price">Free</span>
+                  <span className="period">per month</span>
                 </div>
-                <p className="plan-description">{plan.description}</p>
+                <p className="plan-description">For casual practice and job prep.</p>
               </div>
-
-              <div className="features-list">
-                {plan.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="feature-item">
-                    <span className="checkmark">✓</span>
-                    <span className="feature-text">{feature}</span>
-                  </div>
-                ))}
-              </div>
-
-              <button className={`plan-button ${plan.popular ? "popular-button" : ""}`}>{plan.buttonText}</button>
+              <button className="cta-button">Get started</button>
             </div>
-          ))}
-        </div>
 
-        <div className="pricing-footer">
-          <p className="footer-text">All plans come with a 14-day free trial. No credit card required.</p>
-          <div className="footer-links">
-            <a href="#" className="footer-link">
-              View detailed comparison
-            </a>
-            <span className="separator">•</span>
-            <a href="#" className="footer-link">
-              Contact support
-            </a>
+            <div className="features">
+              <h4 className="features-title">FEATURES</h4>
+              <p className="features-subtitle">Everything you need to get started:</p>
+              <ul className="features-list">
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Community packs access
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Limited AI interviews
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                   Create 1 custom 3-question pack
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Default AI voice
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                   Save up to 5 answers
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Business Plan - Popular */}
+          <div className="pricing-card popular-card">
+            <div className="upper">
+              <div className="popular-badge">
+                <span>Pro Plan</span>
+                <span className="popular-label">Popular</span>
+              </div>
+
+              <div className="sparkles">
+                <div className="sparkle" style={{ top: "25%", right: "20%" }}></div>
+                <div className="sparkle" style={{ top: "45%", right: "15%" }}></div>
+                <div className="sparkle" style={{ top: "35%", right: "25%" }}></div>
+              </div>
+              
+              <div className="card-header">
+                <div className="price-container">
+                  <span className="price">$4</span>
+                  <span className="period">per month</span>
+                </div>
+                <p className="plan-description">For active job seekers</p>
+              </div>
+
+              <button className="cta-button popular-button">Get started</button>
+            </div>
+
+            <div className="features">
+              <h4 className="features-title">FEATURES</h4>
+              <p className="features-subtitle">Everything in our Basic plan plus...</p>
+              <ul className="features-list">
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Unlimited AI interview sessions
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                 Build 10 custom sets
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Choose from 5 AI voices
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Smart answer insights
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                   Save and review unlimited answers
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Enterprise Plan */}
+          <div className="pricing-card">
+            <div className="upper">
+              <div className="card-header">
+                <h3 className="plan-name">Enterprise plan</h3>
+                <div className="price-container">
+                  <span className="price">$10</span>
+                  <span className="period">per month</span>
+                </div>
+                <p className="plan-description">For recruiters and coaches</p>
+              </div>
+              <button className="cta-button">Get started</button>
+            </div>
+
+            <div className="features">
+              <h4 className="features-title">FEATURES</h4>
+              <p className="features-subtitle">Everything in our Pro plan plus…</p>
+              <ul className="features-list">
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                 Unlimited question pack creation
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Custom AI voice and persona
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Advanced analytics dashboard
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                   Early access to new feature
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                   Monetize your question packs
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </section>
   )
 }
-
-export default PricingPage;

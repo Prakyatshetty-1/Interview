@@ -30,8 +30,8 @@ export default function NavBar(){
                 <a href="#pricing" onClick={(e) => handleSmoothScroll(e, "pricing")}>
                 Pricing
                 </a>
-                <a href="#reviews" onClick={(e) => handleSmoothScroll(e, "reviews")}>
-                Reviews
+                <a href="#community" onClick={(e) => handleSmoothScroll(e, "community")}>
+                Community
                 </a>
             </nav>
             <div className="buttons">
