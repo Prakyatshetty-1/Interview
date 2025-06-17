@@ -5,6 +5,7 @@ import PricingPage from './components/PricingPage';
 import Features from './components/Features';
 import Reviews from './components/Reviews';
 import CommunityPage from './components/CommunityPage';
+import HeroSection from './components/HeroSection';
 import './App.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
       <div id="pricing"><PricingPage/></div>
       {/* <div id=""><Reviews/></div> */}
       <div id="community"><CommunityPage/></div>
+      <HeroSection/>
 
     </>
   )
