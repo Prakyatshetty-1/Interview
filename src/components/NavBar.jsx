@@ -1,6 +1,7 @@
 import "./NavBar.css"
 import { useNavigate } from 'react-router-dom'
 
+
 export default function NavBar() {
   const handleSmoothScroll = (e, targetId) => {
     e.preventDefault()
@@ -46,4 +47,6 @@ export default function NavBar() {
       </header>
     </div>
   )
+
+
 }
