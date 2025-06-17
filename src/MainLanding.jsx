@@ -11,8 +11,8 @@ function MainLanding(){
     return (
         <>
             <NavBar/>
-            {/* <div id="home"><LandingPage/></div> */}
-            {/* <div id="about-ai"><AboutAi/></div> */}
+            <div id="home"><LandingPage/></div>
+            <div id="about-ai"><AboutAi/></div>
             <div id="Features"><Features/></div>
             <div id="pricing"><PricingPage/></div>
             {/* <div id=""><Reviews/></div> */}
