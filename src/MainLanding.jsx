@@ -3,7 +3,7 @@ import LandingPage from './components/LandingPage'
 import NavBar from './components/NavBar'
 import PricingPage from './components/PricingPage';
 import Features from './components/Features';
-import Reviews from './components/Reviews';
+
 import CommunityPage from './components/CommunityPage';
 import HeroSection from './components/HeroSection';
 

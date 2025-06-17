@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import './Signup.css';
+import SignupImage from "../assets/Image3.png";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    name: "Emily Harrington",
-    email: "emilyh@gmail.com",
+    name: "",
+    email: "",
     password: "",
   });
 
@@ -34,14 +35,14 @@ const Signup = () => {
         <div className="form-container">
           {/* Logo */}
           <div className="logo-container">
-            <div className="logo">figr</div>
+            <div className="logo">Askora</div>
             <div className="logo-accent"></div>
           </div>
 
           {/* Form Header */}
           <div className="form-header">
-            <h1 className="title">Create an account</h1>
-            <p className="subtitle">Start your 30 day free trial, cancel anytime</p>
+            <h1 className="title1">Create an account</h1>
+            <p className="subtitle1">Start your 30 day free trial, cancel anytime</p>
           </div>
 
           {/* Form */}
@@ -55,6 +56,7 @@ const Signup = () => {
                 onChange={handleInputChange}
                 onFocus={() => setFocusedField("name")}
                 onBlur={() => setFocusedField(null)}
+                placeholder="Enter Your Name"
                 className={`input ${focusedField === "name" ? "input-focused" : ""}`}
                 required
               />
@@ -69,6 +71,7 @@ const Signup = () => {
                 onChange={handleInputChange}
                 onFocus={() => setFocusedField("email")}
                 onBlur={() => setFocusedField(null)}
+                 placeholder="Enter Your Email"
                 className={`input input-active ${focusedField === "email" ? "input-focused" : ""}`}
                 required
               />
@@ -96,10 +99,10 @@ const Signup = () => {
           </form>
 
           {/* Divider */}
-          <div className="divider">
-            <div className="divider-line"></div>
+          <div className="divider1">
+            <div className="divider-line1"></div>
             <span className="divider-text">OR</span>
-            <div className="divider-line"></div>
+            <div className="divider-line1"></div>
           </div>
 
           {/* Google Sign In */}
@@ -134,7 +137,7 @@ const Signup = () => {
           </div>
 
           {/* Footer */}
-          <div className="footer">© 2024 figr. All rights reserved.</div>
+          <div className="footer1">© 2024 figr. All rights reserved.</div>
         </div>
 
         {/* Decorative Elements */}
@@ -144,33 +147,13 @@ const Signup = () => {
 
       {/* Right Panel - Background Image */}
       <div className="right-panel">
-        <img 
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-kbFgQPFbKd0s56DWOl61z9kSiRbVAL.png" 
+        
+        <div className="overlay">
+          <img 
+          src={SignupImage} 
           alt="Background" 
           className="background-image"
         />
-        <div className="overlay">
-          <div className="right-content">
-            <div className="badge">✨ New Feature</div>
-            <h2 className="right-title">Deploy Consistent Designs Faster with Figr Identity</h2>
-            <p className="right-subtitle">
-              Set up, design, and deliver on time with Figr Identity — build cohesive design systems effortlessly!
-            </p>
-            <div className="features">
-              <div className="feature">
-                <div className="feature-icon">🎨</div>
-                <span>Design Systems</span>
-              </div>
-              <div className="feature">
-                <div className="feature-icon">⚡</div>
-                <span>Fast Deployment</span>
-              </div>
-              <div className="feature">
-                <div className="feature-icon">🔧</div>
-                <span>Easy Setup</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

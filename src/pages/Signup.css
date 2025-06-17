@@ -5,8 +5,7 @@
 body {
   margin: 0;
   padding: 0;
-  background: #0a0a0a;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
 }
 
 .signup-container {
@@ -17,7 +16,7 @@ body {
 
 .left-panel {
   flex: 0 0 45%;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+  background:  rgba(15, 16, 31, 0.6);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -39,15 +38,7 @@ body {
   margin-bottom: 3rem;
 }
 
-.logo {
-  font-size: 2rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.02em;
-}
+
 
 .logo-accent {
   position: absolute;
@@ -64,15 +55,25 @@ body {
   margin-bottom: 2.5rem;
 }
 
-.title {
+.title1 {
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 400;
+   background: linear-gradient(
+    to right,
+    #ffffff 20%,      /* White */
+   
+    #313131 100%  /* Purple */
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
   margin: 0 0 0.75rem 0;
   color: #ffffff;
   letter-spacing: -0.02em;
 }
 
-.subtitle {
+.subtitle1 {
   font-size: 0.95rem;
   color: #a1a1aa;
   margin: 0;
@@ -161,14 +162,14 @@ body {
   left: 100%;
 }
 
-.divider {
+.divider1 {
   display: flex;
   align-items: center;
   margin: 2rem 0;
   gap: 1rem;
 }
 
-.divider-line {
+.divider-line1 {
   flex: 1;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent);
@@ -229,7 +230,7 @@ body {
   color: #a855f7;
 }
 
-.footer {
+.footer1 {
   font-size: 0.8rem;
   color: #52525b;
   margin-top: 3rem;
@@ -240,6 +241,7 @@ body {
   flex: 1;
   position: relative;
   overflow: hidden;
+  
 }
 
 .background-image {
