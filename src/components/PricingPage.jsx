@@ -33,7 +33,7 @@ export default function Pricing() {
       <div className="container">
         <div className="header">
           <h2 className="title">A plan for every need</h2>
-          <p className="subtitle">Satisfy leads, start & become digital success with top-tier security.</p>
+          <p className="subtitle1">Satisfy leads, start & become digital success with top-tier security.</p>
         </div>
 
         <div className="pricing-grid">
