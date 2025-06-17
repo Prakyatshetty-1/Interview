@@ -58,7 +58,7 @@ export default function HeroSection() {
               <span className="brand-text">Omni-text SaaS analytics</span>
             </div>
 
-            <h1 className="hero-title">
+            <h1 className="hero-title1 title-gradient">
               Start your
               <br />
               free trial today
