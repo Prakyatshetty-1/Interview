@@ -1,6 +1,7 @@
 import "./NavBar.css"
 import { useNavigate } from 'react-router-dom'
 
+
 export default function NavBar() {
   const handleSmoothScroll = (e, targetId) => {
     e.preventDefault()
@@ -16,6 +17,9 @@ export default function NavBar() {
 
   const handleClick = () => {
     navigate('/signup');
+  };
+  const LoginClick=()=>{
+    navigate('/login');
   };
 
   return (
@@ -40,10 +44,12 @@ export default function NavBar() {
           </a>
         </nav>
         <div className="buttons">
-          <button className="login boton-elegante">Login</button>
+          <button className="login boton-elegante" onClick={LoginClick}>Login</button>
           <button className="get-started cosmic " onClick={handleClick}>Get Started &#8594;</button>
         </div>
       </header>
     </div>
   )
+
+
 }

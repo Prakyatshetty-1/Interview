@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
+import './Login.css';
+import LoginImage from "../assets/Image3.png"; // Replace with your login image
 
-import './Signup.css';
-import SignupImage from "../assets/Image3.png";
-
-const Signup = () => {
+const Login = () => {
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
-
-
     password: "",
   });
 
@@ -32,46 +28,35 @@ const Signup = () => {
   };
 
   return (
-    <div className="signup-container">
-      {/* Left Panel - Form */}
-      <div className="left-panel">
+    <div className="login-container">
+      {/* Left Panel - Background Image */}
+      <div className="left-panel-image">
+        <div className="overlay-image">
+          <img 
+            src={LoginImage} 
+            alt="Login Background" 
+            className="background-image"
+          />
+        </div>
+      </div>
+
+      {/* Right Panel - Form */}
+      <div className="right-panel-form">
         <div className="form-container">
           {/* Logo */}
           <div className="logo-container">
-
             <div className="logo">Askora</div>
-
-
             <div className="logo-accent"></div>
           </div>
 
           {/* Form Header */}
           <div className="form-header">
-
-            <h1 className="title1">Create an account</h1>
-            <p className="subtitle1">Start your 30 day free trial, cancel anytime</p>
-
+            <h1 className="title1">Welcome back</h1>
+            <p className="subtitle1">Sign in to your account</p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="form">
-            <div className="input-group">
-              <label className="label">Name*</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                onFocus={() => setFocusedField("name")}
-                onBlur={() => setFocusedField(null)}
-
-                placeholder="Enter Your Name"
-
-                className={`input ${focusedField === "name" ? "input-focused" : ""}`}
-                required
-              />
-            </div>
-
             <div className="input-group">
               <label className="label">Email*</label>
               <input
@@ -81,9 +66,7 @@ const Signup = () => {
                 onChange={handleInputChange}
                 onFocus={() => setFocusedField("email")}
                 onBlur={() => setFocusedField(null)}
-
-                 placeholder="Enter Your Email"
-
+                placeholder="Enter Your Email"
                 className={`input input-active ${focusedField === "email" ? "input-focused" : ""}`}
                 required
               />
@@ -98,25 +81,30 @@ const Signup = () => {
                 onChange={handleInputChange}
                 onFocus={() => setFocusedField("password")}
                 onBlur={() => setFocusedField(null)}
-                placeholder="Create a Password"
+                placeholder="Enter Your Password"
                 className={`input ${focusedField === "password" ? "input-focused" : ""}`}
                 required
               />
             </div>
 
+            {/* Forgot Password Link */}
+            <div className="forgot-password">
+              <a href="#" className="link">
+                Forgot your password?
+              </a>
+            </div>
+
             <button type="submit" className="create-button">
-              <span>Create an account</span>
+              <span>Sign in</span>
               <div className="button-glow"></div>
             </button>
           </form>
 
           {/* Divider */}
-
           <div className="divider1">
             <div className="divider-line1"></div>
             <span className="divider-text">OR</span>
             <div className="divider-line1"></div>
-
           </div>
 
           {/* Google Sign In */}
@@ -142,41 +130,24 @@ const Signup = () => {
             Sign in with Google
           </button>
 
-          {/* Sign In Link */}
-          <div className="sign-in-link">
-            Already have an account?{" "}
+          {/* Sign Up Link */}
+          <div className="sign-up-link">
+            Don't have an account?{" "}
             <a href="#" className="link">
-              Sign In
+              Sign Up
             </a>
           </div>
 
           {/* Footer */}
-
           <div className="footer1">© 2024 figr. All rights reserved.</div>
-
         </div>
 
         {/* Decorative Elements */}
         <div className="decorative-circle-1"></div>
         <div className="decorative-circle-2"></div>
       </div>
-
-      {/* Right Panel - Background Image */}
-      <div className="right-panel">
-
-        
-        <div className="overlay">
-          <img 
-          src={SignupImage} 
-          alt="Background" 
-          className="background-image"
-        />
-
-        </div>
-      </div>
     </div>
   );
 };
 
-
-export default Signup;
+export default Login;
