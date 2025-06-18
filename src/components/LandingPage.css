@@ -34,7 +34,7 @@ html, body {
 
 .content-wrapper {
     position: absolute;
-    top: 50%;
+    top: 53%;
     left: 50%;
     transform: translate(-50%, -50%);
     max-width: 800px;
@@ -189,7 +189,7 @@ spline-viewer {
     height: 120% !important; /* Match viewport height */
     display: block !important;
     position: absolute !important;
-    top: -3% !important;
+    top: 3% !important;
     left: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
