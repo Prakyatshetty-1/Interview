@@ -18,6 +18,9 @@ export default function NavBar() {
   const handleClick = () => {
     navigate('/signup');
   };
+  const LoginClick=()=>{
+    navigate('/login');
+  };
 
   return (
     <div className="fixed">
@@ -41,7 +44,7 @@ export default function NavBar() {
           </a>
         </nav>
         <div className="buttons">
-          <button className="login boton-elegante">Login</button>
+          <button className="login boton-elegante" onClick={LoginClick}>Login</button>
           <button className="get-started cosmic " onClick={handleClick}>Get Started &#8594;</button>
         </div>
       </header>

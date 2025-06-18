@@ -55,22 +55,22 @@ export default function HeroSection() {
           <div className="hero-content">
             <div className="brand-info">
               <div className="brand-icon"></div>
-              <span className="brand-text">Omni-text SaaS analytics</span>
+              <span className="brand-text">AI Interview Intelligence</span>
             </div>
 
             <h1 className="hero-title1 title-gradient">
               Start your
               <br />
-              free trial today
+              our platform today
             </h1>
 
             <p className="hero-subtitle">
-              Unlock the full potential of your data with our comprehensive SaaS
-              <br />
-              analytics platform
+             Empower your hiring process with AI-driven interview insights.
+No sign-up fees.<br /> No hidden costs. Just smarter interviews, instantly.
+
             </p>
 
-            <button className="cta-button">Schedule a demo</button>
+            <button className="cta-button">Get Started Now</button>
           </div>
         </div>
       </div>
