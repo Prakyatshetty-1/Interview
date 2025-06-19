@@ -102,9 +102,9 @@ const Signup = () => {
               />
             </div>
 
-            <button type="submit" className="create-button">
+            <button type="submit" className="create-button1">
               <span>Create an account</span>
-              <div className="button-glow"></div>
+              <div className="button-glow1"></div>
             </button>
           </form>
 

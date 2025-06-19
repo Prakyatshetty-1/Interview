@@ -423,7 +423,7 @@
   margin-bottom: 1.6rem;
 }
 
-.cta-button {
+.cta-button1 {
   width: 100%;
   padding: 12px 24px;
   border: 1px solid rgba(75, 85, 139, 0.4);
@@ -439,12 +439,12 @@
   z-index: 2;
 }
 
-.cta-button:hover {
+.cta-button1:hover {
   background: rgba(51, 65, 85, 0.8);
   border-color: rgba(75, 85, 139, 0.6);
 }
 
-.popular-button {
+.popular-button1 {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
@@ -452,7 +452,7 @@
   padding: 14px 24px;
 }
 
-.popular-button:hover {
+.popular-button1:hover {
   background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #9333ea 100%);
   box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
 }

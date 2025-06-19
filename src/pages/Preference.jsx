@@ -361,12 +361,12 @@ export default function Preference() {
               <div className="form-section">
                 {renderQuestionContent()}
 
-                <div className="button-section">
+                <div className="button-section1">
                   {isLastStep ? (
                     <button 
                       onClick={handleSubmit} 
                       disabled={!canProceed()} 
-                      className="submit-button" 
+                      className="submit-button1" 
                       type="button"
                     >
                       Submit Response
@@ -375,7 +375,7 @@ export default function Preference() {
                     <button
                       onClick={handleNext}
                       disabled={!canProceed() || isAnimating}
-                      className="continue-button"
+                      className="continue-button1"
                       type="button"
                     >
                       Continue

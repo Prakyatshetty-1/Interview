@@ -159,7 +159,7 @@ body {
   font-size: 0.875rem;
 }
 
-.create-button {
+.create-button1 {
   width: 100%;
   padding: 1rem;
   background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #7c3aed 100%);
@@ -176,11 +176,11 @@ body {
   box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.create-button:hover {
+.create-button1:hover {
   transform: translateY(-2px);
 }
 
-.button-glow {
+.button-glow1 {
   position: absolute;
   top: 0;
   left: -100%;
@@ -190,7 +190,7 @@ body {
   transition: left 0.5s;
 }
 
-.create-button:hover .button-glow {
+.create-button1:hover .button-glow1 {
   left: 100%;
 }
 

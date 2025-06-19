@@ -111,11 +111,6 @@
           z-index: 10;
         }
 
-        .logo {
-          font-size: 1.5rem;
-          font-weight: bold;
-          color: white;
-        }
 
         .image-section {
           flex: 1;
@@ -448,17 +443,17 @@
           color: #6b7280;
         }
 
-        .button-section {
+        .button-section1 {
           padding-top: 2rem;
         }
 
         /* Enhanced Animated Button */
-        .submit-button,
-        .continue-button {
+        .submit-button1,
+        .continue-button1 {
           position: relative;
           background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%);
           color: white;
-          padding: 1.5rem 2rem;
+          padding: 1rem 1.5rem;
           font-size: 1rem;
           font-weight: 600;
           border-radius: 12px;
@@ -475,8 +470,8 @@
             inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
-        .submit-button::before,
-        .continue-button::before {
+        .submit-button1::before,
+        .continue-button1::before {
           content: '';
           position: absolute;
           top: 0;
@@ -492,8 +487,8 @@
           transition: left 0.5s ease-in-out;
         }
 
-        .submit-button:hover,
-        .continue-button:hover {
+        .submit-button1:hover,
+        .continue-button1:hover {
           transform: translateY(-2px) scale(1.02);
           box-shadow: 
             0 8px 25px rgba(139, 92, 246, 0.6),
@@ -502,13 +497,13 @@
           background: linear-gradient(135deg, #8b3cf0 0%, #b45ff7 50%, #d8b4fe 100%);
         }
 
-        .submit-button:hover::before,
-        .continue-button:hover::before {
+        .submit-button1:hover::before,
+        .continue-button1:hover::before {
           left: 100%;
         }
 
-        .submit-button:active,
-        .continue-button:active {
+        .submit-button1:active,
+        .continue-button1:active {
           transform: translateY(0) scale(0.98);
           box-shadow: 
             0 2px 10px rgba(139, 92, 246, 0.4),
@@ -516,8 +511,8 @@
             inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .submit-button:disabled,
-        .continue-button:disabled {
+        .submit-button1:disabled,
+        .continue-button1:disabled {
           opacity: 0.4;
           cursor: not-allowed;
           transform: none;
@@ -525,8 +520,8 @@
           box-shadow: none;
         }
 
-        .submit-button:disabled:hover,
-        .continue-button:disabled:hover {
+        .submit-button1:disabled:hover,
+        .continue-button1:disabled:hover {
           transform: none;
           box-shadow: none;
         }

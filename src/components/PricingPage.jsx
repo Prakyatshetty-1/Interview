@@ -48,7 +48,7 @@ export default function Pricing() {
                 </div>
                 <p className="plan-description">For casual practice and job prep.</p>
               </div>
-              <button className="cta-button">Get started</button>
+              <button className="cta-button1">Get started</button>
             </div>
 
             <div className="features">
@@ -101,7 +101,7 @@ export default function Pricing() {
                 <p className="plan-description">For active job seekers</p>
               </div>
 
-              <button className="cta-button popular-button">Get started</button>
+              <button className="cta-button1 popular-button1">Get started</button>
             </div>
 
             <div className="features">
@@ -143,7 +143,7 @@ export default function Pricing() {
                 </div>
                 <p className="plan-description">For recruiters and coaches</p>
               </div>
-              <button className="cta-button">Get started</button>
+              <button className="cta-button1">Get started</button>
             </div>
 
             <div className="features">
