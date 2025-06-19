@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'
 
 import './Signup.css';
 import SignupImage from "../assets/Image3.png";
@@ -7,12 +8,10 @@ const Signup = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-
-
     password: "",
   });
-
   const [focusedField, setFocusedField] = useState(null);
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -25,6 +24,7 @@ const Signup = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
+    navigate("/Preference");
   };
 
   const handleGoogleSignIn = () => {
@@ -81,9 +81,7 @@ const Signup = () => {
                 onChange={handleInputChange}
                 onFocus={() => setFocusedField("email")}
                 onBlur={() => setFocusedField(null)}
-
-                 placeholder="Enter Your Email"
-
+                placeholder="Enter Your Email"
                 className={`input input-active ${focusedField === "email" ? "input-focused" : ""}`}
                 required
               />
@@ -104,9 +102,9 @@ const Signup = () => {
               />
             </div>
 
-            <button type="submit" className="create-button">
+            <button type="submit" className="create-button1">
               <span>Create an account</span>
-              <div className="button-glow"></div>
+              <div className="button-glow1"></div>
             </button>
           </form>
 
@@ -180,5 +178,3 @@ const Signup = () => {
 
 
 export default Signup;
-
-
