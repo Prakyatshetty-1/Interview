@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
-
 import './Signup.css';
 import SignupImage from "../assets/Image3.png";
+import { Link } from 'react-router-dom';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -143,9 +143,9 @@ const Signup = () => {
           {/* Sign In Link */}
           <div className="sign-in-link">
             Already have an account?{" "}
-            <a href="#" className="link">
+            <Link to="/login" className="link">
               Sign In
-            </a>
+            </Link>
           </div>
 
           {/* Footer */}
