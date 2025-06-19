@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import "./CommunityPage.css"
+import { useNavigate } from "react-router-dom"
 
 const communityMembers = [
   {
@@ -80,6 +81,15 @@ export default function CommunityPage() {
     })
   }, [])
 
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate('/signup');
+  };
+  const LoginClick=()=>{
+    navigate('/login');
+  };
+
   return (
     <div className="community-page">
       {/* Background Elements */}
@@ -107,8 +117,8 @@ export default function CommunityPage() {
               platform for global talents.
             </p>
             <div className="hero-buttons">
-              <button className="get-started-btn">Get Started</button>
-              <button className="log-in-btn">Log In</button>
+              <button className="get-started-btn" onClick={handleClick}>Get Started</button>
+              <button className="log-in-btn" onClick={LoginClick}>Log In</button>
             </div>
           </div>
 
