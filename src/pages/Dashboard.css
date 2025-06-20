@@ -142,14 +142,13 @@ body {
 /* Sidebar Styles */
 .sidebar10 {
   width: 240px;
-  background: rgba(45, 27, 78, 0.95); /* CHANGED: More opaque background */
-  border-right: 1px solid rgba(139, 69, 255, 0.2); /* CHANGED: More visible border */
-  padding: 1.5rem; /* CHANGED: Reduced padding for cleaner look */
+  background: #2d1b4e;
+  border-right: 1px solid rgba(139, 69, 255, 0.1);
+  padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   overflow-y: auto;
-  backdrop-filter: blur(10px); /* CHANGED: Added blur effect */
 }
 
 .create-section10 {
@@ -161,21 +160,19 @@ body {
   background: linear-gradient(135deg, #8b45ff, #6b2dd4);
   border: none;
   border-radius: 12px;
-  padding: 1rem 1.25rem; /* CHANGED: Better padding */
+  padding: 1rem;
   color: white;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: all 0.3s ease; /* CHANGED: Smoother transition */
+  transition: transform 0.2s ease;
   font-size: 0.9rem;
-  box-shadow: 0 4px 12px rgba(139, 69, 255, 0.3); /* CHANGED: Added shadow */
 }
 
 .create-btn10:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(139, 69, 255, 0.4); /* CHANGED: Enhanced hover shadow */
 }
 
 .plus-icon10 {
@@ -200,40 +197,25 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 1.25rem; /* CHANGED: Better padding */
-  border-radius: 12px; /* CHANGED: More rounded corners */
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease; /* CHANGED: Smoother transition */
+  transition: background 0.2s ease;
   margin-bottom: 0.5rem;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.9rem;
   width: 100%;
   flex-shrink: 0;
-  position: relative; /* CHANGED: For active indicator */
 }
 
 .nav-item10:hover {
-  background: rgba(139, 69, 255, 0.15); /* CHANGED: Subtle hover effect */
+  background: rgba(139, 69, 255, 0.1);
   color: white;
-  transform: translateX(4px); /* CHANGED: Subtle slide effect */
 }
 
 .nav-item10.active10 {
-  background: rgba(139, 69, 255, 0.25); /* CHANGED: More prominent active state */
+  background: rgba(139, 69, 255, 0.2);
   color: #8b45ff;
-  box-shadow: 0 2px 8px rgba(139, 69, 255, 0.2); /* CHANGED: Active shadow */
-}
-
-.nav-item10.active10::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 20px;
-  background: #8b45ff;
-  border-radius: 0 2px 2px 0;
 }
 
 .nav-icon10 {
@@ -382,20 +364,19 @@ body {
 }
 
 .month-labels10 {
-  display: flex;
-  justify-content: space-between; /* CHANGED: Distribute month labels evenly */
-  margin-bottom: 1rem;
-  padding-left: 5rem;
-  padding-right: 1rem;
-  width: calc(100% - 6rem); /* CHANGED: Account for padding */
+  display: grid; /* CHANGED: From flex to grid for better spacing control */
+  grid-template-columns: repeat(12, 1fr); /* CHANGED: 12 equal columns for months */
+  gap: 1.5rem; /* CHANGED: Added gap between month labels for better spacing */
+  margin-bottom: 1rem; /* CHANGED: Increased from 0.75rem to 1rem for better spacing */
+  padding-left: 5rem; /* CHANGED: Increased from 4rem to 5rem to accommodate larger weekday labels */
+  padding-right: 1rem; /* CHANGED: Added right padding for balance */
 }
 
 .month-label10 {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 600;
-  flex: 1; /* CHANGED: Equal distribution */
-  text-align: center;
+  font-size: 0.9rem; /* CHANGED: Increased from 0.8rem to 0.9rem for better visibility at 67% zoom */
+  color: rgba(255, 255, 255, 0.8); /* CHANGED: Increased opacity for better visibility */
+  text-align: center; /* CHANGED: Center align month labels */
+  font-weight: 600; /* CHANGED: Made font bolder for better visibility */
 }
 
 .heatmap-grid10 {
@@ -424,28 +405,15 @@ body {
 
 .heatmap-weeks10 {
   display: flex;
-  gap: 3px; /* CHANGED: Base gap between weeks */
+  gap: 5px; /* CHANGED: Increased from 4px to 5px for better visual separation at 67% zoom */
   flex: 1;
-  min-width: fit-content;
+  min-width: fit-content; /* CHANGED: Prevent compression */
 }
 
 .heatmap-week10 {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-}
-
-/* CHANGED: Add month separations every ~4.3 weeks (monthly gaps) */
-.heatmap-week10:nth-child(4n) {
-  margin-right: 12px; /* CHANGED: Clear monthly separation */
-}
-
-.heatmap-week10:nth-child(8n) {
-  margin-right: 15px; /* CHANGED: Slightly larger gap every 2 months */
-}
-
-.heatmap-week10:nth-child(13n) {
-  margin-right: 18px; /* CHANGED: Even larger gap every quarter */
+  gap: 5px; /* CHANGED: Increased from 4px to 5px for consistent spacing */
 }
 
 .heatmap-day10 {
