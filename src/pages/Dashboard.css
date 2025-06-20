@@ -1,0 +1,771 @@
+/* Pure CSS - No Tailwind */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #1a0d2e;
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+.dashboard10 {
+  min-height: 100vh;
+  background: #1a0d2e;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Styles */
+.header10 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #2d1b4e;
+  border-bottom: 1px solid rgba(139, 69, 255, 0.1);
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+  height: 80px;
+}
+
+.header-left10 {
+  display: flex;
+  align-items: center;
+}
+
+.logo10 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: white;
+}
+
+.logo-icon10 {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #8b45ff, #6b2dd4);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.header-center10 {
+  text-align: center;
+}
+
+.header-center10 h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: white;
+}
+
+.date10 {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.header-right10 {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-icons10 {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-btn10 {
+  width: 36px;
+  height: 36px;
+  background: rgba(139, 69, 255, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border: none;
+  color: white;
+  font-size: 1rem;
+}
+
+.icon-btn10:hover {
+  background: rgba(139, 69, 255, 0.2);
+}
+
+.user-profile10 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-profile10 span {
+  color: white;
+  font-weight: 500;
+}
+
+.avatar10 {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #8b45ff, #6b2dd4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: white;
+}
+
+/* Main Container */
+.main-container10 {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 80px);
+  overflow: hidden;
+}
+
+/* Sidebar Styles */
+.sidebar10 {
+  width: 240px;
+  background: rgba(45, 27, 78, 0.95); /* CHANGED: More opaque background */
+  border-right: 1px solid rgba(139, 69, 255, 0.2); /* CHANGED: More visible border */
+  padding: 1.5rem; /* CHANGED: Reduced padding for cleaner look */
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+  backdrop-filter: blur(10px); /* CHANGED: Added blur effect */
+}
+
+.create-section10 {
+  margin-bottom: 2rem;
+}
+
+.create-btn10 {
+  width: 100%;
+  background: linear-gradient(135deg, #8b45ff, #6b2dd4);
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 1.25rem; /* CHANGED: Better padding */
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease; /* CHANGED: Smoother transition */
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(139, 69, 255, 0.3); /* CHANGED: Added shadow */
+}
+
+.create-btn10:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 69, 255, 0.4); /* CHANGED: Enhanced hover shadow */
+}
+
+.plus-icon10 {
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.nav-menu10 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.nav-item10 {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem; /* CHANGED: Better padding */
+  border-radius: 12px; /* CHANGED: More rounded corners */
+  cursor: pointer;
+  transition: all 0.3s ease; /* CHANGED: Smoother transition */
+  margin-bottom: 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  width: 100%;
+  flex-shrink: 0;
+  position: relative; /* CHANGED: For active indicator */
+}
+
+.nav-item10:hover {
+  background: rgba(139, 69, 255, 0.15); /* CHANGED: Subtle hover effect */
+  color: white;
+  transform: translateX(4px); /* CHANGED: Subtle slide effect */
+}
+
+.nav-item10.active10 {
+  background: rgba(139, 69, 255, 0.25); /* CHANGED: More prominent active state */
+  color: #8b45ff;
+  box-shadow: 0 2px 8px rgba(139, 69, 255, 0.2); /* CHANGED: Active shadow */
+}
+
+.nav-item10.active10::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: #8b45ff;
+  border-radius: 0 2px 2px 0;
+}
+
+.nav-icon10 {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.sidebar-bottom10 {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-card10 {
+  background: rgba(139, 69, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.preview-image10 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.upgrade-btn10 {
+  width: 100%;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.upgrade-btn10:hover {
+  transform: translateY(-2px);
+}
+
+/* Content Styles */
+.content10 {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background: #1a0d2e;
+}
+
+/* Welcome Section */
+.welcome-section10 {
+  background: linear-gradient(135deg, rgba(139, 69, 255, 0.15), rgba(107, 45, 212, 0.1));
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid rgba(139, 69, 255, 0.1);
+}
+
+.welcome-content10 h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.welcome-content10 p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+}
+
+.welcome-illustration10 {
+  font-size: 4rem;
+}
+
+.illustration-woman10 {
+  font-size: 4rem;
+}
+
+/* Activity Heatmap Section - OPTIMIZED FOR 67% ZOOM */
+.activity-section10 {
+  margin-bottom: 2rem;
+  background: rgba(45, 27, 78, 0.4);
+  border-radius: 12px;
+  padding: 2.5rem; /* CHANGED: Increased from 2rem to 2.5rem for more space around heatmap */
+  border: 1px solid rgba(139, 69, 255, 0.1);
+}
+
+.activity-header10 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.activity-stats10 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.submissions-count10 {
+  font-size: 1.1rem;
+  color: white;
+  font-weight: 600;
+}
+
+.activity-info10 {
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.activity-summary10 {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.current-dropdown10 {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+  background: rgba(139, 69, 255, 0.1);
+  border: 1px solid rgba(139, 69, 255, 0.2);
+}
+
+.current-dropdown10:hover {
+  background: rgba(139, 69, 255, 0.2);
+}
+
+.heatmap-container10 {
+  margin-top: 1.5rem;
+  width: 100%; /* CHANGED: Ensure full width usage */
+  overflow-x: auto; /* CHANGED: Allow horizontal scroll if needed */
+}
+
+.month-labels10 {
+  display: flex;
+  justify-content: space-between; /* CHANGED: Distribute month labels evenly */
+  margin-bottom: 1rem;
+  padding-left: 5rem;
+  padding-right: 1rem;
+  width: calc(100% - 6rem); /* CHANGED: Account for padding */
+}
+
+.month-label10 {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  flex: 1; /* CHANGED: Equal distribution */
+  text-align: center;
+}
+
+.heatmap-grid10 {
+  display: flex;
+  gap: 1rem; /* CHANGED: Increased from 0.75rem to 1rem for better separation at 67% zoom */
+  min-width: fit-content; /* CHANGED: Ensure heatmap doesn't compress */
+}
+
+.weekday-labels10 {
+  display: flex;
+  flex-direction: column;
+  gap: 5px; /* CHANGED: Increased from 4px to 5px for better spacing at 67% zoom */
+  margin-right: 1.25rem; /* CHANGED: Increased from 1rem to 1.25rem for better separation */
+  width: 3.5rem; /* CHANGED: Increased from 3rem to 3.5rem for more space for labels */
+}
+
+.weekday-labels10 span {
+  height: 22px; /* CHANGED: Increased from 18px to 22px to align with larger square height */
+  font-size: 0.9rem; /* CHANGED: Increased from 0.85rem to 0.9rem for better readability at 67% zoom */
+  color: rgba(255, 255, 255, 0.8); /* CHANGED: Increased opacity for better visibility */
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  font-weight: 600; /* CHANGED: Made font bolder for better visibility */
+}
+
+.heatmap-weeks10 {
+  display: flex;
+  gap: 3px; /* CHANGED: Base gap between weeks */
+  flex: 1;
+  min-width: fit-content;
+}
+
+.heatmap-week10 {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* CHANGED: Add month separations every ~4.3 weeks (monthly gaps) */
+.heatmap-week10:nth-child(4n) {
+  margin-right: 12px; /* CHANGED: Clear monthly separation */
+}
+
+.heatmap-week10:nth-child(8n) {
+  margin-right: 15px; /* CHANGED: Slightly larger gap every 2 months */
+}
+
+.heatmap-week10:nth-child(13n) {
+  margin-right: 18px; /* CHANGED: Even larger gap every quarter */
+}
+
+.heatmap-day10 {
+  width: 22px; /* CHANGED: Increased from 18px to 22px (22% larger squares for 67% zoom) */
+  height: 22px; /* CHANGED: Increased from 18px to 22px (22% larger squares for 67% zoom) */
+  border-radius: 5px; /* CHANGED: Increased from 4px to 5px for proportional rounding */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.heatmap-day10.empty10 {
+  background: transparent;
+}
+
+.heatmap-day10.level-010 {
+  background: rgba(45, 27, 78, 0.4);
+  border-color: rgba(45, 27, 78, 0.6);
+}
+
+.heatmap-day10.level-110 {
+  background: rgba(139, 69, 255, 0.4);
+  border-color: rgba(139, 69, 255, 0.5);
+}
+
+.heatmap-day10.level-210 {
+  background: rgba(139, 69, 255, 0.6);
+  border-color: rgba(139, 69, 255, 0.7);
+}
+
+.heatmap-day10.level-310 {
+  background: rgba(139, 69, 255, 0.8);
+  border-color: rgba(139, 69, 255, 0.9);
+}
+
+.heatmap-day10.level-410 {
+  background: rgba(139, 69, 255, 1);
+  border-color: rgba(139, 69, 255, 1);
+  box-shadow: 0 0 10px rgba(139, 69, 255, 0.5); /* CHANGED: Increased glow for better visibility */
+}
+
+.heatmap-day10:hover {
+  transform: scale(1.4); /* CHANGED: Increased from 1.3 to 1.4 for better hover effect at 67% zoom */
+  border-color: rgba(255, 255, 255, 0.9) !important; /* CHANGED: Increased opacity for better visibility */
+  z-index: 10;
+  position: relative;
+}
+
+.heatmap-legend10 {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.25rem; /* CHANGED: Increased from 1rem to 1.25rem for better spacing */
+  margin-top: 1.5rem; /* CHANGED: Increased from 1.25rem to 1.5rem for more separation */
+  font-size: 0.9rem; /* CHANGED: Increased from 0.85rem to 0.9rem for better readability at 67% zoom */
+  color: rgba(255, 255, 255, 0.8); /* CHANGED: Increased opacity for better visibility */
+  font-weight: 600; /* CHANGED: Made font bolder */
+}
+
+.legend-squares10 {
+  display: flex;
+  gap: 5px; /* CHANGED: Increased from 4px to 5px to match main heatmap spacing */
+}
+
+.legend-square10 {
+  width: 22px; /* CHANGED: Increased from 18px to 22px to match main squares */
+  height: 22px; /* CHANGED: Increased from 18px to 22px to match main squares */
+  border-radius: 5px; /* CHANGED: Increased from 4px to 5px to match main squares */
+  border: 1px solid transparent;
+}
+
+.legend-square10.level-010 {
+  background: rgba(45, 27, 78, 0.4);
+  border-color: rgba(45, 27, 78, 0.6);
+}
+
+.legend-square10.level-110 {
+  background: rgba(139, 69, 255, 0.4);
+  border-color: rgba(139, 69, 255, 0.5);
+}
+
+.legend-square10.level-210 {
+  background: rgba(139, 69, 255, 0.6);
+  border-color: rgba(139, 69, 255, 0.7);
+}
+
+.legend-square10.level-310 {
+  background: rgba(139, 69, 255, 0.8);
+  border-color: rgba(139, 69, 255, 0.9);
+}
+
+.legend-square10.level-410 {
+  background: rgba(139, 69, 255, 1);
+  border-color: rgba(139, 69, 255, 1);
+  box-shadow: 0 0 6px rgba(139, 69, 255, 0.5); /* CHANGED: Increased glow for better visibility */
+}
+
+/* Projects Section */
+.projects-section10 {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.project-card10 {
+  background: rgba(45, 27, 78, 0.8);
+  border: 1px solid rgba(139, 69, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.project-card10:hover {
+  transform: translateY(-2px);
+  border-color: rgba(139, 69, 255, 0.3);
+}
+
+.project-thumbnail10 {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.project-thumbnail10.orange-bg10 {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.project-thumbnail10.blue-bg10 {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.project-icon10 {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.project-info10 {
+  flex: 1;
+}
+
+.project-info10 h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.project-info10 p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.slide-count10 {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+}
+
+.project-actions10 {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status10 {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status10.public10 {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status10.private10 {
+  background: rgba(251, 146, 60, 0.2);
+  color: #fb923c;
+  border: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+.action-buttons10 {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn10 {
+  width: 32px;
+  height: 32px;
+  background: rgba(139, 69, 255, 0.1);
+  border: 1px solid rgba(139, 69, 255, 0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  color: white;
+  font-size: 0.875rem;
+}
+
+.action-btn10:hover {
+  background: rgba(139, 69, 255, 0.2);
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(139, 69, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 69, 255, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 69, 255, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard10 {
+    flex-direction: column;
+  }
+
+  .main-container10 {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .sidebar10 {
+    width: 100%;
+    padding: 1rem;
+    height: auto;
+  }
+
+  .header10 {
+    padding: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    height: auto;
+  }
+
+  .header-center10 h1 {
+    font-size: 1.25rem;
+  }
+
+  .content10 {
+    padding: 1rem;
+  }
+
+  .welcome-section10 {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .activity-header10 {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .activity-summary10 {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .heatmap-grid10 {
+    overflow-x: auto;
+  }
+
+  .project-card10 {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .project-actions10 {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .header10 {
+    padding: 0.5rem;
+  }
+
+  .sidebar10 {
+    padding: 0.5rem;
+  }
+
+  .content10 {
+    padding: 0.5rem;
+  }
+
+  .welcome-section10 {
+    padding: 1rem;
+  }
+
+  .activity-section10 {
+    padding: 1rem;
+  }
+
+  .project-card10 {
+    padding: 1rem;
+  }
+}

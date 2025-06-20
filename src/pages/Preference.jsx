@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Preference.css";
 
 const questions = [
@@ -116,10 +117,11 @@ export default function Preference() {
       setIsAnimating(false)
     }
   }
-
+  const navigate=useNavigate();
   const handleSubmit = () => {
     console.log("Submitted answers:", answers)
-    alert("Thank you! Your responses have been submitted.")
+    alert("Thank you! Your responses have been submitted.");
+    navigate("/dashboard");
   }
 
   const handleAnswerChange = (value, subQuestionId = null) => {
