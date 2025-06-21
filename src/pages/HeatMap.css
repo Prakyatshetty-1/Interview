@@ -78,6 +78,7 @@
   font-weight: 600; /* CHANGED: Made font bolder for better visibility */
 }
 
+
 .heatmap-grid10 {
   display: flex;
   gap: 1rem; /* CHANGED: Increased from 0.75rem to 1rem for better separation at 67% zoom */
@@ -116,8 +117,8 @@
 }
 
 .heatmap-day10 {
-  width: 22px; /* CHANGED: Increased from 18px to 22px (22% larger squares for 67% zoom) */
-  height: 22px; /* CHANGED: Increased from 18px to 22px (22% larger squares for 67% zoom) */
+  width: 17px; /* CHANGED: Increased from 18px to 22px (22% larger squares for 67% zoom) */
+  height: 17px; /* CHANGED: Increased from 18px to 22px (22% larger squares for 67% zoom) */
   border-radius: 5px; /* CHANGED: Increased from 4px to 5px for proportional rounding */
   cursor: pointer;
   transition: all 0.2s ease;
@@ -165,12 +166,22 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 1.25rem; /* CHANGED: Increased from 1rem to 1.25rem for better spacing */
+  gap: 2rem; /* CHANGED: Increased from 1rem to 1.25rem for better spacing */
   margin-top: 1.5rem; /* CHANGED: Increased from 1.25rem to 1.5rem for more separation */
   font-size: 0.9rem; /* CHANGED: Increased from 0.85rem to 0.9rem for better readability at 67% zoom */
   color: rgba(255, 255, 255, 0.8); /* CHANGED: Increased opacity for better visibility */
   font-weight: 600; /* CHANGED: Made font bolder */
 }
+
+.heatmap-week10.month-gap10 {
+  width: 5px; /* adjust width as desired */
+}
+
+.heatmap-container10 {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
 
 .legend-squares10 {
   display: flex;
