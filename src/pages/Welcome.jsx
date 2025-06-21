@@ -11,15 +11,15 @@ const Welcome = () => {
 
   useEffect(() => {
     if (typingComplete) {
-      // Start fade out after a brief pause to show completed text
+      // Start fade out after completion animation
       const fadeOutTimer = setTimeout(() => {
         setShowWelcome(false)
-      }, 1000) // Increased delay to let the text completion animation play
+      }, 1200)
 
-      // Start dashboard fade in with better timing
+      // Start dashboard fade in
       const showDashboardTimer = setTimeout(() => {
         setShowDashboard(true)
-      }, 1500) // Adjusted timing for smoother transition
+      }, 1800)
 
       return () => {
         clearTimeout(fadeOutTimer)
@@ -32,7 +32,10 @@ const Welcome = () => {
     <div className="app">
       {showWelcome && (
         <div className={`welcome-container ${typingComplete ? "fade-out" : ""}`}>
-          <TypingText text="WELCOME TO ASKORA" onComplete={() => setTypingComplete(true)} />
+          <div className="circle-container">
+            <div className={`glowing-circle ${typingComplete ? "complete" : ""}`}></div>
+            <TypingText text="WELCOME TO ASKORA" onComplete={() => setTypingComplete(true)} />
+          </div>
         </div>
       )}
 
@@ -55,16 +58,15 @@ const TypingText = ({ text, onComplete }) => {
       const timer = setTimeout(() => {
         setDisplayedText((prev) => prev + text[currentIndex])
         setCurrentIndex((prev) => prev + 1)
-      }, 150) // Typing speed
+      }, 150)
 
       return () => clearTimeout(timer)
     } else if (currentIndex === text.length && !isComplete) {
-      // Typing is complete, trigger completion animation
       setIsComplete(true)
       if (onComplete) {
         setTimeout(() => {
           onComplete()
-        }, 50) // Small delay before starting exit animation
+        }, 800) // Pause to show completed text
       }
     }
   }, [currentIndex, text, onComplete, isComplete])
