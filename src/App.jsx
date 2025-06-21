@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Preference from './pages/Preference';
 import Dashboard from './pages/Dashboard';
 import './App.css';
+import Welcome from './pages/Welcome';
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path='/login' element={<Login/>}/>
         <Route path='/Preference' element={<Preference/>}/>
-        <Route path='/dashboard' element={<Dashboard/>}/>
+        <Route path='/dashboard' element={<Welcome/>}/>
       </Routes>
     </Router>
   );

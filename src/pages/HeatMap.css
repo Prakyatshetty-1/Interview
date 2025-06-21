@@ -220,3 +220,18 @@
   border-color: rgba(139, 69, 255, 1);
   box-shadow: 0 0 6px rgba(139, 69, 255, 0.5); /* CHANGED: Increased glow for better visibility */
 }
+
+.month-labels10 {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: repeat(auto-fit, 1fr); /* fallback */
+  margin-bottom: 1rem;
+  padding-left: 4.6rem; /* match weekday labels column width */
+}
+
+.month-label10 {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  text-align: left;
+}
