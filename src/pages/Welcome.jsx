@@ -11,15 +11,15 @@ const Welcome = () => {
 
   useEffect(() => {
     if (typingComplete) {
-      // Start fade out immediately when typing completes
+      // Start fade out after a brief pause to show completed text
       const fadeOutTimer = setTimeout(() => {
         setShowWelcome(false)
-      }, 500) // Small delay to let user see completed text
+      }, 1000) // Increased delay to let the text completion animation play
 
-      // Start dashboard fade in as welcome fades out
+      // Start dashboard fade in with better timing
       const showDashboardTimer = setTimeout(() => {
         setShowDashboard(true)
-      }, 800) // Slight overlap for smoother transition
+      }, 1500) // Adjusted timing for smoother transition
 
       return () => {
         clearTimeout(fadeOutTimer)
@@ -31,7 +31,7 @@ const Welcome = () => {
   return (
     <div className="app">
       {showWelcome && (
-        <div className={`welcome-container ${!showWelcome ? "fade-out" : ""}`}>
+        <div className={`welcome-container ${typingComplete ? "fade-out" : ""}`}>
           <TypingText text="WELCOME TO ASKORA" onComplete={() => setTypingComplete(true)} />
         </div>
       )}
@@ -48,6 +48,7 @@ const Welcome = () => {
 const TypingText = ({ text, onComplete }) => {
   const [displayedText, setDisplayedText] = useState("")
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isComplete, setIsComplete] = useState(false)
 
   useEffect(() => {
     if (currentIndex < text.length) {
@@ -57,17 +58,22 @@ const TypingText = ({ text, onComplete }) => {
       }, 150) // Typing speed
 
       return () => clearTimeout(timer)
-    } else if (currentIndex === text.length && onComplete) {
-      // Typing is complete, notify parent component
-      onComplete()
+    } else if (currentIndex === text.length && !isComplete) {
+      // Typing is complete, trigger completion animation
+      setIsComplete(true)
+      if (onComplete) {
+        setTimeout(() => {
+          onComplete()
+        }, 50) // Small delay before starting exit animation
+      }
     }
-  }, [currentIndex, text, onComplete])
+  }, [currentIndex, text, onComplete, isComplete])
 
   return (
     <div className="typing-container">
-      <h1 className="typing-text">
+      <h1 className={`typing-text ${isComplete ? "complete" : ""}`}>
         {displayedText}
-        <span className="cursor">|</span>
+        {!isComplete && <span className="cursor">|</span>}
       </h1>
     </div>
   )
