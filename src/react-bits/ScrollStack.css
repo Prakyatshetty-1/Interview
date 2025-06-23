@@ -548,23 +548,26 @@
 
 /* Add these styles to your existing PricingPage.css */
 
-/* Ensure smooth animations for the pricing cards */
+/* Force fixed z-index values that never change */
 .pricing-card {
-  position: relative;
-  transition: none !important; /* Let GSAP handle all transitions */
+  position: relative !important;
+  transition: none !important;
+  transform-origin: center center;
 }
 
-/* Ensure proper stacking order */
-.popular-card {
-  z-index: 10;
+.basic-card {
+  z-index: 1 !important;
 }
 
-.basic-card,
 .enterprise-card {
-  z-index: 1;
+  z-index: 2 !important;
 }
 
-/* Maintain the original grid layout */
+.popular-card {
+  z-index: 10 !important;
+}
+
+/* Ensure grid maintains proper layout */
 .pricing-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -575,29 +578,24 @@
   position: relative;
 }
 
-/* Ensure cards maintain their transform origin */
-.pricing-card {
-  transform-origin: center center;
+/* Prevent any z-index changes during animations */
+.pricing-card * {
+  z-index: inherit;
 }
 
-/* Mobile responsiveness - disable animation on mobile */
+/* Mobile responsiveness */
 @media (max-width: 768px) {
   .pricing-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
 
-  /* Reset transforms on mobile */
   .basic-card,
-  .enterprise-card {
-    transform: none !important;
-    opacity: 1 !important;
-  }
-
+  .enterprise-card,
   .popular-card {
     transform: none !important;
-    margin: 0;
+    opacity: 1 !important;
+    z-index: auto !important;
   }
 }
-
 

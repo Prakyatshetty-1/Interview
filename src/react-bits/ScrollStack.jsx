@@ -23,64 +23,115 @@ export default function Pricing() {
 
     if (!basicCard || !enterpriseCard || !popularCard || !section) return
 
-    // Get the natural positions of the cards in the grid
-    const basicRect = basicCard.getBoundingClientRect()
-    const enterpriseRect = enterpriseCard.getBoundingClientRect()
-    const popularRect = popularCard.getBoundingClientRect()
+    // Wait for layout to be calculated
+    setTimeout(() => {
+      // Get the natural positions of the cards in the grid
+      const basicRect = basicCard.getBoundingClientRect()
+      const enterpriseRect = enterpriseCard.getBoundingClientRect()
+      const popularRect = popularCard.getBoundingClientRect()
 
-    // Calculate the distance each card needs to move to center behind popular card
-    const basicOffset = popularRect.left - basicRect.left
-    const enterpriseOffset = popularRect.left - enterpriseRect.left
+      // Calculate how much to move each card to center them behind popular card
+      const basicMoveX = popularRect.left - basicRect.left
+      const enterpriseMoveX = popularRect.left - enterpriseRect.left
 
-    // Set initial positions - move cards to center behind popular card
-    gsap.set(basicCard, {
-      x: basicOffset,
-      scale: 0.9,
-      opacity: 0.1,
-      zIndex: 1,
-    })
+      // Set FIXED z-index values that never change
+      gsap.set(basicCard, {
+        zIndex: 1, // Always behind
+      })
 
-    gsap.set(enterpriseCard, {
-      x: enterpriseOffset,
-      scale: 0.9,
-      opacity: 0.1,
-      zIndex: 1,
-    })
+      gsap.set(enterpriseCard, {
+        zIndex: 2, // Always in middle
+      })
 
-    gsap.set(popularCard, {
-      zIndex: 10,
-      scale: 1.05,
-      opacity: 1,
-    })
+      gsap.set(popularCard, {
+        zIndex: 10, // Always on top
+      })
 
-    // Create scroll-triggered animation to move cards back to their natural positions
-    ScrollTrigger.create({
-      trigger: section,
-      start: "top center",
-      end: "top+=200px center", // Much shorter scroll distance for faster completion
-      scrub: 0.1, // Changed from 0.3 to 0.1 for ultra-fast animation
-      onUpdate: (self) => {
-        const progress = self.progress
+      // Create the animation timeline
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top center",
+          // CHANGE 1: Increased scroll distance from "top+=200px center" to "top+=400px center"
+          // This makes the animation take longer to complete, making it slower
+          end: "top+=400px center",
+          // CHANGE 2: Increased scrub value from 0.1 to 0.4
+          // Higher scrub values create smoother, slower animations tied to scroll
+          scrub: 0.4,
+          onUpdate: (self) => {
+            // Ensure z-index stays fixed during animation
+            gsap.set(basicCard, { zIndex: 1 })
+            gsap.set(enterpriseCard, { zIndex: 2 })
+            gsap.set(popularCard, { zIndex: 10 })
+          },
+        },
+      })
 
-        // Animate basic card back to its natural position
-        gsap.to(basicCard, {
-          x: basicOffset * (1 - progress),
-          scale: 0.9 + 0.1 * progress,
-          opacity: 0.1 + 0.9 * progress,
-          duration: 0.02, // Reduced from 0.05 to 0.02 for instant movement
-          ease: "power4.out", // Even sharper easing
+      // Set initial state (stacked)
+      tl.set(basicCard, {
+        x: basicMoveX,
+        y: 0,
+        scale: 0.9,
+        opacity: 0.2,
+      })
+        .set(
+          enterpriseCard,
+          {
+            x: enterpriseMoveX,
+            y: 0,
+            scale: 0.9,
+            opacity: 0.2,
+          },
+          0,
+        )
+        .set(
+          popularCard,
+          {
+            x: 0,
+            y: 0,
+            scale: 1.05,
+            opacity: 1,
+          },
+          0,
+        )
+
+        // Animate to final positions
+        .to(basicCard, {
+          x: 0, // Move to natural position
+          scale: 1,
+          opacity: 1,
+          // CHANGE 3: Increased duration from 1 to 1.5 seconds
+          // This makes each individual card animation take longer
+          duration: 1.5,
+          // CHANGE 4: Changed easing from "power4.out" to "power2.out"
+          // power2.out is gentler and slower than power4.out
+          ease: "power2.out",
         })
-
-        // Animate enterprise card back to its natural position
-        gsap.to(enterpriseCard, {
-          x: enterpriseOffset * (1 - progress),
-          scale: 0.9 + 0.1 * progress,
-          opacity: 0.1 + 0.9 * progress,
-          duration: 0.02, // Reduced from 0.05 to 0.02 for instant movement
-          ease: "power4.out", // Even sharper easing
-        })
-      },
-    })
+        .to(
+          enterpriseCard,
+          {
+            x: 0, // Move to natural position
+            scale: 1,
+            opacity: 1,
+            // CHANGE 5: Increased duration from 1 to 1.5 seconds (same as basic card)
+            duration: 1.5,
+            // CHANGE 6: Changed easing from "power4.out" to "power2.out" (same as basic card)
+            ease: "power2.out",
+          },
+          0,
+        ) // Start at the same time
+        .to(
+          popularCard,
+          {
+            scale: 1.05, // Keep popular card scale
+            // CHANGE 7: Increased duration from 1 to 1.5 seconds (consistent with other cards)
+            duration: 1.5,
+            // CHANGE 8: Changed easing from "power4.out" to "power2.out" (consistent with other cards)
+            ease: "power2.out",
+          },
+          0,
+        )
+    }, 100)
 
     // Cleanup function
     return () => {
