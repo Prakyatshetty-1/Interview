@@ -42,6 +42,9 @@ export default function NavBar() {
           <a href="#community" onClick={(e) => handleSmoothScroll(e, "community")}>
             Community
           </a>
+          <a href="#aaa" onClick={(e) => handleSmoothScroll(e, "aaa")}>
+            aaa
+          </a>
         </nav>
         <div className="buttons">
           <button className="login boton-elegante" onClick={LoginClick}>Login</button>
