@@ -24,7 +24,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: radial-gradient(circle at center, #1a1a2e 0%, #16213e 30%, #0a0a0f 70%, #000 100%);
+  background: radial-gradient(circle at center, rgba(25, 25, 35, 0.8) 0%, rgba(15, 15, 25, 0.9) 40%, #000 80%);
   z-index: 1000;
   opacity: 1;
   transition: opacity 0.8s ease-out;
@@ -54,8 +54,8 @@ body {
   pointer-events: none;
 }
 
-.welcome-container.fade-out {
-  animation: welcomeExit 1.5s ease-out forwards;
+.welcome-container.blast-fade {
+  animation: blastFadeOut 0.8s ease-out forwards;
 }
 
 .circle-container {
@@ -75,14 +75,15 @@ body {
   border-radius: 50%;
   background: radial-gradient(
     circle at center,
-    transparent 60%,
-    rgba(0, 100, 255, 0.1) 70%,
-    rgba(0, 150, 255, 0.3) 85%,
-    rgba(0, 200, 255, 0.6) 95%,
-    rgba(0, 255, 255, 0.8) 100%
+    #000 0%,
+    #000 60%,
+    rgba(75, 0, 130, 0.3) 70%,
+    rgba(138, 43, 226, 0.5) 80%,
+    rgba(75, 0, 130, 0.7) 90%,
+    rgba(138, 43, 226, 0.9) 100%
   );
-  box-shadow: 0 0 50px rgba(0, 150, 255, 0.5), 0 0 100px rgba(0, 100, 255, 0.3), 0 0 150px rgba(0, 50, 255, 0.2), inset
-    0 0 50px rgba(0, 200, 255, 0.1);
+  box-shadow: 0 0 50px rgba(138, 43, 226, 0.6), 0 0 100px rgba(75, 0, 130, 0.4), 0 0 150px rgba(138, 43, 226, 0.3), 0 0
+    200px rgba(75, 0, 130, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.8);
   animation: circleGlow 4s ease-in-out infinite alternate;
 }
 
@@ -97,17 +98,13 @@ body {
   background: conic-gradient(
     from 0deg,
     transparent,
-    rgba(0, 150, 255, 0.8),
+    rgba(138, 43, 226, 0.8),
     transparent,
-    rgba(0, 200, 255, 0.6),
+    rgba(75, 0, 130, 0.6),
     transparent
   );
   animation: rotate 10s linear infinite;
   z-index: -1;
-}
-
-.glowing-circle.complete {
-  animation: circleComplete 1.5s ease-out forwards;
 }
 
 .typing-container {
@@ -128,13 +125,175 @@ body {
   line-height: 1.2;
 }
 
-.typing-text.complete {
-  animation: textComplete 1.5s ease-out forwards;
-}
-
 .cursor {
   animation: blink 1.2s infinite, cursorGlow 2s ease-in-out infinite alternate;
   color: #00aaff;
+}
+
+.particles-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.particle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(138, 43, 226, 0.8) 50%, transparent 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 30px rgba(138, 43, 226, 0.7);
+  opacity: 0;
+  transform: scale(0);
+}
+
+.particle-1 {
+  top: 10%;
+  left: 20%;
+  animation: particleAppear 0.5s ease-out 0s forwards, particleFloat 2s ease-in-out 0.5s infinite alternate;
+}
+.particle-2 {
+  top: 15%;
+  left: 80%;
+  animation: particleAppear 0.5s ease-out 0.2s forwards, particleFloat 2s ease-in-out 0.7s infinite alternate;
+}
+.particle-3 {
+  top: 30%;
+  left: 10%;
+  animation: particleAppear 0.5s ease-out 0.4s forwards, particleFloat 2s ease-in-out 0.9s infinite alternate;
+}
+.particle-4 {
+  top: 70%;
+  left: 15%;
+  animation: particleAppear 0.5s ease-out 0.6s forwards, particleFloat 2s ease-in-out 1.1s infinite alternate;
+}
+.particle-5 {
+  top: 85%;
+  left: 30%;
+  animation: particleAppear 0.5s ease-out 0.8s forwards, particleFloat 2s ease-in-out 1.3s infinite alternate;
+}
+.particle-6 {
+  top: 90%;
+  left: 70%;
+  animation: particleAppear 0.5s ease-out 1s forwards, particleFloat 2s ease-in-out 1.5s infinite alternate;
+}
+.particle-7 {
+  top: 75%;
+  left: 85%;
+  animation: particleAppear 0.5s ease-out 1.2s forwards, particleFloat 2s ease-in-out 1.7s infinite alternate;
+}
+.particle-8 {
+  top: 40%;
+  left: 90%;
+  animation: particleAppear 0.5s ease-out 1.4s forwards, particleFloat 2s ease-in-out 1.9s infinite alternate;
+}
+.particle-9 {
+  top: 20%;
+  left: 50%;
+  animation: particleAppear 0.5s ease-out 1.6s forwards, particleFloat 2s ease-in-out 2.1s infinite alternate;
+}
+.particle-10 {
+  top: 80%;
+  left: 50%;
+  animation: particleAppear 0.5s ease-out 1.8s forwards, particleFloat 2s ease-in-out 2.3s infinite alternate;
+}
+.particle-11 {
+  top: 50%;
+  left: 5%;
+  animation: particleAppear 0.5s ease-out 2s forwards, particleFloat 2s ease-in-out 2.5s infinite alternate;
+}
+.particle-12 {
+  top: 50%;
+  left: 95%;
+  animation: particleAppear 0.5s ease-out 2.2s forwards, particleFloat 2s ease-in-out 2.7s infinite alternate;
+}
+
+.particles-container.converging .particle-1 {
+  animation: converge1 1.8s ease-in forwards;
+}
+.particles-container.converging .particle-2 {
+  animation: converge2 1.8s ease-in forwards;
+}
+.particles-container.converging .particle-3 {
+  animation: converge3 1.8s ease-in forwards;
+}
+.particles-container.converging .particle-4 {
+  animation: converge4 1.8s ease-in forwards;
+}
+.particles-container.converging .particle-5 {
+  animation: converge5 1.8s ease-in forwards;
+}
+.particles-container.converging .particle-6 {
+  animation: converge6 1.8s ease-in forwards;
+}
+.particles-container.converging .particle-7 {
+  animation: converge7 1.8s ease-in forwards;
+}
+.particles-container.converging .particle-8 {
+  animation: converge8 1.8s ease-in forwards;
+}
+.particles-container.converging .particle-9 {
+  animation: converge9 1.8s ease-in forwards;
+}
+.particles-container.converging .particle-10 {
+  animation: converge10 1.8s ease-in forwards;
+}
+.particles-container.converging .particle-11 {
+  animation: converge11 1.8s ease-in forwards;
+}
+.particles-container.converging .particle-12 {
+  animation: converge12 1.8s ease-in forwards;
+}
+
+.blast-effect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.blast-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+  border-radius: 50%;
+  animation: blastCore 0.8s ease-out forwards;
+}
+
+.blast-ring-1,
+.blast-ring-2,
+.blast-ring-3 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  animation: blastRing 0.8s ease-out forwards;
+}
+
+.blast-ring-1 {
+  animation-delay: 0s;
+}
+
+.blast-ring-2 {
+  animation-delay: 0.1s;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.blast-ring-3 {
+  animation-delay: 0.2s;
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .dashboard-container {
@@ -176,12 +335,12 @@ body {
 
 @keyframes circleGlow {
   0% {
-    box-shadow: 0 0 50px rgba(0, 150, 255, 0.5), 0 0 100px rgba(0, 100, 255, 0.3), 0 0 150px rgba(0, 50, 255, 0.2),
-      inset 0 0 50px rgba(0, 200, 255, 0.1);
+    box-shadow: 0 0 50px rgba(138, 43, 226, 0.6), 0 0 100px rgba(75, 0, 130, 0.4), 0 0 150px rgba(138, 43, 226, 0.3), 0
+      0 200px rgba(75, 0, 130, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.8);
   }
   100% {
-    box-shadow: 0 0 80px rgba(0, 150, 255, 0.8), 0 0 150px rgba(0, 100, 255, 0.5), 0 0 200px rgba(0, 50, 255, 0.3),
-      inset 0 0 80px rgba(0, 200, 255, 0.2);
+    box-shadow: 0 0 80px rgba(138, 43, 226, 0.8), 0 0 150px rgba(75, 0, 130, 0.6), 0 0 200px rgba(138, 43, 226, 0.4), 0
+      0 250px rgba(75, 0, 130, 0.3), inset 0 0 80px rgba(0, 0, 0, 0.9);
   }
 }
 
@@ -223,44 +382,197 @@ body {
   }
 }
 
-@keyframes welcomeExit {
+@keyframes particleAppear {
   0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
     opacity: 0;
-    transform: scale(2);
-  }
-}
-
-@keyframes circleComplete {
-  0% {
-    transform: scale(1);
-    opacity: 1;
+    transform: scale(0);
   }
   50% {
+    opacity: 0.8;
     transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(0px) scale(1);
     opacity: 0.8;
   }
   100% {
-    transform: scale(3);
+    transform: translateY(-10px) scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Individual particle convergence animations */
+@keyframes converge1 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(50vw - 20vw), calc(50vh - 10vh)) scale(0.5);
     opacity: 0;
   }
 }
 
-@keyframes textComplete {
+@keyframes converge2 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(50vw - 80vw), calc(50vh - 15vh)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes converge3 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(50vw - 10vw), calc(50vh - 30vh)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes converge4 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(50vw - 15vw), calc(50vh - 70vh)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes converge5 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(50vw - 30vw), calc(50vh - 85vh)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes converge6 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(50vw - 70vw), calc(50vh - 90vh)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes converge7 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(50vw - 85vw), calc(50vh - 75vh)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes converge8 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(50vw - 90vw), calc(50vh - 40vh)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes converge9 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(50vw - 50vw), calc(50vh - 20vh)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes converge10 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(50vw - 50vw), calc(50vh - 80vh)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes converge11 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(50vw - 5vw), calc(50vh - 50vh)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes converge12 {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(50vw - 95vw), calc(50vh - 50vh)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes blastCore {
+  0% {
+    width: 30px;
+    height: 30px;
+    opacity: 1;
+  }
+  100% {
+    width: 2000px;
+    height: 2000px;
+    opacity: 0;
+  }
+}
+
+@keyframes blastRing {
+  0% {
+    width: 0px;
+    height: 0px;
+    opacity: 1;
+  }
+  100% {
+    width: 1500px;
+    height: 1500px;
+    opacity: 0;
+  }
+}
+
+@keyframes blastFadeOut {
   0% {
     opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.1);
   }
   100% {
     opacity: 0;
-    transform: scale(1.5);
   }
 }
 

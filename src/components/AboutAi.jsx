@@ -1,5 +1,6 @@
 import React from 'react';
 import './AboutAi.css';
+import ScrollFloat from '../react-bits/ScrollFloat';
 
 const AboutAi = () => {
   return (
@@ -21,11 +22,18 @@ const AboutAi = () => {
           {/* Content Section */}
           <div className="about-ai-content-section">
             {/* Main Title */}
-            <h1 className="about-ai-main-title">
+              <ScrollFloat
+              animationDuration={1}
+              ease='back.inOut(2)'
+              scrollStart='center bottom+=10%'
+              scrollEnd='bottom bottom-=60%'
+              stagger={0.03}
+              textClassName="about-ai-main-title"
+            >
               INTRODUCING 
               <br />
               ASKORA
-            </h1>
+          </ScrollFloat>
                          
             {/* Description */}
             <p className="about-ai-main-description">

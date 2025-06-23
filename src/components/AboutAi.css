@@ -257,16 +257,7 @@ iframe {
 .about-ai-main-title {
   font-size: 4rem;
   font-weight:400;
-  background: linear-gradient(
-    to right, 
-    
-    #ffffff , /* White */
-    #313131 80% /* Purple */
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
+  
   margin: 0 0 2rem 0;
   line-height: 1.1;
   text-align: left;

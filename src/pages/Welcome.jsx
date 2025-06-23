@@ -8,20 +8,41 @@ const Welcome = () => {
   const [showWelcome, setShowWelcome] = useState(true)
   const [showDashboard, setShowDashboard] = useState(false)
   const [typingComplete, setTypingComplete] = useState(false)
+  const [showParticles, setShowParticles] = useState(false)
+  const [particlesConverging, setParticlesConverging] = useState(false)
+  const [showBlast, setShowBlast] = useState(false)
 
   useEffect(() => {
     if (typingComplete) {
-      // Start fade out after completion animation
+      // Show particles after typing completes (they will appear one by one)
+      const showParticlesTimer = setTimeout(() => {
+        setShowParticles(true)
+      }, 1000)
+
+      // Start particle convergence after all particles have appeared (2.2s + 1s buffer)
+      const convergeTimer = setTimeout(() => {
+        setParticlesConverging(true)
+      }, 4200)
+
+      // Show blast effect at circle center after particles converge
+      const blastTimer = setTimeout(() => {
+        setShowBlast(true)
+      }, 6000)
+
+      // Hide welcome screen after blast
       const fadeOutTimer = setTimeout(() => {
         setShowWelcome(false)
-      }, 1200)
+      }, 6700)
 
-      // Start dashboard fade in
+      // Show dashboard
       const showDashboardTimer = setTimeout(() => {
         setShowDashboard(true)
-      }, 1800)
+      }, 7000)
 
       return () => {
+        clearTimeout(showParticlesTimer)
+        clearTimeout(convergeTimer)
+        clearTimeout(blastTimer)
         clearTimeout(fadeOutTimer)
         clearTimeout(showDashboardTimer)
       }
@@ -31,11 +52,28 @@ const Welcome = () => {
   return (
     <div className="app">
       {showWelcome && (
-        <div className={`welcome-container ${typingComplete ? "fade-out" : ""}`}>
+        <div className={`welcome-container ${showBlast ? "blast-fade" : ""}`}>
           <div className="circle-container">
             <div className={`glowing-circle ${typingComplete ? "complete" : ""}`}></div>
             <TypingText text="WELCOME TO ASKORA" onComplete={() => setTypingComplete(true)} />
+
+            {showBlast && (
+              <div className="blast-effect">
+                <div className="blast-core"></div>
+                <div className="blast-ring-1"></div>
+                <div className="blast-ring-2"></div>
+                <div className="blast-ring-3"></div>
+              </div>
+            )}
           </div>
+
+          {showParticles && (
+            <div className={`particles-container ${particlesConverging ? "converging" : ""}`}>
+              {Array.from({ length: 12 }).map((_, index) => (
+                <div key={index} className={`particle particle-${index + 1}`} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -66,7 +104,7 @@ const TypingText = ({ text, onComplete }) => {
       if (onComplete) {
         setTimeout(() => {
           onComplete()
-        }, 800) // Pause to show completed text
+        }, 800)
       }
     }
   }, [currentIndex, text, onComplete, isComplete])

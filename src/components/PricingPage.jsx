@@ -1,4 +1,5 @@
 import "./PricingPage.css"
+import ScrollFloat from "../react-bits/ScrollFloat"
 
 export default function Pricing() {
   return (
@@ -18,9 +19,9 @@ export default function Pricing() {
       {/* Floating Particles */}
       <div className="pricing-particles">
         {[...Array(12)].map((_, i) => (
-          <div 
-            key={i} 
-            className="pricing-particle" 
+          <div
+            key={i}
+            className="pricing-particle"
             style={{
               left: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 15}s`,
@@ -32,8 +33,29 @@ export default function Pricing() {
 
       <div className="container">
         <div className="header">
-          <h2 className="title">A plan for every need</h2>
-          <p className="subtitle1">Satisfy leads, start & become digital success with top-tier security.</p>
+            <ScrollFloat
+              animationDuration={1}
+              ease='back.inOut(2)'
+              scrollStart='center bottom+=10%'
+              scrollEnd='bottom bottom-=60%'
+              stagger={0.09}
+              textClassName="title"
+            >
+              A plan for every need
+            </ScrollFloat>
+
+            <ScrollFloat
+              animationDuration={1}
+              ease='back.inOut(2)'
+              scrollStart='center bottom+=10%'
+              scrollEnd='bottom bottom-=60%'
+              stagger={0.03}
+              textClassName="subtitle1"
+            >
+              Satisfy leads, start & become digital success with top-tier security.
+            </ScrollFloat>
+
+          {/* <p className="subtitle1">Satisfy leads, start & become digital success with top-tier security.</p> */}
         </div>
 
         <div className="pricing-grid">
@@ -65,7 +87,7 @@ export default function Pricing() {
                 </li>
                 <li className="feature-item">
                   <span className="checkmark">✓</span>
-                   Create 1 custom 3-question pack
+                  Create 1 custom 3-question pack
                 </li>
                 <li className="feature-item">
                   <span className="checkmark">✓</span>
@@ -73,7 +95,7 @@ export default function Pricing() {
                 </li>
                 <li className="feature-item">
                   <span className="checkmark">✓</span>
-                   Save up to 5 answers
+                  Save up to 5 answers
                 </li>
               </ul>
             </div>
@@ -92,7 +114,7 @@ export default function Pricing() {
                 <div className="sparkle" style={{ top: "45%", right: "15%" }}></div>
                 <div className="sparkle" style={{ top: "35%", right: "25%" }}></div>
               </div>
-              
+
               <div className="card-header">
                 <div className="price-container">
                   <span className="price">$4</span>
@@ -114,7 +136,7 @@ export default function Pricing() {
                 </li>
                 <li className="feature-item">
                   <span className="checkmark">✓</span>
-                 Build 10 custom sets
+                  Build 10 custom sets
                 </li>
                 <li className="feature-item">
                   <span className="checkmark">✓</span>
@@ -126,7 +148,7 @@ export default function Pricing() {
                 </li>
                 <li className="feature-item">
                   <span className="checkmark">✓</span>
-                   Save and review unlimited answers
+                  Save and review unlimited answers
                 </li>
               </ul>
             </div>
@@ -152,7 +174,7 @@ export default function Pricing() {
               <ul className="features-list">
                 <li className="feature-item">
                   <span className="checkmark">✓</span>
-                 Unlimited question pack creation
+                  Unlimited question pack creation
                 </li>
                 <li className="feature-item">
                   <span className="checkmark">✓</span>
@@ -164,11 +186,11 @@ export default function Pricing() {
                 </li>
                 <li className="feature-item">
                   <span className="checkmark">✓</span>
-                   Early access to new feature
+                  Early access to new feature
                 </li>
                 <li className="feature-item">
                   <span className="checkmark">✓</span>
-                   Monetize your question packs
+                  Monetize your question packs
                 </li>
               </ul>
             </div>

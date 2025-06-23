@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import ScrollFloat from "../react-bits/ScrollFloat"
 import "./Features.css"
 
 export default function Features() {
@@ -14,9 +15,18 @@ export default function Features() {
     <div className={`gradient-grid ${isLoaded ? "loaded" : ""}`}>
       <div className="pricing-bg-orbss">
         <div className="pricing-orbb pricing-orbs1"></div>
-        
+
       </div>
-      <h1 className="Title">Key Features of Askora</h1>
+      <ScrollFloat
+        animationDuration={1}
+        ease='back.inOut(2)'
+        scrollStart='center bottom+=10%'
+        scrollEnd='bottom bottom-=60%'
+        stagger={0.03}
+        textClassName="title"
+      >
+        Key Features of Askora
+      </ScrollFloat>
       <div className="grid-container">
         {/* Top left block */}
         <div className="grid-item top-left">

@@ -14,7 +14,7 @@ function MainLanding(){
             {/* <div id="home"><LandingPage/></div> */}
             {/* <div id="about-ai"><AboutAi/></div> */}
             <div id="Features"><Features/></div>
-            {/* <div id="pricing"><PricingPage/></div> */}
+            <div id="pricing"><PricingPage/></div>
             {/* <div id=""><Reviews/></div> */}
             <div id="community"><CommunityPage/></div>
             <HeroSection/>
