@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import "./ScrollStack.css"
+import "./PricingPage.css"
 import ScrollFloat from "../react-bits/ScrollFloat"
 
 // Register ScrollTrigger plugin
