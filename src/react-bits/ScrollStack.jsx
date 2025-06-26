@@ -1,337 +1,235 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import "./ScrollStack.css"
-import ScrollFloat from "../react-bits/ScrollFloat"
 
-// Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger)
 
-export default function Pricing() {
-  const basicCardRef = useRef(null)
-  const enterpriseCardRef = useRef(null)
-  const popularCardRef = useRef(null)
-  const sectionRef = useRef(null)
+const communityMembers = [
+  {
+    id: 1,
+    name: "Fatima Ameen",
+    handle: "@fatima",
+    title: "Senior Product Designer at Shopify",
+    location: "Toronto, Canada",
+    avatar: "/profilepic1.png",
+    skills: ["Figma", "Sketch", "Prototyping"],
+    isOnline: true,
+  },
+  {
+    id: 2,
+    name: "Ekene Smart",
+    handle: "@smartofux",
+    title: "UX Designer & Engineer at Shopify",
+    location: "Lagos, Nigeria",
+    avatar: "/placeholder.svg?height=60&width=60&text=ES",
+    skills: ["Figma", "Javascript", "React Native"],
+    isOnline: true,
+  },
+  {
+    id: 3,
+    name: "Femi John",
+    handle: "@thefemijohn",
+    title: "Product Design Lead @lifechangeNG",
+    location: "Abuja, Nigeria",
+    avatar: "/placeholder.svg?height=60&width=60&text=FJ",
+    skills: ["Figma", "Photoshop", "Illustrator"],
+    isOnline: false,
+  },
+  {
+    id: 4,
+    name: "David Martinez",
+    handle: "@davidmtz",
+    title: "Full Stack Developer at Meta",
+    location: "San Francisco, USA",
+    avatar: "/placeholder.svg?height=60&width=60&text=DM",
+    skills: ["React", "Node.js", "TypeScript"],
+    isOnline: true,
+  },
+]
+
+const creativeTypes = ["Illustrators", "Bloggers", "Animators", "Developers", "Designers", "Writers"]
+
+const UserIcon = () => (
+  <svg className="user-icon" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+  </svg>
+)
+
+export default function CommunityPage() {
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [loadedCards, setLoadedCards] = useState([])
+  const cardRefs = useRef([])
+  const containerRef = useRef(null)
 
   useEffect(() => {
-    const basicCard = basicCardRef.current
-    const enterpriseCard = enterpriseCardRef.current
-    const popularCard = popularCardRef.current
-    const section = sectionRef.current
+    setIsLoaded(true)
 
-    if (!basicCard || !enterpriseCard || !popularCard || !section) return
+    communityMembers.forEach((_, index) => {
+      setTimeout(() => {
+        setLoadedCards((prev) => [...prev, index])
+      }, index * 200)
+    })
 
-    // Wait for layout to be calculated
     setTimeout(() => {
-      // Get the natural positions of the cards in the grid
-      const basicRect = basicCard.getBoundingClientRect()
-      const enterpriseRect = enterpriseCard.getBoundingClientRect()
-      const popularRect = popularCard.getBoundingClientRect()
+      setupStackAnimation()
+    }, 1000)
 
-      // Calculate how much to move each card to center them behind popular card
-      const basicMoveX = popularRect.left - basicRect.left
-      const enterpriseMoveX = popularRect.left - enterpriseRect.left
-
-      // Set FIXED z-index values that never change
-      gsap.set(basicCard, {
-        zIndex: 1, // Always behind
-      })
-
-      gsap.set(enterpriseCard, {
-        zIndex: 2, // Always in middle
-      })
-
-      gsap.set(popularCard, {
-        zIndex: 10, // Always on top
-      })
-
-      // Create the animation timeline
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top center",
-          // CHANGE 1: Increased scroll distance from "top+=200px center" to "top+=400px center"
-          // This makes the animation take longer to complete, making it slower
-          end: "top+=400px center",
-          // CHANGE 2: Increased scrub value from 0.1 to 0.4
-          // Higher scrub values create smoother, slower animations tied to scroll
-          scrub: 0.4,
-          onUpdate: (self) => {
-            // Ensure z-index stays fixed during animation
-            gsap.set(basicCard, { zIndex: 1 })
-            gsap.set(enterpriseCard, { zIndex: 2 })
-            gsap.set(popularCard, { zIndex: 10 })
-          },
-        },
-      })
-
-      // Set initial state (stacked)
-      tl.set(basicCard, {
-        x: basicMoveX,
-        y: 0,
-        scale: 0.9,
-        opacity: 0.2,
-      })
-        .set(
-          enterpriseCard,
-          {
-            x: enterpriseMoveX,
-            y: 0,
-            scale: 0.9,
-            opacity: 0.2,
-          },
-          0,
-        )
-        .set(
-          popularCard,
-          {
-            x: 0,
-            y: 0,
-            scale: 1.05,
-            opacity: 1,
-          },
-          0,
-        )
-
-        // Animate to final positions
-        .to(basicCard, {
-          x: 0, // Move to natural position
-          scale: 1,
-          opacity: 1,
-          // CHANGE 3: Increased duration from 1 to 1.5 seconds
-          // This makes each individual card animation take longer
-          duration: 1.5,
-          // CHANGE 4: Changed easing from "power4.out" to "power2.out"
-          // power2.out is gentler and slower than power4.out
-          ease: "power2.out",
-        })
-        .to(
-          enterpriseCard,
-          {
-            x: 0, // Move to natural position
-            scale: 1,
-            opacity: 1,
-            // CHANGE 5: Increased duration from 1 to 1.5 seconds (same as basic card)
-            duration: 1.5,
-            // CHANGE 6: Changed easing from "power4.out" to "power2.out" (same as basic card)
-            ease: "power2.out",
-          },
-          0,
-        ) // Start at the same time
-        .to(
-          popularCard,
-          {
-            scale: 1.05, // Keep popular card scale
-            // CHANGE 7: Increased duration from 1 to 1.5 seconds (consistent with other cards)
-            duration: 1.5,
-            // CHANGE 8: Changed easing from "power4.out" to "power2.out" (consistent with other cards)
-            ease: "power2.out",
-          },
-          0,
-        )
-    }, 100)
-
-    // Cleanup function
     return () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
     }
   }, [])
 
+  const setupStackAnimation = () => {
+    cardRefs.current.forEach((card, index) => {
+      if (!card) return
+
+      gsap.set(card, {
+        position: "absolute",
+        top: 100,
+        left: 0,
+        x: 0,
+        y: 0,
+        scale: 1,
+        width: "100%",
+        opacity: 1,
+        filter: "blur(0px)",
+        transform: "none",
+        zIndex: 10 - index,
+      })
+
+      if (index === 1) {
+        gsap.set(card, { zIndex: 100 }) // Ekene on top
+        return
+      }
+
+      let toVars = {}
+      if (index === 0) {
+        toVars = {
+          y: -160,
+          x: 40,
+          width: "85%",
+          opacity: 0.5,
+          scale: 0.95,
+          filter: "blur(2px)",
+        }
+      } else if (index === 2) {
+        toVars = {
+          y: 160,
+          x: 40,
+          width: "92%",
+          opacity: 0.7,
+          scale: 0.97,
+          filter: "blur(1.5px)",
+        }
+      } else if (index === 3) {
+        toVars = {
+          y: 320,
+          x: 60,
+          width: "80%",
+          opacity: 0.4,
+          scale: 0.92,
+          filter: "blur(3px)",
+        }
+      }
+
+      gsap.to(card, {
+        ...toVars,
+        scrollTrigger: {
+          trigger: ".community-cards",
+          start: "top 80%",
+          end: "top 40%",
+          scrub: true,
+        },
+        duration: 0.8,
+        ease: "power2.out",
+      })
+    })
+  }
+
+  const handleGetStarted = () => console.log("Get Started clicked")
+  const handleLogin = () => console.log("Login clicked")
+
   return (
-    <section ref={sectionRef} className="pricing-section">
-      {/* Animated Background Elements - Only for this section */}
-      <div className="pricing-bg-orbs">
-        <div className="pricing-or1 pricing-orb1"></div>
-        <div className="pricing-orb pricing-orb2"></div>
-        <div className="pricing-orb pricing-orb3"></div>
-        <div className="pricing-orb pricing-orb4"></div>
-        <div className="pricing-orb pricing-orb5"></div>
+    <div className="community-page">
+      <div className="background-elements">
+        <div className="bg-blur-1"></div>
+        <div className="bg-blur-2"></div>
+        <div className="bg-blur-3"></div>
+        <div className="bg-blur-4"></div>
       </div>
 
-      {/* Geometric Grid Pattern */}
-      <div className="pricing-bg-grid"></div>
-
-      {/* Floating Particles */}
-      <div className="pricing-particles">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="pricing-particle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 15}s`,
-              animationDuration: `${15 + Math.random() * 10}s`,
-            }}
-          ></div>
-        ))}
-      </div>
-
-      <div className="container">
-        <div className="header">
-          <ScrollFloat
-            animationDuration={1}
-            ease="back.inOut(2)"
-            scrollStart="center bottom+=10%"
-            scrollEnd="bottom bottom-=60%"
-            stagger={0.09}
-            textClassName="title"
-          >
-            A plan for every need
-          </ScrollFloat>
-
-          <ScrollFloat
-            animationDuration={1}
-            ease="back.inOut(2)"
-            scrollStart="center bottom+=10%"
-            scrollEnd="bottom bottom-=60%"
-            stagger={0.03}
-            textClassName="subtitle1"
-          >
-            Satisfy leads, start & become digital success with top-tier security.
-          </ScrollFloat>
-        </div>
-
-        <div className="pricing-grid">
-          {/* Basic Plan */}
-          <div ref={basicCardRef} className="pricing-card basic-card">
-            <div className="upper">
-              <div className="card-header">
-                <h3 className="plan-name">Basic plan</h3>
-                <div className="price-container">
-                  <span className="price">Free</span>
-                  <span className="period">per month</span>
-                </div>
-                <p className="plan-description">For casual practice and job prep.</p>
-              </div>
-              <button className="cta-button1">Get started</button>
-            </div>
-
-            <div className="features">
-              <h4 className="features-title">FEATURES</h4>
-              <p className="features-subtitle">Everything you need to get started:</p>
-              <ul className="features-list">
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Community packs access
-                </li>
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Limited AI interviews
-                </li>
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Create 1 custom 3-question pack
-                </li>
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Default AI voice
-                </li>
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Save up to 5 answers
-                </li>
-              </ul>
+      <div className={`main-content ${isLoaded ? "loaded" : ""}`}>
+        <div className="content-container">
+          <div className="hero-section">
+            <h1 className="hero-title">
+              Contribute.
+              <br />
+              Share.
+              <br />
+              Collaborate.
+            </h1>
+            <p className="hero-description">
+              Share your works, connect with employers, and socialize with other creatives. We are the social networking
+              platform for global talents.
+            </p>
+            <div className="hero-buttons">
+              <button className="get-started-btn" onClick={handleGetStarted}>
+                Get Started
+              </button>
+              <button className="log-in-btn" onClick={handleLogin}>
+                Log In
+              </button>
             </div>
           </div>
 
-          {/* Business Plan - Popular */}
-          <div ref={popularCardRef} className="pricing-card popular-card">
-            <div className="upper">
-              <div className="popular-badge">
-                <span>Pro Plan</span>
-                <span className="popular-label">Popular</span>
-              </div>
-
-              <div className="sparkles">
-                <div className="sparkle" style={{ top: "25%", right: "20%" }}></div>
-                <div className="sparkle" style={{ top: "45%", right: "15%" }}></div>
-                <div className="sparkle" style={{ top: "35%", right: "25%" }}></div>
-              </div>
-
-              <div className="card-header">
-                <div className="price-container">
-                  <span className="price">$4</span>
-                  <span className="period">per month</span>
+          <div className="community-section">
+            <div className="community-cards" ref={containerRef} style={{ position: "relative", minHeight: "500px" }}>
+              {communityMembers.map((member, index) => (
+                <div
+                  key={member.id}
+                  ref={(el) => (cardRefs.current[index] = el)}
+                  className={`member-card ${loadedCards.includes(index) ? "loaded" : ""} ${index === 1 ? "ekene-card" : ""}`}
+                >
+                  <div className="member-header">
+                    <div className="member-avatar">
+                      <UserIcon />
+                      {member.isOnline && <div className="online-indicator"></div>}
+                    </div>
+                    <div className="member-info">
+                      <div className="member-name-row">
+                        <h3 className="member-name">{member.name}</h3>
+                        <span className="member-handle">{member.handle}</span>
+                      </div>
+                      <p className="member-title">{member.title}</p>
+                      <div className="member-skills">
+                        {member.skills.map((skill, skillIndex) => (
+                          <span key={skillIndex} className="skill-tag">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <p className="plan-description">For active job seekers</p>
-              </div>
-
-              <button className="cta-button1 popular-button1">Get started</button>
-            </div>
-
-            <div className="features">
-              <h4 className="features-title">FEATURES</h4>
-              <p className="features-subtitle">Everything in our Basic plan plus...</p>
-              <ul className="features-list">
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Unlimited AI interview sessions
-                </li>
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Build 10 custom sets
-                </li>
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Choose from 5 AI voices
-                </li>
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Smart answer insights
-                </li>
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Save and review unlimited answers
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Enterprise Plan */}
-          <div ref={enterpriseCardRef} className="pricing-card enterprise-card">
-            <div className="upper">
-              <div className="card-header">
-                <h3 className="plan-name">Enterprise plan</h3>
-                <div className="price-container">
-                  <span className="price">$10</span>
-                  <span className="period">per month</span>
-                </div>
-                <p className="plan-description">For recruiters and coaches</p>
-              </div>
-              <button className="cta-button1">Get started</button>
-            </div>
-
-            <div className="features">
-              <h4 className="features-title">FEATURES</h4>
-              <p className="features-subtitle">Everything in our Pro plan plus…</p>
-              <ul className="features-list">
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Unlimited question pack creation
-                </li>
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Custom AI voice and persona
-                </li>
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Advanced analytics dashboard
-                </li>
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Early access to new feature
-                </li>
-                <li className="feature-item">
-                  <span className="checkmark">✓</span>
-                  Monetize your question packs
-                </li>
-              </ul>
+              ))}
             </div>
           </div>
         </div>
+
+        <div className="bottom-section">
+          <h2 className="bottom-title">BUILT FOR ALL TYPES OF DIGITAL CREATIVES</h2>
+          <div className="creative-types">
+            {creativeTypes.map((type, index) => (
+              <span key={index} className="creative-type">
+                {type}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
   )
 }

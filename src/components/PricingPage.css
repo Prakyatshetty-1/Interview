@@ -26,11 +26,11 @@
   animation: pricingFloat 25s infinite ease-in-out;
   opacity: 0.4;
 }
+
 .pricing-or1 {
   position: absolute;
   border-radius: 50%;
   filter: blur(80px);
-  
   opacity: 0.4;
 }
 
@@ -40,7 +40,6 @@
   background: radial-gradient(circle, rgba(99, 102, 241, 0.6), rgba(139, 92, 246, 0.4));
   top: -12%;
   left: -15%;
-  
   z-index: -1;
 }
 
@@ -81,7 +80,8 @@
 }
 
 @keyframes pricingFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) translateX(0px) rotate(0deg);
   }
   25% {
@@ -103,8 +103,7 @@
   width: 100%;
   height: 100%;
   opacity: 0.08;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+  background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
   background-size: 60px 60px;
   animation: pricingGridMove 40s linear infinite;
@@ -175,13 +174,9 @@
 .title {
   font-size: 48px;
   font-weight: 400;
-  
   margin: 0 0 16px 0;
   letter-spacing: -0.02em;
 }
-
-/* Add this to make the gradient visible when opacity is 1 */
-
 
 .subtitle1 {
   font-size: 16px;
@@ -197,23 +192,67 @@
   max-width: 1000px;
   margin: 0 auto;
   align-items: start;
+  position: relative;
 }
 
+/* FLASH FIX: Prevent flash on page load by setting initial animation states */
 .pricing-card {
   background: rgba(15, 16, 31, 0.6);
   border: 1px solid rgba(75, 85, 139, 0.3);
   border-radius: 16px;
   padding: 0;
-  position: relative;
-  transition: all 0.3s ease;
+  position: relative !important;
+  transition: none !important;
+  transform-origin: center center;
   overflow: hidden;
   backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
 }
 
+/* Initial stacked states - cards should be positioned behind popular card */
+.basic-card {
+  z-index: 1 !important;
+  opacity: 0;
+  transform: scale(0.9);
+  /* This will be overridden by GSAP with proper positioning */
+}
+
+.enterprise-card {
+  z-index: 2 !important;
+  opacity: 0;
+  transform: scale(0.9);
+  /* This will be overridden by GSAP with proper positioning */
+}
+
+.popular-card {
+  z-index: 10 !important;
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* Keep cards in stacked state until GSAP takes full control */
+.pricing-section:not(.gsap-initialized) .basic-card,
+.pricing-section:not(.gsap-initialized) .enterprise-card {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  opacity: 0.2;
+}
+
+.pricing-section:not(.gsap-initialized) .popular-card {
+  position: relative;
+  transform: scale(1.05);
+  opacity: 1;
+}
+
+/* Once GSAP is initialized, let it handle all positioning */
+.pricing-section.gsap-initialized .pricing-card {
+  position: relative;
+}
+
 .pricing-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -221,11 +260,12 @@
   bottom: 0;
   border-radius: 16px;
   padding: 1px;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.1) 25%, 
-    rgba(255, 255, 255, 0.05) 50%, 
-    rgba(255, 255, 255, 0.1) 75%, 
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.1) 75%,
     rgba(255, 255, 255, 0.15) 100%
   );
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -250,7 +290,6 @@
   border: 1px solid rgba(139, 92, 246, 0.4);
   position: relative;
   overflow: hidden;
-  transform: scale(1.05);
   margin: -10px 0;
 }
 
@@ -260,9 +299,13 @@
 }
 
 .popular-card .upper {
-  background: 
-    radial-gradient(ellipse 120% 80% at 90% 10%, rgba(236, 72, 153, 0.4) 0%, rgba(217, 70, 239, 0.3) 25%, rgba(168, 85, 247, 0.2) 50%, transparent 70%),
-    rgba(19, 20, 39, 0.8);
+  background: radial-gradient(
+      ellipse 120% 80% at 90% 10%,
+      rgba(236, 72, 153, 0.4) 0%,
+      rgba(217, 70, 239, 0.3) 25%,
+      rgba(168, 85, 247, 0.2) 50%,
+      transparent 70%
+    ), rgba(19, 20, 39, 0.8);
   border-bottom: 1px solid rgba(139, 92, 246, 0.3);
   position: relative;
   overflow: hidden;
@@ -270,24 +313,19 @@
 }
 
 .popular-card .upper::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
-    linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.1) 0%, 
-      rgba(255, 255, 255, 0.02) 50%, 
-      rgba(255, 255, 255, 0.05) 100%
-    );
+  background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.05) 100%);
   pointer-events: none;
 }
 
 .popular-card .upper::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -317,7 +355,6 @@
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.5px;
-
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -364,7 +401,8 @@
 }
 
 @keyframes sparkle {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0;
     transform: scale(0);
   }
@@ -391,7 +429,7 @@
 .price-container {
   display: flex;
   align-items: baseline;
-  margin-bottom:1rem;
+  margin-bottom: 1rem;
 }
 
 .price {
@@ -514,14 +552,24 @@
   flex-shrink: 0;
 }
 
+/* Prevent any z-index changes during animations */
+/* .pricing-card * {
+  z-index: inherit;
+} */
+
+/* Mobile responsiveness - reset all transforms on mobile */
 @media (max-width: 768px) {
   .pricing-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
 
+  .basic-card,
+  .enterprise-card,
   .popular-card {
-    transform: none;
+    transform: none !important;
+    opacity: 1 !important;
+    z-index: auto !important;
     margin: 0;
   }
 
@@ -538,64 +586,12 @@
   }
 
   /* Scale down background elements on mobile */
-  .pricing-orb1, .pricing-orb2, .pricing-orb3, .pricing-orb4, .pricing-orb5 {
+  .pricing-orb1,
+  .pricing-orb2,
+  .pricing-orb3,
+  .pricing-orb4,
+  .pricing-orb5 {
     width: 200px;
     height: 200px;
   }
 }
-
-/* Add these styles to your existing PricingPage.css */
-
-/* Add these styles to your existing PricingPage.css */
-
-/* Force fixed z-index values that never change */
-.pricing-card {
-  position: relative !important;
-  transition: none !important;
-  transform-origin: center center;
-}
-
-.basic-card {
-  z-index: 1 !important;
-}
-
-.enterprise-card {
-  z-index: 2 !important;
-}
-
-.popular-card {
-  z-index: 10 !important;
-}
-
-/* Ensure grid maintains proper layout */
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  max-width: 1000px;
-  margin: 0 auto;
-  align-items: start;
-  position: relative;
-}
-
-/* Prevent any z-index changes during animations */
-.pricing-card * {
-  z-index: inherit;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-  .pricing-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .basic-card,
-  .enterprise-card,
-  .popular-card {
-    transform: none !important;
-    opacity: 1 !important;
-    z-index: auto !important;
-  }
-}
-

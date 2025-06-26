@@ -28,3 +28,19 @@
   margin: 0;
   font-weight: 300;
 }
+.title {
+  font-size: 48px;
+  font-weight: 400;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.02em;
+}
+.about-ai-main-description {
+  color: #b0b0b0;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin: 0 0 1rem 0;
+  text-align: left;
+  opacity: 0.9;
+  position: relative;
+  z-index: 3;
+}
