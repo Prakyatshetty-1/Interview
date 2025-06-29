@@ -1,6 +1,13 @@
 import "./HeroSection.css"
+import { useNavigate } from "react-router-dom";
 
 export default function HeroSection() {
+
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate('/signup');
+  };
   return (
     <div className="hero-page">
       {/* Hero Section */}
@@ -70,7 +77,7 @@ No sign-up fees.<br /> No hidden costs. Just smarter interviews, instantly.
 
             </p>
 
-            <button className="cta-button">Get Started Now</button>
+            <button className="cta-button" onClick={handleClick}>Get Started Now</button>
           </div>
         </div>
       </div>

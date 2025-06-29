@@ -1,3 +1,4 @@
+
 "use client"
 
 import "./LandingPage.css"
@@ -29,6 +30,7 @@ function LandingPage() {
       }
     }
 
+
     // Wait for the script to load and then apply styles
     script.onload = () => {
       setTimeout(handleSplineLoad, 100)
@@ -49,6 +51,7 @@ function LandingPage() {
   }, [])
 
   const navigate = useNavigate()
+
 
   return (
     // CHANGE: Added conditional class for fade-in effect
@@ -84,6 +87,7 @@ function LandingPage() {
           <br />
           Practice smart. Perform better.
         </p>
+
 
         <div className="button-group">
           <button className="primary-button" onClick={() => navigate("/signup")}>
