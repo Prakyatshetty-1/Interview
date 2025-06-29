@@ -172,23 +172,16 @@
   margin-bottom: 60px;
 }
 
-.title {
+.title11 {
   font-size: 48px;
   font-weight: 400;
-   background: linear-gradient(
-    to right,
-     #313131,
-    #ffffff 20%,      /* White */
-   
-    #313131 80%  /* Purple */
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
+  
   margin: 0 0 16px 0;
   letter-spacing: -0.02em;
 }
+
+/* Add this to make the gradient visible when opacity is 1 */
+
 
 .subtitle1 {
   font-size: 16px;
@@ -548,5 +541,60 @@
   .pricing-orb1, .pricing-orb2, .pricing-orb3, .pricing-orb4, .pricing-orb5 {
     width: 200px;
     height: 200px;
+  }
+}
+
+/* Add these styles to your existing PricingPage.css */
+
+/* Add these styles to your existing PricingPage.css */
+
+/* Force fixed z-index values that never change */
+.pricing-card {
+  position: relative !important;
+  transition: none !important;
+  transform-origin: center center;
+}
+
+.basic-card {
+  z-index: 1 !important;
+}
+
+.enterprise-card {
+  z-index: 2 !important;
+}
+
+.popular-card {
+  z-index: 10 !important;
+}
+
+/* Ensure grid maintains proper layout */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+  align-items: start;
+  position: relative;
+}
+
+/* Prevent any z-index changes during animations */
+.pricing-card * {
+  z-index: inherit;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .basic-card,
+  .enterprise-card,
+  .popular-card {
+    transform: none !important;
+    opacity: 1 !important;
+    z-index: auto !important;
   }
 }
