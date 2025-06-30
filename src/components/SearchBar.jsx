@@ -1,12 +1,17 @@
-import { useState, useMemo } from "react";
-import { MdFilterAlt, MdFilterAltOff } from "react-icons/md";
-import Card from "./Card";
-import "./SearchBar.css";
+"use client"
+
+import { useState, useMemo } from "react"
+import { MdFilterAlt, MdFilterAltOff } from "react-icons/md"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import Card from "./Card"
+import "./SearchBar.css"
 
 export default function SearchBar() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortOrder, setSortOrder] = useState("desc");
-  const [sortBy, setSortBy] = useState("count");
+  const [searchTerm, setSearchTerm] = useState("")
+  const [sortOrder, setSortOrder] = useState("desc")
+  const [sortBy, setSortBy] = useState("count")
+  const [currentPage, setCurrentPage] = useState(1)
+  const cardsPerPage = 5
 
   const cardData = [
     {
@@ -44,22 +49,79 @@ export default function SearchBar() {
       tags: ["Web Dev", "Full Stack"],
       path: "/BackEndDev.png",
     },
-  ];
+    {
+      difficulty: "Med.",
+      title: "Full Stack Challenge",
+      creator: "bhavith",
+      tags: ["Web Dev", "Full Stack"],
+      path: "/FullStackWebDev.png",
+    },
+    {
+      difficulty: "Easy",
+      title: "Frontend Basics",
+      creator: "Prakyat",
+      tags: ["React", "UI"],
+      path: "/MLEngineering.png",
+    },
+    {
+      difficulty: "Med.",
+      title: "Full Stack Challenge",
+      creator: "bhavith",
+      tags: ["Web Dev", "Full Stack"],
+      path: "/FrontEndDev.png",
+    },
+    {
+      difficulty: "Easy",
+      title: "Frontend Basics",
+      creator: "Prakyat",
+      tags: ["React", "UI"],
+      path: "/DesktopDev.png",
+    },
+    {
+      difficulty: "Med.",
+      title: "Full Stack Challenge",
+      creator: "bhavith",
+      tags: ["Web Dev", "Full Stack"],
+      path: "/BackEndDev.png",
+    },
+  ]
 
   const filteredCards = useMemo(() => {
-    if (!searchTerm.trim()) return cardData;
-    return cardData.filter((card) =>
-      card.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm]);
+    if (!searchTerm.trim()) return cardData
+
+    return cardData.filter((card) => card.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+  }, [searchTerm])
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredCards.length / cardsPerPage)
+  const startIndex = (currentPage - 1) * cardsPerPage
+  const endIndex = startIndex + cardsPerPage
+  const currentCards = filteredCards.slice(startIndex, endIndex)
+
+  // Reset to first page when search changes
+  useMemo(() => {
+    setCurrentPage(1)
+  }, [searchTerm])
 
   const handleSortToggle = () => {
-    setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"));
-  };
+    setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
+  }
 
   const handleSortByToggle = () => {
-    setSortBy((prev) => (prev === "count" ? "name" : "count"));
-  };
+    setSortBy((prev) => (prev === "count" ? "name" : "count"))
+  }
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+  }
+
+  const handlePrevPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1))
+  }
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+  }
 
   return (
     <div className="mainclass5">
@@ -101,21 +163,63 @@ export default function SearchBar() {
           </button>
         </div>
       </div>
-      
+
       <div className="horizontal-divider"></div>
 
+      {/* Results info */}
+      {filteredCards.length > 0 && (
+        <div className="results-info">
+          <p className="results-text">
+            Showing {startIndex + 1}-{Math.min(endIndex, filteredCards.length)} of {filteredCards.length} results
+          </p>
+        </div>
+      )}
+
       {/* Card grid */}
-      
       <div className="topicholder">
-        {filteredCards.length > 0 ? (
-          filteredCards.map((card, index) => (
-            <Card key={index} {...card} />
-          ))
+        {currentCards.length > 0 ? (
+          currentCards.map((card, index) => <Card key={startIndex + index} {...card} />)
         ) : (
           <p className="no-results5">No matching cards found.</p>
         )}
       </div>
 
+      {/* Pagination */}
+      {filteredCards.length > cardsPerPage && (
+        <div className="pagination-container">
+          <button
+            className="pagination-btn pagination-nav"
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+            title="Previous page"
+          >
+            <ChevronLeft size={16} />
+            Previous
+          </button>
+
+          <div className="pagination-numbers">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                className={`pagination-btn pagination-number ${currentPage === page ? "active" : ""}`}
+                onClick={() => handlePageChange(page)}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <button
+            className="pagination-btn pagination-nav"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            title="Next page"
+          >
+            Next
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
     </div>
-  );
+  )
 }
