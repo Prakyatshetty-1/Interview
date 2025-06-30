@@ -595,3 +595,39 @@
     height: 200px;
   }
 }
+
+/* Add these optimizations to your existing CSS */
+
+/* Hardware acceleration for pricing cards */
+.pricing-card {
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Optimize background animations */
+
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .pricing-particle {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .sparkle {
+    animation: none !important;
+  }
+}
+
+/* Optimize for lower-end devices */
+@media (max-width: 768px) {
+  .pricing-particles {
+    display: none; /* Hide particles on mobile for better performance */
+  }
+
+  .pricing-bg-orbs .pricing-orb:nth-child(n + 4) {
+    display: none; /* Reduce orbs on mobile */
+  }
+}

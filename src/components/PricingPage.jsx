@@ -3,10 +3,8 @@
 import { useEffect, useRef } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import "./PricingPage.css"
+import './PricingPage.css'
 import ScrollFloat from "../react-bits/ScrollFloat"
-
-// Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger)
 
 export default function PricingPage() {
@@ -23,116 +21,80 @@ export default function PricingPage() {
 
     if (!basicCard || !enterpriseCard || !popularCard || !section) return
 
-    // Immediately set initial states to prevent flash
-    gsap.set([basicCard, enterpriseCard, popularCard], { clearProps: "all" })
+    gsap.set([basicCard, enterpriseCard, popularCard], {
+      clearProps: "all",
+      willChange: "transform, opacity", // 🚀 Hint GPU to optimize performance
+    })
 
-    // Wait for layout to be calculated
     const initAnimation = () => {
-      // Get the natural positions of the cards in the grid
       const basicRect = basicCard.getBoundingClientRect()
       const enterpriseRect = enterpriseCard.getBoundingClientRect()
       const popularRect = popularCard.getBoundingClientRect()
 
-      // Calculate how much to move each card to center them behind popular card
       const basicMoveX = popularRect.left - basicRect.left
       const enterpriseMoveX = popularRect.left - enterpriseRect.left
 
-      // Set FIXED z-index values that never change
-      gsap.set(basicCard, {
-        zIndex: 0, // Always behind
-      })
+      // 🧹 Remove per-frame zIndex updates to avoid layout thrashing
+      gsap.set(basicCard, { zIndex: 0 })
+      gsap.set(enterpriseCard, { zIndex: 0 })
+      gsap.set(popularCard, { zIndex: 10 })
 
-      gsap.set(enterpriseCard, {
-        zIndex: 0, // Always in middle
-      })
-
-      gsap.set(popularCard, {
-        zIndex: 10, // Always on top
-      })
-
-      // Create the animation timeline
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top center",
           end: "top+=400px center",
-          scrub: 0.4,
-          onUpdate: (self) => {
-            // Ensure z-index stays fixed during animation
-            gsap.set(basicCard, { zIndex: 0 })
-            gsap.set(enterpriseCard, { zIndex: 0 })
-            gsap.set(popularCard, { zIndex: 10 })
-          },
+          scrub: 0.35, // 🎯 Reduced scrub time for responsiveness
         },
       })
 
-      // Set initial state (stacked)
       tl.set(basicCard, {
         x: basicMoveX,
         y: 0,
-        scale: 0.9,
+        scale: 0.92,
         opacity: 0,
       })
-        .set(
-          enterpriseCard,
-          {
-            x: enterpriseMoveX,
-            y: 0,
-            scale: 0.9,
-            opacity: 0,
-          },
-          0,
-        )
-        .set(
-          popularCard,
-          {
-            x: 0,
-            y: 0,
-            scale: 1.05,
-            opacity: 1,
-          },
-          0,
-        )
+        .set(enterpriseCard, {
+          x: enterpriseMoveX,
+          y: 0,
+          scale: 0.92,
+          opacity: 0,
+        }, 0)
+        .set(popularCard, {
+          x: 0,
+          y: 0,
+          scale: 1.05,
+          opacity: 1,
+        }, 0)
 
-        // Animate to final positions
+        // 🧊 Use power3.out easing for smooth motion
         .to(basicCard, {
-          x: 0, // Move to natural position
+          x: 0,
           scale: 1,
           opacity: 1,
-          duration: 1.5,
-          ease: "power2.out",
+          duration: 1.2,
+          ease: "power3.out",
         })
-        .to(
-          enterpriseCard,
-          {
-            x: 0, // Move to natural position
-            scale: 1,
-            opacity: 1,
-            duration: 1.5,
-            ease: "power2.out",
-          },
-          0,
-        ) // Start at the same time
-        .to(
-          popularCard,
-          {
-            scale: 1.05, // Keep popular card scale
-            duration: 1.5,
-            ease: "power2.out",
-          },
-          0,
-        )
+        .to(enterpriseCard, {
+          x: 0,
+          scale: 1,
+          opacity: 1,
+          duration: 1.2,
+          ease: "power3.out",
+        }, 0)
+        .to(popularCard, {
+          scale: 1.05,
+          duration: 1.2,
+          ease: "power3.out",
+        }, 0)
 
-      // Add class to indicate GSAP is initialized
       section.classList.add("gsap-initialized")
     }
 
-    // Use requestAnimationFrame for better timing
     requestAnimationFrame(() => {
       requestAnimationFrame(initAnimation)
     })
 
-    // Cleanup function
     return () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
       section.classList.remove("gsap-initialized")
@@ -141,7 +103,7 @@ export default function PricingPage() {
 
   return (
     <section ref={sectionRef} className="pricing-section">
-      {/* Animated Background Elements - Only for this section */}
+        {/* Animated Background Elements - Only for this section */}
       <div className="pricing-bg-orbs">
         <div className="pricing-or1 pricing-orb1"></div>
         <div className="pricing-orb pricing-orb2"></div>

@@ -3,7 +3,6 @@
 import "./LandingPage.css"
 import { useEffect, useState } from "react" // CHANGE: Added useState import
 import { useNavigate } from "react-router-dom"
-import BlurText from "../react-bits/BlurText"
 
 function LandingPage() {
   // CHANGE: Added state to control fade-in effect
@@ -11,7 +10,7 @@ function LandingPage() {
 
   useEffect(() => {
     const script = document.createElement("script")
-    script.src = "https://unpkg.com/@splinetool/viewer@1.10.2/build/spline-viewer.js"
+    // script.src = "https://unpkg.com/@splinetool/viewer@1.10.2/build/spline-viewer.js"
     script.type = "module"
     document.body.appendChild(script)
 

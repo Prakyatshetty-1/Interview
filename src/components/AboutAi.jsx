@@ -11,13 +11,13 @@ const AboutAi = () => {
       <div className="about-ai-wrapper">
         <div className="about-ai-layout">
           {/* Spline 3D Model Container */}
-          <iframe
+          {/* <iframe
             src='https://my.spline.design/voiceinteractionanimation-2TyeWSP24w6QzdGddVpF30we/'
             frameBorder='0'
             width='100%'
             height='100%'
             title="Askora Voice Interaction Animation"
-          ></iframe>
+          ></iframe> */}
 
           {/* Content Section */}
           <div className="about-ai-content-section">

@@ -1,144 +1,111 @@
-import "./Dashboard.css"
-import HeatMap from "./HeatMap"
+import HeaderCard from "../components/HeaderCard";
+import "./Dashboard.css";
+import Dock from "../react-bits/Dock";
+import TopicFilter from "../components/TopicFilter";
+import Topics from "../components/Topics";
+import Card from "../components/Card";
+import SearchBar from "../components/SearchBar";
 
-const Dashboard = () => {
-  // Generate sample data for the heatmap (365 days)
+export default function Dashboard() {
+
+    const cardData = [
+    {
+      difficulty: "Med.",
+      title: "Full Stack Challenge",
+      creator: "bhavith",
+      tags: ["Web Dev", "Full Stack"],
+      path:"/FullStackWebDev.png"
+    },
+    {
+      difficulty: "Easy",
+      title: "Frontend Basics",
+      creator: "Prakyat",
+      tags: ["React", "UI"],
+      path:"/MLEngineering.png"
+    },
+    {
+      difficulty: "Med.",
+      title: "Full Stack Challenge",
+      creator: "bhavith",
+      tags: ["Web Dev", "Full Stack"],
+      path:"/FrontEndDev.png"
+    },
+    {
+      difficulty: "Easy",
+      title: "Frontend Basics",
+      creator: "Prakyat",
+      tags: ["React", "UI"],
+      path:"/DesktopDev.png"
+    },
+    {
+      difficulty: "Med.",
+      title: "Full Stack Challenge",
+      creator: "bhavith",
+      tags: ["Web Dev", "Full Stack"],
+      path:"/BackEndDev.png"
+    },
+  ]
+  const items = [
+    {
+      icon: <img src="/homeicon.png" alt="Home" style={{ width: '48px', height: '48px' }} />,
+      label: "Home",
+      onClick: () => alert("Home!"),
+    },
+    {
+      icon: <img src="/interviewicon.png" alt="Interviews" style={{ width: '48px', height: '48px' }} />,
+      label: "Interviews",
+      onClick: () => alert("Interviews!"),
+    },
+    {
+      icon: <img src="/createicon.png" alt="Create" style={{ width: '48px', height: '48px' }} />,
+      label: "Create",
+      onClick: () => alert("Create!"),
+    },
+    {
+      icon: <img src="/favicon.png" alt="Saves" style={{ width: '48px', height: '48px' }} />,
+      label: "Saves",
+      onClick: () => alert("Saves!"),
+    },
+    {
+      icon: <img src="/settingsicon.png" alt="Settings"style={{ width: '48px', height: '48px' }} />,
+      label: "Settings",
+      onClick: () => alert("Settings!"),
+    },
+    {
+      icon: <img src="/settingsicon.png" alt="Settings"style={{ width: '48px', height: '48px' }} />,
+      label: "Settings",
+      onClick: () => alert("Settings!"),
+    },
+    {
+      icon: <img src="/profileicon.png" alt="Profile" style={{ width: '48px', height: '48px' }} />,
+      label: "Profile",
+      onClick: () => alert("Profile!"),
+    },
   
+    {
+      icon: <img src="/settingsicon.png" alt="Settings"style={{ width: '48px', height: '48px' }} />,
+      label: "Settings",
+      onClick: () => alert("Settings!"),
+    },
+  ];
 
-   // Sample max streak
-
-  // Get month labels
-  
-
-  // CHANGED: Better month grouping for visual separation
-  
   return (
-    <div className="dashboard10">
-      {/* Header */}
-      <header className="header10">
-        <div className="header-left10">
-          <div className="logo10">
-            <div className="logo-icon10">P</div>
-            <span>Pitch.io</span>
-          </div>
-        </div>
-        <div className="header-center10">
-          <h1>Dashboard</h1>
-          <span className="date10">Monday, 27 March 2023</span>
-        </div>
-        <div className="header-right10">
-          <div className="header-icons10">
-            <div className="icon-btn10">✉</div>
-            <div className="icon-btn10">🔔</div>
-          </div>
-          <div className="user-profile10">
-            <span>Alyssa Jones</span>
-            <div className="avatar10">AJ</div>
-          </div>
-        </div>
-      </header>
-
-      <div className="main-container10">
-        {/* Sidebar */}
-        <aside className="sidebar10">
-          <div className="create-section10">
-            <button className="create-btn10">
-              <span>Create New Pitch</span>
-              <div className="plus-icon10">+</div>
-            </button>
-          </div>
-
-          <nav className="nav-menu10">
-            <div className="nav-item10 active10">
-              <div className="nav-icon10">📊</div>
-              <span>Dashboard</span>
-            </div>
-            <div className="nav-item10">
-              <div className="nav-icon10">✏️</div>
-              <span>Editor</span>
-            </div>
-            <div className="nav-item10">
-              <div className="nav-icon10">👥</div>
-              <span>Leads</span>
-            </div>
-            <div className="nav-item10">
-              <div className="nav-icon10">⚙️</div>
-              <span>Settings</span>
-            </div>
-            <div className="nav-item10">
-              <div className="nav-icon10">👁️</div>
-              <span>Preview</span>
-            </div>
-          </nav>
-
-          <div className="sidebar-bottom10">
-            <div className="preview-card10">
-              <div className="preview-image10">📺</div>
-            </div>
-            <button className="upgrade-btn10">Upgrade</button>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="content10">
-          {/* Welcome Section */}
-          <section className="welcome-section10">
-            <div className="welcome-content10">
-              <h2>Hi, Alyssa</h2>
-              <p>Ready to start your day with some pitch decks?</p>
-            </div>
-            <div className="welcome-illustration10">
-              <div className="illustration-woman10">👩‍💻</div>
-            </div>
-          </section>
-
-          {/* Activity Heatmap Section */}
-          <HeatMap/>
-          {/*this is the heatmap component*/}
-          
-
-          {/* Projects Section */}
-          <section className="projects-section10">
-            <div className="project-card10">
-              <div className="project-thumbnail10 orange-bg10">
-                <div className="project-icon10">🔔</div>
-              </div>
-              <div className="project-info10">
-                <h4>Next in Fashion</h4>
-                <p>Get everyone organized with product, such as using our offline discount cards when out and about.</p>
-                <span className="slide-count10">10 Slides</span>
-              </div>
-              <div className="project-actions10">
-                <span className="status10 public10">Public</span>
-                <div className="action-buttons10">
-                  <button className="action-btn10">✏️</button>
-                  <button className="action-btn10">🗑️</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="project-card10">
-              <div className="project-thumbnail10 blue-bg10">
-                <div className="project-icon10">🚀</div>
-              </div>
-              <div className="project-info10">
-                <h4>Digital Marketing Today</h4>
-                <p>Get everyone organized with product, such as using our offline discount cards when out and about.</p>
-                <span className="slide-count10">10 Slides</span>
-              </div>
-              <div className="project-actions10">
-                <span className="status10 private10">Private</span>
-                <div className="action-buttons10">
-                  <button className="action-btn10">✏️</button>
-                  <button className="action-btn10">🗑️</button>
-                </div>
-              </div>
-            </div>
-          </section>
-        </main>
+    <div className="body-container">
+      <div className="logo-containernew">
+        <span className="logonew">Askora</span>
+      </div>
+      <div className="mainbody">
+        <HeaderCard />
+        <Topics/>
+        <TopicFilter/>
+        <SearchBar/>
+        <Dock
+          items={items}
+          panelHeight={78}
+          baseItemSize={60}
+          magnification={80}
+        />
       </div>
     </div>
-  )
+  );
 }
-
-export default Dashboard

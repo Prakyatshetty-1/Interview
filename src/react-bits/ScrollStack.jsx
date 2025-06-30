@@ -1,235 +1,299 @@
-// "use client"
+"use client"
 
-// import { useState, useEffect, useRef } from "react"
-// import { gsap } from "gsap"
-// import { ScrollTrigger } from "gsap/ScrollTrigger"
-// import "./ScrollStack.css"
+import { useEffect, useRef } from "react"
+import { gsap } from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import './ScrollStack.css'
+import ScrollFloat from "./ScrollFloat"
+gsap.registerPlugin(ScrollTrigger)
 
-// gsap.registerPlugin(ScrollTrigger)
+export default function PricingPage() {
+  const basicCardRef = useRef(null)
+  const enterpriseCardRef = useRef(null)
+  const popularCardRef = useRef(null)
+  const sectionRef = useRef(null)
 
-// const communityMembers = [
-//   {
-//     id: 1,
-//     name: "Fatima Ameen",
-//     handle: "@fatima",
-//     title: "Senior Product Designer at Shopify",
-//     location: "Toronto, Canada",
-//     avatar: "/profilepic1.png",
-//     skills: ["Figma", "Sketch", "Prototyping"],
-//     isOnline: true,
-//   },
-//   {
-//     id: 2,
-//     name: "Ekene Smart",
-//     handle: "@smartofux",
-//     title: "UX Designer & Engineer at Shopify",
-//     location: "Lagos, Nigeria",
-//     avatar: "/placeholder.svg?height=60&width=60&text=ES",
-//     skills: ["Figma", "Javascript", "React Native"],
-//     isOnline: true,
-//   },
-//   {
-//     id: 3,
-//     name: "Femi John",
-//     handle: "@thefemijohn",
-//     title: "Product Design Lead @lifechangeNG",
-//     location: "Abuja, Nigeria",
-//     avatar: "/placeholder.svg?height=60&width=60&text=FJ",
-//     skills: ["Figma", "Photoshop", "Illustrator"],
-//     isOnline: false,
-//   },
-//   {
-//     id: 4,
-//     name: "David Martinez",
-//     handle: "@davidmtz",
-//     title: "Full Stack Developer at Meta",
-//     location: "San Francisco, USA",
-//     avatar: "/placeholder.svg?height=60&width=60&text=DM",
-//     skills: ["React", "Node.js", "TypeScript"],
-//     isOnline: true,
-//   },
-// ]
+  useEffect(() => {
+    const basicCard = basicCardRef.current
+    const enterpriseCard = enterpriseCardRef.current
+    const popularCard = popularCardRef.current
+    const section = sectionRef.current
 
-// const creativeTypes = ["Illustrators", "Bloggers", "Animators", "Developers", "Designers", "Writers"]
+    if (!basicCard || !enterpriseCard || !popularCard || !section) return
 
-// const UserIcon = () => (
-//   <svg className="user-icon" viewBox="0 0 24 24" fill="currentColor">
-//     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-//   </svg>
-// )
+    gsap.set([basicCard, enterpriseCard, popularCard], {
+      clearProps: "all",
+      willChange: "transform, opacity", // 🚀 Hint GPU to optimize performance
+    })
 
-// export default function CommunityPage() {
-//   const [isLoaded, setIsLoaded] = useState(false)
-//   const [loadedCards, setLoadedCards] = useState([])
-//   const cardRefs = useRef([])
-//   const containerRef = useRef(null)
+    const initAnimation = () => {
+      const basicRect = basicCard.getBoundingClientRect()
+      const enterpriseRect = enterpriseCard.getBoundingClientRect()
+      const popularRect = popularCard.getBoundingClientRect()
 
-//   useEffect(() => {
-//     setIsLoaded(true)
+      const basicMoveX = popularRect.left - basicRect.left
+      const enterpriseMoveX = popularRect.left - enterpriseRect.left
 
-//     communityMembers.forEach((_, index) => {
-//       setTimeout(() => {
-//         setLoadedCards((prev) => [...prev, index])
-//       }, index * 200)
-//     })
+      // 🧹 Remove per-frame zIndex updates to avoid layout thrashing
+      gsap.set(basicCard, { zIndex: 0 })
+      gsap.set(enterpriseCard, { zIndex: 0 })
+      gsap.set(popularCard, { zIndex: 10 })
 
-//     setTimeout(() => {
-//       setupStackAnimation()
-//     }, 1000)
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top center",
+          end: "top+=400px center",
+          scrub: 0.35, // 🎯 Reduced scrub time for responsiveness
+        },
+      })
 
-//     return () => {
-//       ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
-//     }
-//   }, [])
+      tl.set(basicCard, {
+        x: basicMoveX,
+        y: 0,
+        scale: 0.92,
+        opacity: 0,
+      })
+        .set(enterpriseCard, {
+          x: enterpriseMoveX,
+          y: 0,
+          scale: 0.92,
+          opacity: 0,
+        }, 0)
+        .set(popularCard, {
+          x: 0,
+          y: 0,
+          scale: 1.05,
+          opacity: 1,
+        }, 0)
 
-//   const setupStackAnimation = () => {
-//     cardRefs.current.forEach((card, index) => {
-//       if (!card) return
+        // 🧊 Use power3.out easing for smooth motion
+        .to(basicCard, {
+          x: 0,
+          scale: 1,
+          opacity: 1,
+          duration: 1.2,
+          ease: "power3.out",
+        })
+        .to(enterpriseCard, {
+          x: 0,
+          scale: 1,
+          opacity: 1,
+          duration: 1.2,
+          ease: "power3.out",
+        }, 0)
+        .to(popularCard, {
+          scale: 1.05,
+          duration: 1.2,
+          ease: "power3.out",
+        }, 0)
 
-//       gsap.set(card, {
-//         position: "absolute",
-//         top: 100,
-//         left: 0,
-//         x: 0,
-//         y: 0,
-//         scale: 1,
-//         width: "100%",
-//         opacity: 1,
-//         filter: "blur(0px)",
-//         transform: "none",
-//         zIndex: 10 - index,
-//       })
+      section.classList.add("gsap-initialized")
+    }
 
-//       if (index === 1) {
-//         gsap.set(card, { zIndex: 100 }) // Ekene on top
-//         return
-//       }
+    requestAnimationFrame(() => {
+      requestAnimationFrame(initAnimation)
+    })
 
-//       let toVars = {}
-//       if (index === 0) {
-//         toVars = {
-//           y: -160,
-//           x: 40,
-//           width: "85%",
-//           opacity: 0.5,
-//           scale: 0.95,
-//           filter: "blur(2px)",
-//         }
-//       } else if (index === 2) {
-//         toVars = {
-//           y: 160,
-//           x: 40,
-//           width: "92%",
-//           opacity: 0.7,
-//           scale: 0.97,
-//           filter: "blur(1.5px)",
-//         }
-//       } else if (index === 3) {
-//         toVars = {
-//           y: 320,
-//           x: 60,
-//           width: "80%",
-//           opacity: 0.4,
-//           scale: 0.92,
-//           filter: "blur(3px)",
-//         }
-//       }
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
+      section.classList.remove("gsap-initialized")
+    }
+  }, [])
 
-//       gsap.to(card, {
-//         ...toVars,
-//         scrollTrigger: {
-//           trigger: ".community-cards",
-//           start: "top 80%",
-//           end: "top 40%",
-//           scrub: true,
-//         },
-//         duration: 0.8,
-//         ease: "power2.out",
-//       })
-//     })
-//   }
+  return (
+    <section ref={sectionRef} className="pricing-section">
+        {/* Animated Background Elements - Only for this section */}
+      <div className="pricing-bg-orbs">
+        <div className="pricing-or1 pricing-orb1"></div>
+        <div className="pricing-orb pricing-orb2"></div>
+        <div className="pricing-orb pricing-orb3"></div>
+        <div className="pricing-orb pricing-orb4"></div>
+        <div className="pricing-orb pricing-orb5"></div>
+      </div>
 
-//   const handleGetStarted = () => console.log("Get Started clicked")
-//   const handleLogin = () => console.log("Login clicked")
+      {/* Geometric Grid Pattern */}
+      <div className="pricing-bg-grid"></div>
 
-//   return (
-//     <div className="community-page">
-//       <div className="background-elements">
-//         <div className="bg-blur-1"></div>
-//         <div className="bg-blur-2"></div>
-//         <div className="bg-blur-3"></div>
-//         <div className="bg-blur-4"></div>
-//       </div>
+      {/* Floating Particles */}
+      <div className="pricing-particles">
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="pricing-particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 15}s`,
+              animationDuration: `${15 + Math.random() * 10}s`,
+            }}
+          ></div>
+        ))}
+      </div>
 
-//       <div className={`main-content ${isLoaded ? "loaded" : ""}`}>
-//         <div className="content-container">
-//           <div className="hero-section">
-//             <h1 className="hero-title">
-//               Contribute.
-//               <br />
-//               Share.
-//               <br />
-//               Collaborate.
-//             </h1>
-//             <p className="hero-description">
-//               Share your works, connect with employers, and socialize with other creatives. We are the social networking
-//               platform for global talents.
-//             </p>
-//             <div className="hero-buttons">
-//               <button className="get-started-btn" onClick={handleGetStarted}>
-//                 Get Started
-//               </button>
-//               <button className="log-in-btn" onClick={handleLogin}>
-//                 Log In
-//               </button>
-//             </div>
-//           </div>
+      <div className="container">
+        <div className="header">
+          <ScrollFloat
+            animationDuration={1}
+            ease="back.inOut(2)"
+            scrollStart="center bottom+=10%"
+            scrollEnd="bottom bottom-=60%"
+            stagger={0.09}
+            textClassName="title"
+          >
+            A plan for every need
+          </ScrollFloat>
 
-//           <div className="community-section">
-//             <div className="community-cards" ref={containerRef} style={{ position: "relative", minHeight: "500px" }}>
-//               {communityMembers.map((member, index) => (
-//                 <div
-//                   key={member.id}
-//                   ref={(el) => (cardRefs.current[index] = el)}
-//                   className={`member-card ${loadedCards.includes(index) ? "loaded" : ""} ${index === 1 ? "ekene-card" : ""}`}
-//                 >
-//                   <div className="member-header">
-//                     <div className="member-avatar">
-//                       <UserIcon />
-//                       {member.isOnline && <div className="online-indicator"></div>}
-//                     </div>
-//                     <div className="member-info">
-//                       <div className="member-name-row">
-//                         <h3 className="member-name">{member.name}</h3>
-//                         <span className="member-handle">{member.handle}</span>
-//                       </div>
-//                       <p className="member-title">{member.title}</p>
-//                       <div className="member-skills">
-//                         {member.skills.map((skill, skillIndex) => (
-//                           <span key={skillIndex} className="skill-tag">
-//                             {skill}
-//                           </span>
-//                         ))}
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-//           </div>
-//         </div>
+          <ScrollFloat
+            animationDuration={1}
+            ease="back.inOut(2)"
+            scrollStart="center bottom+=10%"
+            scrollEnd="bottom bottom-=60%"
+            stagger={0.03}
+            textClassName="subtitle1"
+          >
+            Satisfy leads, start & become digital success with top-tier security.
+          </ScrollFloat>
+        </div>
 
-//         <div className="bottom-section">
-//           <h2 className="bottom-title">BUILT FOR ALL TYPES OF DIGITAL CREATIVES</h2>
-//           <div className="creative-types">
-//             {creativeTypes.map((type, index) => (
-//               <span key={index} className="creative-type">
-//                 {type}
-//               </span>
-//             ))}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
+        <div className="pricing-grid">
+          {/* Basic Plan */}
+          <div ref={basicCardRef} className="pricing-card basic-card">
+            <div className="upper">
+              <div className="card-header">
+                <h3 className="plan-name">Basic plan</h3>
+                <div className="price-container">
+                  <span className="price">Free</span>
+                  <span className="period">per month</span>
+                </div>
+                <p className="plan-description">For casual practice and job prep.</p>
+              </div>
+              <button className="cta-button1">Get started</button>
+            </div>
+
+            <div className="features">
+              <h4 className="features-title">FEATURES</h4>
+              <p className="features-subtitle">Everything you need to get started:</p>
+              <ul className="features-list">
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Community packs access
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Limited AI interviews
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Create 1 custom 3-question pack
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Default AI voice
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Save up to 5 answers
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Business Plan - Popular */}
+          <div ref={popularCardRef} className="pricing-card popular-card">
+            <div className="upper">
+              <div className="popular-badge">
+                <span>Pro Plan</span>
+                <span className="popular-label">Popular</span>
+              </div>
+
+              <div className="sparkles">
+                <div className="sparkle" style={{ top: "25%", right: "20%" }}></div>
+                <div className="sparkle" style={{ top: "45%", right: "15%" }}></div>
+                <div className="sparkle" style={{ top: "35%", right: "25%" }}></div>
+              </div>
+
+              <div className="card-header">
+                <div className="price-container">
+                  <span className="price">$4</span>
+                  <span className="period">per month</span>
+                </div>
+                <p className="plan-description">For active job seekers</p>
+              </div>
+
+              <button className="cta-button1 popular-button1">Get started</button>
+            </div>
+
+            <div className="features">
+              <h4 className="features-title">FEATURES</h4>
+              <p className="features-subtitle">Everything in our Basic plan plus...</p>
+              <ul className="features-list">
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Unlimited AI interview sessions
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Build 10 custom sets
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Choose from 5 AI voices
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Smart answer insights
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Save and review unlimited answers
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Enterprise Plan */}
+          <div ref={enterpriseCardRef} className="pricing-card enterprise-card">
+            <div className="upper">
+              <div className="card-header">
+                <h3 className="plan-name">Enterprise plan</h3>
+                <div className="price-container">
+                  <span className="price">$10</span>
+                  <span className="period">per month</span>
+                </div>
+                <p className="plan-description">For recruiters and coaches</p>
+              </div>
+              <button className="cta-button1">Get started</button>
+            </div>
+
+            <div className="features">
+              <h4 className="features-title">FEATURES</h4>
+              <p className="features-subtitle">Everything in our Pro plan plus…</p>
+              <ul className="features-list">
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Unlimited question pack creation
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Custom AI voice and persona
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Advanced analytics dashboard
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Early access to new feature
+                </li>
+                <li className="feature-item">
+                  <span className="checkmark">✓</span>
+                  Monetize your question packs
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
