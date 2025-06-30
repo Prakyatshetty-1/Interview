@@ -6,6 +6,7 @@
   padding: 24px;
   border-radius: 12px;
   flex-wrap: wrap;
+  margin-top: -10px;
 }
 
 .topic-button {

@@ -2,6 +2,8 @@ import HeaderCard from "../components/HeaderCard";
 import "./Dashboard.css";
 import Dock from "../react-bits/Dock";
 import TopicFilter from "../components/TopicFilter";
+import Topics from "../components/Topics";
+import Card from "../components/Card";
 
 export default function Dashboard() {
   const items = [
@@ -26,10 +28,21 @@ export default function Dashboard() {
       onClick: () => alert("Saves!"),
     },
     {
+      icon: <img src="/settingsicon.png" alt="Settings"style={{ width: '48px', height: '48px' }} />,
+      label: "Settings",
+      onClick: () => alert("Settings!"),
+    },
+    {
+      icon: <img src="/settingsicon.png" alt="Settings"style={{ width: '48px', height: '48px' }} />,
+      label: "Settings",
+      onClick: () => alert("Settings!"),
+    },
+    {
       icon: <img src="/profileicon.png" alt="Profile" style={{ width: '48px', height: '48px' }} />,
       label: "Profile",
       onClick: () => alert("Profile!"),
     },
+  
     {
       icon: <img src="/settingsicon.png" alt="Settings"style={{ width: '48px', height: '48px' }} />,
       label: "Settings",
@@ -44,7 +57,16 @@ export default function Dashboard() {
       </div>
       <div className="mainbody">
         <HeaderCard />
+        <Topics/>
         <TopicFilter/>
+        <div className="horizontal-divider"></div>
+        <div className="topicholder">
+          <Card/>
+          <Card/>
+          <Card/>
+          <Card/>
+          <Card/>
+        </div>
         <Dock
           items={items}
           panelHeight={78}
