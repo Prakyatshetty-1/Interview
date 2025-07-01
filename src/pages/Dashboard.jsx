@@ -98,6 +98,7 @@ export default function Dashboard() {
         <HeaderCard />
         <Topics/>
         <TopicFilter/>
+        <div className="horizontal-divider"></div>
         <SearchBar/>
         <Dock
           items={items}
