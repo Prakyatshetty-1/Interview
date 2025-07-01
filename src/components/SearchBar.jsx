@@ -11,7 +11,7 @@ export default function SearchBar() {
   const [sortOrder, setSortOrder] = useState("desc")
   const [sortBy, setSortBy] = useState("count")
   const [currentPage, setCurrentPage] = useState(1)
-  const cardsPerPage = 4
+  const cardsPerPage = 5
 
   const cardData = [
   {
