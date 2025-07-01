@@ -8,6 +8,8 @@
 .dock-panel {
  position: absolute;
   bottom: 1rem;
+  z-index: 999;
+  position: fixed;
  
   left: 50%;
   transform: translateX(-50%);

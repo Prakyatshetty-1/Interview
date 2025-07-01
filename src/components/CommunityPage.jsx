@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 import ScrollFloat from "../react-bits/ScrollFloat"
 import { useNavigate } from "react-router-dom"
 import "./CommunityPage.css"
-import { useNavigate } from "react-router-dom"
+
 
 gsap.registerPlugin(ScrollTrigger)
 

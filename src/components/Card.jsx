@@ -2,7 +2,7 @@
 import React from 'react';
 import "./Card.css";
 
-const Card = ({ difficulty = "Med.", title = "Full Stack Challenge", creator = "bhavith", tags = ["Web Dev", "Full Stack"] }) => {
+const Card = ({ difficulty = "Med.", title = "Full Stack Challenge", creator = "bhavith", tags = ["Web Dev", "Full Stack"],path="/FullStackWebDev.png" }) => {
   const getDifficultyClass = (difficulty) => {
     switch (difficulty.toLowerCase()) {
       case 'easy':
@@ -19,7 +19,9 @@ const Card = ({ difficulty = "Med.", title = "Full Stack Challenge", creator = "
 
   return (
     <>
-    <div className="challenge-card">
+    
+
+    <div className="challenge-card" style={ { backgroundImage: `url(${path})` }}>
         <div className="gradient-overlay"></div>
         <div className="bottom-blur"></div>
         

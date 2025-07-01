@@ -4,8 +4,47 @@ import Dock from "../react-bits/Dock";
 import TopicFilter from "../components/TopicFilter";
 import Topics from "../components/Topics";
 import Card from "../components/Card";
+import SearchBar from "../components/SearchBar";
 
 export default function Dashboard() {
+
+    const cardData = [
+    {
+      difficulty: "Med.",
+      title: "Full Stack Challenge",
+      creator: "bhavith",
+      tags: ["Web Dev", "Full Stack"],
+      path:"/FullStackWebDev.png"
+    },
+    {
+      difficulty: "Easy",
+      title: "Frontend Basics",
+      creator: "Prakyat",
+      tags: ["React", "UI"],
+      path:"/MLEngineering.png"
+    },
+    {
+      difficulty: "Med.",
+      title: "Full Stack Challenge",
+      creator: "bhavith",
+      tags: ["Web Dev", "Full Stack"],
+      path:"/FrontEndDev.png"
+    },
+    {
+      difficulty: "Easy",
+      title: "Frontend Basics",
+      creator: "Prakyat",
+      tags: ["React", "UI"],
+      path:"/DesktopDev.png"
+    },
+    {
+      difficulty: "Med.",
+      title: "Full Stack Challenge",
+      creator: "bhavith",
+      tags: ["Web Dev", "Full Stack"],
+      path:"/BackEndDev.png"
+    },
+  ]
   const items = [
     {
       icon: <img src="/homeicon.png" alt="Home" style={{ width: '48px', height: '48px' }} />,
@@ -60,13 +99,7 @@ export default function Dashboard() {
         <Topics/>
         <TopicFilter/>
         <div className="horizontal-divider"></div>
-        <div className="topicholder">
-          <Card/>
-          <Card/>
-          <Card/>
-          <Card/>
-          <Card/>
-        </div>
+        <SearchBar/>
         <Dock
           items={items}
           panelHeight={78}
