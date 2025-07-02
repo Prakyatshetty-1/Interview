@@ -1,22 +1,26 @@
 "use client"
 
 import { useState, useMemo, useRef, useEffect } from "react"
-import { MdFilterAlt, MdFilterAltOff } from "react-icons/md"
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import Card from "./Card"
 import "./SearchBar.css"
+import { MdSort } from "react-icons/md"
 
 export default function SearchBar() {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortOrder, setSortOrder] = useState("desc")
   const [sortBy, setSortBy] = useState("count")
   const [currentPage, setCurrentPage] = useState(1)
-  const [categoryFilter, setCategoryFilter] = useState("all")
-  const [difficultySort, setDifficultySort] = useState("none")
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] = useState(false)
   const [selectedFilter, setSelectedFilter] = useState("All")
+  const [selectedDifficulties, setSelectedDifficulties] = useState([])
+  const [selectedTopics, setSelectedTopics] = useState([])
+  const [topicsSearch, setTopicsSearch] = useState("")
   const filterRef = useRef(null)
+  const advancedFilterRef = useRef(null)
   const cardsPerPage = 25
+  const [filterView, setFilterView] = useState("main") // "main", "difficulty", "topics"
 
   // Character limits configuration
   const TITLE_CHAR_LIMIT = 20
@@ -27,6 +31,9 @@ export default function SearchBar() {
     const handleClickOutside = (event) => {
       if (filterRef.current && !filterRef.current.contains(event.target)) {
         setIsFilterOpen(false)
+      }
+      if (advancedFilterRef.current && !advancedFilterRef.current.contains(event.target)) {
+        setIsAdvancedFilterOpen(false)
       }
     }
 
@@ -247,7 +254,7 @@ export default function SearchBar() {
     {
       difficulty: "Hard",
       title: "Reinforcement Learning Agent",
-      creator: "Kriti",
+      creator: "Rohan",
       tags: ["AI Researcher", "Gym"],
       path: "/AIResearch.png",
     },
@@ -782,48 +789,78 @@ export default function SearchBar() {
     }))
   }, [])
 
-  // Helper function to get difficulty order value
-  const getDifficultyOrder = (difficulty) => {
-    switch (difficulty.toLowerCase()) {
-      case "easy":
-        return 1
-      case "med.":
-        return 2
-      case "hard":
-        return 3
-      default:
-        return 2
-    }
-  }
+  // Get all unique topics from card data
+  const allTopics = useMemo(() => {
+    const topics = new Set()
+    cardData.forEach((card) => {
+      card.tags.forEach((tag) => topics.add(tag))
+    })
+    return Array.from(topics).sort()
+  }, [])
+
+  // Filter topics based on search
+  const filteredTopics = useMemo(() => {
+    if (!topicsSearch.trim()) return allTopics
+    return allTopics.filter((topic) => topic.toLowerCase().includes(topicsSearch.toLowerCase()))
+  }, [allTopics, topicsSearch])
 
   const filteredCards = useMemo(() => {
     let filtered = processedCardData
 
-    // Apply tag search if any (search on original tags)
+    // Apply search term filter
     if (searchTerm.trim()) {
-      filtered = filtered.filter((card) =>
-        card.originalTags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())),
+      filtered = filtered.filter(
+        (card) =>
+          card.originalTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          card.originalTags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())),
       )
     }
 
-    // Apply category filter (use original tags for filtering)
-    if (categoryFilter === "frontend") {
-      filtered = filtered.filter((card) => card.originalTags.some((tag) => tag.toLowerCase() === "front end"))
-    } else if (categoryFilter === "backend") {
-      filtered = filtered.filter((card) => card.originalTags.some((tag) => tag.toLowerCase() === "back end"))
+    // Apply difficulty filter
+    if (selectedDifficulties.length > 0) {
+      filtered = filtered.filter((card) => selectedDifficulties.includes(card.difficulty))
     }
 
-    // Apply difficulty sorting
-    if (difficultySort === "easy-to-hard") {
+    // Apply topics filter
+    if (selectedTopics.length > 0) {
+      filtered = filtered.filter((card) => selectedTopics.some((topic) => card.originalTags.includes(topic)))
+    }
+
+    // Apply sorting
+    if (selectedFilter === "Easy to Hard") {
       filtered = [...filtered].sort((a, b) => {
+        const getDifficultyOrder = (difficulty) => {
+          switch (difficulty.toLowerCase()) {
+            case "easy":
+              return 1
+            case "med.":
+              return 2
+            case "hard":
+              return 3
+            default:
+              return 2
+          }
+        }
         return getDifficultyOrder(a.difficulty) - getDifficultyOrder(b.difficulty)
       })
-    } else if (difficultySort === "hard-to-easy") {
+    } else if (selectedFilter === "Hard to Easy") {
       filtered = [...filtered].sort((a, b) => {
+        const getDifficultyOrder = (difficulty) => {
+          switch (difficulty.toLowerCase()) {
+            case "easy":
+              return 1
+            case "med.":
+              return 2
+            case "hard":
+              return 3
+            default:
+              return 2
+          }
+        }
         return getDifficultyOrder(b.difficulty) - getDifficultyOrder(a.difficulty)
       })
     } else {
-      // Apply original sorting by title if no difficulty sort is applied
+      // Apply default alphabetical sorting
       filtered = [...filtered].sort((a, b) => {
         const aVal = a.originalTitle.toLowerCase()
         const bVal = b.originalTitle.toLowerCase()
@@ -832,7 +869,7 @@ export default function SearchBar() {
     }
 
     return filtered
-  }, [searchTerm, sortOrder, categoryFilter, difficultySort, processedCardData])
+  }, [searchTerm, selectedDifficulties, selectedTopics, selectedFilter, sortOrder, processedCardData])
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredCards.length / cardsPerPage)
@@ -840,10 +877,10 @@ export default function SearchBar() {
   const endIndex = startIndex + cardsPerPage
   const currentCards = filteredCards.slice(startIndex, endIndex)
 
-  // Reset to first page when search changes
+  // Reset to first page when filters change
   useMemo(() => {
     setCurrentPage(1)
-  }, [searchTerm])
+  }, [searchTerm, selectedDifficulties, selectedTopics, selectedFilter])
 
   // Calculate pagination range (show 5 pages at a time)
   const getPaginationRange = () => {
@@ -859,14 +896,6 @@ export default function SearchBar() {
     return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
   }
 
-  const handleSortToggle = () => {
-    setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
-  }
-
-  const handleSortByToggle = () => {
-    setSortBy((prev) => (prev === "count" ? "name" : "count"))
-  }
-
   const handlePageChange = (page) => {
     setCurrentPage(page)
   }
@@ -879,16 +908,26 @@ export default function SearchBar() {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
   }
 
-  const handleFilterSelect = (filterType, filterValue, displayName) => {
-    if (filterType === "category") {
-      setCategoryFilter(filterValue)
-      setDifficultySort("none")
-    } else if (filterType === "difficulty") {
-      setDifficultySort(filterValue)
-      setCategoryFilter("all")
-    }
+  const handleFilterSelect = (filterValue, displayName) => {
     setSelectedFilter(displayName)
     setIsFilterOpen(false)
+  }
+
+  const handleDifficultyToggle = (difficulty) => {
+    setSelectedDifficulties((prev) =>
+      prev.includes(difficulty) ? prev.filter((d) => d !== difficulty) : [...prev, difficulty],
+    )
+  }
+
+  const handleTopicToggle = (topic) => {
+    setSelectedTopics((prev) => (prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]))
+  }
+
+  const handleAdvancedFilterToggle = () => {
+    if (isAdvancedFilterOpen) {
+      setFilterView("main")
+    }
+    setIsAdvancedFilterOpen(!isAdvancedFilterOpen)
   }
 
   return (
@@ -912,66 +951,245 @@ export default function SearchBar() {
         </div>
 
         <div className="filter-buttons5">
-          <div className="custom-filter-dropdown" ref={filterRef}>
-            <button className="filter-dropdown-btn" onClick={() => setIsFilterOpen(!isFilterOpen)}>
-              {selectedFilter}
-              <ChevronDown className={`filter-dropdown-icon ${isFilterOpen ? "rotated" : ""}`} />
+          {/* Simple Filter Button */}
+          <div className="custom-filter-dropdown5" ref={filterRef}>
+            <button className="filter-icon-btn5" onClick={() => setIsFilterOpen(!isFilterOpen)}>
+              <svg className="filter-icon5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
+              </svg>
             </button>
 
             {isFilterOpen && (
-              <div className="filter-dropdown-menu">
-                <div className="filter-dropdown-item" onClick={() => handleFilterSelect("category", "all", "All")}>
-                  All
+              <div className="filter-dropdown-menu5">
+                <div
+                  className={`filter-dropdown-item5 ${selectedFilter === "All" ? "selected" : ""}`}
+                  onClick={() => handleFilterSelect("all", "All")}
+                >
+                  <span>All</span>
+                  <svg
+                    className={`tick-mark5 ${selectedFilter === "All" ? "" : "hidden"}`}
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                  </svg>
                 </div>
                 <div
-                  className="filter-dropdown-item"
-                  onClick={() => handleFilterSelect("category", "frontend", "Frontend")}
+                  className={`filter-dropdown-item5 ${selectedFilter === "Easy to Hard" ? "selected" : ""}`}
+                  onClick={() => handleFilterSelect("easy-to-hard", "Easy to Hard")}
                 >
-                  Frontend
+                  <span>Easy to Hard</span>
+                  <svg
+                    className={`tick-mark5 ${selectedFilter === "Easy to Hard" ? "" : "hidden"}`}
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                  </svg>
                 </div>
                 <div
-                  className="filter-dropdown-item"
-                  onClick={() => handleFilterSelect("category", "backend", "Backend")}
+                  className={`filter-dropdown-item5 ${selectedFilter === "Hard to Easy" ? "selected" : ""}`}
+                  onClick={() => handleFilterSelect("hard-to-easy", "Hard to Easy")}
                 >
-                  Backend
+                  <span>Hard to Easy</span>
+                  <svg
+                    className={`tick-mark5 ${selectedFilter === "Hard to Easy" ? "" : "hidden"}`}
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                  </svg>
                 </div>
                 <div
-                  className="filter-dropdown-item"
-                  onClick={() => handleFilterSelect("difficulty", "easy-to-hard", "Easy to Hard")}
+                  className={`filter-dropdown-item5 ${selectedFilter === "Easy to Hard" ? "selected" : ""}`}
+                  onClick={() => handleFilterSelect("easy-to-hard", "Easy to Hard")}
                 >
-                  Easy to Hard
-                </div>
-                <div
-                  className="filter-dropdown-item"
-                  onClick={() => handleFilterSelect("difficulty", "hard-to-easy", "Hard to Easy")}
-                >
-                  Hard to Easy
+                  <span>Popular Questions</span>
+                  <svg
+                    className={`tick-mark5 ${selectedFilter === "Easy to Hard" ? "" : "hidden"}`}
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                  </svg>
                 </div>
               </div>
             )}
           </div>
 
-          <button
-            className="filter-btn5"
-            onClick={handleSortToggle}
-            title={`Sort ${sortOrder === "desc" ? "Ascending" : "Descending"}`}
-          >
-            {sortOrder === "desc" ? <MdFilterAlt /> : <MdFilterAltOff />}
-          </button>
+          {/* Advanced Filter Button (replacing sort) */}
+          <div className="advanced-filter-dropdown5" ref={advancedFilterRef}>
+            <button className="filter-btn5" onClick={handleAdvancedFilterToggle}>
+              <MdSort />
+            </button>
+
+            {isAdvancedFilterOpen && (
+              <div className="advanced-filter-menu5">
+                {filterView === "main" && (
+                  <>
+                    <div className="filter-section5 clickable" onClick={() => setFilterView("difficulty")}>
+                      <div className="filter-section-title5">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                        Difficulty
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          style={{ marginLeft: "auto" }}
+                        >
+                          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                        </svg>
+                      </div>
+                      
+                    </div>
+                    <div className="filter-section5 clickable" onClick={() => setFilterView("difficulty")}>
+                      <div className="filter-section-title5">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                        To Do
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          style={{ marginLeft: "auto" }}
+                        >
+                          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                        </svg>
+                      </div>
+                      
+                    </div>
+                    <div className="filter-section5 clickable" onClick={() => setFilterView("topics")}>
+                      <div className="filter-section-title5">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 2 2 2h11c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z" />
+                        </svg>
+                        Topics
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          style={{ marginLeft: "auto" }}
+                        >
+                          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {filterView === "difficulty" && (
+                  <>
+                    <div className="filter-header5">
+                      <button className="back-button5" onClick={() => setFilterView("main")}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                        </svg>
+                        Back
+                      </button>
+                      <span className="filter-title5">Difficulty</span>
+                    </div>
+                    <div className="filter-section5">
+                      <div className="difficulty-options5">
+                        <div
+                          className={`difficulty-option5 easy ${selectedDifficulties.includes("Easy") ? "selected" : ""}`}
+                          onClick={() => handleDifficultyToggle("Easy")}
+                        >
+                          <span>Easy</span>
+                          <svg
+                            className={`tick-mark5 ${selectedDifficulties.includes("Easy") ? "" : "hidden"}`}
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                          </svg>
+                        </div>
+                        <div
+                          className={`difficulty-option5 medium ${selectedDifficulties.includes("Med.") ? "selected" : ""}`}
+                          onClick={() => handleDifficultyToggle("Med.")}
+                        >
+                          <span>Med.</span>
+                          <svg
+                            className={`tick-mark5 ${selectedDifficulties.includes("Med.") ? "" : "hidden"}`}
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                          </svg>
+                        </div>
+                        <div
+                          className={`difficulty-option5 hard ${selectedDifficulties.includes("Hard") ? "selected" : ""}`}
+                          onClick={() => handleDifficultyToggle("Hard")}
+                        >
+                          <span>Hard</span>
+                          <svg
+                            className={`tick-mark5 ${selectedDifficulties.includes("Hard") ? "" : "hidden"}`}
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {filterView === "topics" && (
+                  <>
+                    <div className="filter-header5">
+                      <button className="back-button5" onClick={() => setFilterView("main")}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                        </svg>
+                        Back
+                      </button>
+                      <span className="filter-title5">Topics</span>
+                    </div>
+                    <div className="filter-section5">
+                      <input
+                        type="text"
+                        placeholder="Search topics..."
+                        value={topicsSearch}
+                        onChange={(e) => setTopicsSearch(e.target.value)}
+                        className="topics-search5"
+                      />
+                      <div className="topics-grid5">
+                        {filteredTopics.map((topic) => (
+                          <div
+                            key={topic}
+                            className={`topic-tag5 ${selectedTopics.includes(topic) ? "selected" : ""}`}
+                            onClick={() => handleTopicToggle(topic)}
+                          >
+                            {topic}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Results info */}
       {filteredCards.length > 0 && (
-        <div className="results-info">
-          <p className="results-text">
+        <div className="results-info5">
+          <p className="results-text5">
             Showing {startIndex + 1}-{Math.min(endIndex, filteredCards.length)} of {filteredCards.length} results
           </p>
         </div>
       )}
 
       {/* Card grid */}
-      <div className="topicholder">
+      <div className="topicholder5">
         {currentCards.length > 0 ? (
           currentCards.map((card, index) => <Card key={startIndex + index} {...card} />)
         ) : (
@@ -981,9 +1199,9 @@ export default function SearchBar() {
 
       {/* Pagination */}
       {filteredCards.length > cardsPerPage && (
-        <div className="pagination-container">
+        <div className="pagination-container5">
           <button
-            className="pagination-btn pagination-nav"
+            className="pagination-btn5 pagination-nav5"
             onClick={handlePrevPage}
             disabled={currentPage === 1}
             title="Previous page"
@@ -992,35 +1210,32 @@ export default function SearchBar() {
             Previous
           </button>
 
-          <div className="pagination-numbers">
-            {/* Show first page if not in current range */}
+          <div className="pagination-numbers5">
             {getPaginationRange()[0] > 1 && (
               <>
-                <button className="pagination-btn pagination-number" onClick={() => handlePageChange(1)}>
+                <button className="pagination-btn5 pagination-number5" onClick={() => handlePageChange(1)}>
                   1
                 </button>
                 {getPaginationRange()[0] > 2 && <span className="pagination-ellipsis">...</span>}
               </>
             )}
 
-            {/* Show current range */}
             {getPaginationRange().map((page) => (
               <button
                 key={page}
-                className={`pagination-btn pagination-number ${currentPage === page ? "active" : ""}`}
+                className={`pagination-btn5 pagination-number5 ${currentPage === page ? "active" : ""}`}
                 onClick={() => handlePageChange(page)}
               >
                 {page}
               </button>
             ))}
 
-            {/* Show last page if not in current range */}
             {getPaginationRange()[getPaginationRange().length - 1] < totalPages && (
               <>
                 {getPaginationRange()[getPaginationRange().length - 1] < totalPages - 1 && (
                   <span className="pagination-ellipsis">...</span>
                 )}
-                <button className="pagination-btn pagination-number" onClick={() => handlePageChange(totalPages)}>
+                <button className="pagination-btn5 pagination-number5" onClick={() => handlePageChange(totalPages)}>
                   {totalPages}
                 </button>
               </>
@@ -1028,7 +1243,7 @@ export default function SearchBar() {
           </div>
 
           <button
-            className="pagination-btn pagination-nav"
+            className="pagination-btn5 pagination-nav5"
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
             title="Next page"
