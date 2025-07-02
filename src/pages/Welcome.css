@@ -5,13 +5,14 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: black;
+  background: #000000;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   opacity: 1;
   transition: opacity 1s ease-in-out;
+  overflow: hidden;
 }
 
 .welcome-screen6.fade-out6 {
@@ -21,7 +22,7 @@
 .welcome-text6 {
   color: white;
   font-size: 4rem;
-  font-weight: bold;
+  font-weight: 400;
   letter-spacing: 0.1em;
   text-align: center;
   margin: 0;

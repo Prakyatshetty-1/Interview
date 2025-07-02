@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import { MdFilterAlt, MdFilterAltOff } from "react-icons/md"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react"
 import Card from "./Card"
 import "./SearchBar.css"
 
@@ -11,8 +11,41 @@ export default function SearchBar() {
   const [sortOrder, setSortOrder] = useState("desc")
   const [sortBy, setSortBy] = useState("count")
   const [currentPage, setCurrentPage] = useState(1)
-  const [categoryFilter, setCategoryFilter] = useState("mix");
-  const cardsPerPage = 5
+  const [categoryFilter, setCategoryFilter] = useState("all")
+  const [difficultySort, setDifficultySort] = useState("none")
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [selectedFilter, setSelectedFilter] = useState("All")
+  const filterRef = useRef(null)
+  const cardsPerPage = 25
+
+  // Character limits configuration
+  const TITLE_CHAR_LIMIT = 20
+  const TAG_CHAR_LIMIT = 10
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setIsFilterOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
+
+  // Helper function to truncate text
+  const truncateText = (text, limit) => {
+    if (text.length <= limit) return text
+    return text.substring(0, limit) + "..."
+  }
+
+  // Helper function to truncate tags
+  const truncateTags = (tags) => {
+    return tags.map((tag) => truncateText(tag, TAG_CHAR_LIMIT))
+  }
 
   const cardData = [
     {
@@ -735,39 +768,71 @@ export default function SearchBar() {
       creator: "Kavitha",
       tags: ["AI Researcher", "Multi-modal"],
       path: "/AIResearch.png",
+    },
+  ]
+
+  // Process card data with character limits
+  const processedCardData = useMemo(() => {
+    return cardData.map((card) => ({
+      ...card,
+      title: truncateText(card.title, TITLE_CHAR_LIMIT),
+      tags: truncateTags(card.tags),
+      originalTitle: card.title, // Keep original for search purposes
+      originalTags: card.tags, // Keep original for search purposes
+    }))
+  }, [])
+
+  // Helper function to get difficulty order value
+  const getDifficultyOrder = (difficulty) => {
+    switch (difficulty.toLowerCase()) {
+      case "easy":
+        return 1
+      case "med.":
+        return 2
+      case "hard":
+        return 3
+      default:
+        return 2
     }
-  ];
+  }
 
   const filteredCards = useMemo(() => {
-    let filtered = cardData;
+    let filtered = processedCardData
 
-    // Apply tag search if any
+    // Apply tag search if any (search on original tags)
     if (searchTerm.trim()) {
       filtered = filtered.filter((card) =>
-        card.tags.some((tag) =>
-          tag.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
+        card.originalTags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())),
+      )
     }
 
-    // Apply category filter
+    // Apply category filter (use original tags for filtering)
     if (categoryFilter === "frontend") {
-      filtered = filtered.filter((card) =>
-        card.tags.some((tag) => tag.toLowerCase() === "front end")
-      );
+      filtered = filtered.filter((card) => card.originalTags.some((tag) => tag.toLowerCase() === "front end"))
     } else if (categoryFilter === "backend") {
-      filtered = filtered.filter((card) =>
-        card.tags.some((tag) => tag.toLowerCase() === "back end")
-      );
+      filtered = filtered.filter((card) => card.originalTags.some((tag) => tag.toLowerCase() === "back end"))
     }
 
-    // Apply sorting by title
-    return [...filtered].sort((a, b) => {
-      const aVal = a.title.toLowerCase();
-      const bVal = b.title.toLowerCase();
-      return sortOrder === "asc" ?  bVal.localeCompare(aVal): aVal.localeCompare(bVal);
-    });
-  }, [searchTerm, sortOrder, categoryFilter]);
+    // Apply difficulty sorting
+    if (difficultySort === "easy-to-hard") {
+      filtered = [...filtered].sort((a, b) => {
+        return getDifficultyOrder(a.difficulty) - getDifficultyOrder(b.difficulty)
+      })
+    } else if (difficultySort === "hard-to-easy") {
+      filtered = [...filtered].sort((a, b) => {
+        return getDifficultyOrder(b.difficulty) - getDifficultyOrder(a.difficulty)
+      })
+    } else {
+      // Apply original sorting by title if no difficulty sort is applied
+      filtered = [...filtered].sort((a, b) => {
+        const aVal = a.originalTitle.toLowerCase()
+        const bVal = b.originalTitle.toLowerCase()
+        return sortOrder === "asc" ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal)
+      })
+    }
+
+    return filtered
+  }, [searchTerm, sortOrder, categoryFilter, difficultySort, processedCardData])
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredCards.length / cardsPerPage)
@@ -784,7 +849,7 @@ export default function SearchBar() {
   const getPaginationRange = () => {
     const maxPagesToShow = 5
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2))
-    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1)
+    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1)
 
     // Adjust start page if we're near the end
     if (endPage - startPage + 1 < maxPagesToShow) {
@@ -814,6 +879,18 @@ export default function SearchBar() {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
   }
 
+  const handleFilterSelect = (filterType, filterValue, displayName) => {
+    if (filterType === "category") {
+      setCategoryFilter(filterValue)
+      setDifficultySort("none")
+    } else if (filterType === "difficulty") {
+      setDifficultySort(filterValue)
+      setCategoryFilter("all")
+    }
+    setSelectedFilter(displayName)
+    setIsFilterOpen(false)
+  }
+
   return (
     <div className="mainclass5">
       <div className="search-bar-container5">
@@ -835,24 +912,52 @@ export default function SearchBar() {
         </div>
 
         <div className="filter-buttons5">
-            <select
-              className="filter-dropdown5"
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-            >
-              <option value="mix">Mix</option>
-              <option value="frontend">Frontend</option>
-              <option value="backend">Backend</option>
-            </select>
-
-            <button
-              className="filter-btn5"
-              onClick={handleSortToggle}
-              title={`Sort ${sortOrder === "desc" ? "Ascending" : "Descending"}`}
-            >
-              {sortOrder === "desc" ? <MdFilterAlt /> : <MdFilterAltOff />}
+          <div className="custom-filter-dropdown" ref={filterRef}>
+            <button className="filter-dropdown-btn" onClick={() => setIsFilterOpen(!isFilterOpen)}>
+              {selectedFilter}
+              <ChevronDown className={`filter-dropdown-icon ${isFilterOpen ? "rotated" : ""}`} />
             </button>
 
+            {isFilterOpen && (
+              <div className="filter-dropdown-menu">
+                <div className="filter-dropdown-item" onClick={() => handleFilterSelect("category", "all", "All")}>
+                  All
+                </div>
+                <div
+                  className="filter-dropdown-item"
+                  onClick={() => handleFilterSelect("category", "frontend", "Frontend")}
+                >
+                  Frontend
+                </div>
+                <div
+                  className="filter-dropdown-item"
+                  onClick={() => handleFilterSelect("category", "backend", "Backend")}
+                >
+                  Backend
+                </div>
+                <div
+                  className="filter-dropdown-item"
+                  onClick={() => handleFilterSelect("difficulty", "easy-to-hard", "Easy to Hard")}
+                >
+                  Easy to Hard
+                </div>
+                <div
+                  className="filter-dropdown-item"
+                  onClick={() => handleFilterSelect("difficulty", "hard-to-easy", "Hard to Easy")}
+                >
+                  Hard to Easy
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button
+            className="filter-btn5"
+            onClick={handleSortToggle}
+            title={`Sort ${sortOrder === "desc" ? "Ascending" : "Descending"}`}
+          >
+            {sortOrder === "desc" ? <MdFilterAlt /> : <MdFilterAltOff />}
+          </button>
         </div>
       </div>
 
@@ -891,15 +996,10 @@ export default function SearchBar() {
             {/* Show first page if not in current range */}
             {getPaginationRange()[0] > 1 && (
               <>
-                <button
-                  className="pagination-btn pagination-number"
-                  onClick={() => handlePageChange(1)}
-                >
+                <button className="pagination-btn pagination-number" onClick={() => handlePageChange(1)}>
                   1
                 </button>
-                {getPaginationRange()[0] > 2 && (
-                  <span className="pagination-ellipsis">...</span>
-                )}
+                {getPaginationRange()[0] > 2 && <span className="pagination-ellipsis">...</span>}
               </>
             )}
 
@@ -920,10 +1020,7 @@ export default function SearchBar() {
                 {getPaginationRange()[getPaginationRange().length - 1] < totalPages - 1 && (
                   <span className="pagination-ellipsis">...</span>
                 )}
-                <button
-                  className="pagination-btn pagination-number"
-                  onClick={() => handlePageChange(totalPages)}
-                >
+                <button className="pagination-btn pagination-number" onClick={() => handlePageChange(totalPages)}>
                   {totalPages}
                 </button>
               </>
