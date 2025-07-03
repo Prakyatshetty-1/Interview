@@ -4,23 +4,37 @@ import { useState, useMemo, useRef, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import Card from "./Card"
 import "./SearchBar.css"
-import { MdSort } from "react-icons/md"
+import { BiSort } from "react-icons/bi"
+import { FaFilter } from "react-icons/fa"
+import ShinyText from "../react-bits/ShinyText"
+import cardDataJson from "../data/CardData.json"
 
 export default function SearchBar() {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortOrder, setSortOrder] = useState("desc")
-  const [sortBy, setSortBy] = useState("count")
+  const [cardData, setCardData] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] = useState(false)
   const [selectedFilter, setSelectedFilter] = useState("All")
   const [selectedDifficulties, setSelectedDifficulties] = useState([])
   const [selectedTopics, setSelectedTopics] = useState([])
+  const [selectedStatus, setSelectedStatus] = useState([])
+  const [selectedLanguages, setSelectedLanguages] = useState([])
   const [topicsSearch, setTopicsSearch] = useState("")
+  const [matchType, setMatchType] = useState("All") // "All" or "Any"
+
+  // CHANGE 1: Updated advanced filter form state - changed topics to use array instead of single value
+  const [advancedFilters, setAdvancedFilters] = useState({
+    status: { condition: "is", value: "" },
+    difficulty: { condition: "is", value: "" },
+    topics: { condition: "is", values: [] }, // Changed from 'value' to 'values' array
+    language: { condition: "is", value: "" },
+  })
+
   const filterRef = useRef(null)
   const advancedFilterRef = useRef(null)
   const cardsPerPage = 25
-  const [filterView, setFilterView] = useState("main") // "main", "difficulty", "topics"
 
   // Character limits configuration
   const TITLE_CHAR_LIMIT = 20
@@ -36,7 +50,6 @@ export default function SearchBar() {
         setIsAdvancedFilterOpen(false)
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside)
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
@@ -54,755 +67,36 @@ export default function SearchBar() {
     return tags.map((tag) => truncateText(tag, TAG_CHAR_LIMIT))
   }
 
-  const cardData = [
-    {
-      difficulty: "Easy",
-      title: "React Component Basics",
-      creator: "Arjun",
-      tags: ["Front End", "React"],
-      path: "/FrontEndDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "API Development Challenge",
-      creator: "Priya",
-      tags: ["Back End", "Node.js"],
-      path: "/BackEndDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Complete Web Application",
-      creator: "Rahul",
-      tags: ["Full Stack", "MERN"],
-      path: "/FullStackWebDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Cross-Platform Desktop App",
-      creator: "Sneha",
-      tags: ["Desktop Dev", "Electron"],
-      path: "/DesktopDev.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Mobile UI Components",
-      creator: "Vikram",
-      tags: ["Mobile Dev", "Flutter"],
-      path: "/MobileDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Neural Network Implementation",
-      creator: "Ananya",
-      tags: ["ML Engineer", "Deep Learning"],
-      path: "/MLEngineering.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Data Analysis Project",
-      creator: "Karthik",
-      tags: ["Data Scientist", "Python"],
-      path: "/DataScientist.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "ETL Pipeline Design",
-      creator: "Meera",
-      tags: ["Data Engineer", "Apache Spark"],
-      path: "/DataEngineer.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Research Paper Implementation",
-      creator: "Rohan",
-      tags: ["AI Researcher", "PyTorch"],
-      path: "/AIResearch.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "CI/CD Pipeline Setup",
-      creator: "Divya",
-      tags: ["DevOps Engineer", "Docker"],
-      path: "/DevOpsEngineer.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "CSS Animation Workshop",
-      creator: "Amit",
-      tags: ["Front End", "CSS"],
-      path: "/FrontEndDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Microservices Architecture",
-      creator: "Nidhi",
-      tags: ["Back End", "Kubernetes"],
-      path: "/BackEndDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "E-commerce Platform",
-      creator: "Suresh",
-      tags: ["Full Stack", "Vue.js"],
-      path: "/FullStackWebDev.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Desktop Calculator App",
-      creator: "Pooja",
-      tags: ["Desktop Dev", "Python"],
-      path: "/DesktopDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Native Mobile App",
-      creator: "Ajay",
-      tags: ["Mobile Dev", "React Native"],
-      path: "/MobileDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Computer Vision Model",
-      creator: "Shruti",
-      tags: ["ML Engineer", "OpenCV"],
-      path: "/MLEngineering.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Statistical Analysis",
-      creator: "Manoj",
-      tags: ["Data Scientist", "R"],
-      path: "/DataScientist.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Real-time Data Processing",
-      creator: "Kavya",
-      tags: ["Data Engineer", "Kafka"],
-      path: "/DataEngineer.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Transformer Architecture Study",
-      creator: "Arun",
-      tags: ["AI Researcher", "Transformers"],
-      path: "/AIResearch.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Infrastructure Monitoring",
-      creator: "Ravi",
-      tags: ["Site Reliability Engineer", "Prometheus"],
-      path: "/SiteReliabilityEngineer.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "JavaScript DOM Manipulation",
-      creator: "Lakshmi",
-      tags: ["Front End", "JavaScript"],
-      path: "/FrontEndDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "GraphQL API Design",
-      creator: "Sanjay",
-      tags: ["Back End", "GraphQL"],
-      path: "/BackEndDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Social Media Platform",
-      creator: "Deepika",
-      tags: ["Full Stack", "Next.js"],
-      path: "/FullStackWebDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "File Management System",
-      creator: "Varun",
-      tags: ["Desktop Dev", "C#"],
-      path: "/DesktopDev.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Mobile Weather App",
-      creator: "Sunita",
-      tags: ["Mobile Dev", "Swift"],
-      path: "/MobileDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Recommendation System",
-      creator: "Prakash",
-      tags: ["ML Engineer", "Scikit-learn"],
-      path: "/MLEngineering.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Business Intelligence Dashboard",
-      creator: "Rashmi",
-      tags: ["Data Scientist", "Tableau"],
-      path: "/DataScientist.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Data Warehouse Design",
-      creator: "Gopal",
-      tags: ["Data Engineer", "Snowflake"],
-      path: "/DataEngineer.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Reinforcement Learning Agent",
-      creator: "Rohan",
-      tags: ["AI Researcher", "Gym"],
-      path: "/AIResearch.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "AWS EC2 Setup",
-      creator: "Nitin",
-      tags: ["Cloud Engineer", "AWS"],
-      path: "/CloudEngineering.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Responsive Web Design",
-      creator: "Jyoti",
-      tags: ["Front End", "Bootstrap"],
-      path: "/FrontEndDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Distributed Database System",
-      creator: "Harsh",
-      tags: ["Back End", "MongoDB"],
-      path: "/BackEndDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Project Management Tool",
-      creator: "Swati",
-      tags: ["Full Stack", "Angular"],
-      path: "/FullStackWebDev.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Text Editor Application",
-      creator: "Rohit",
-      tags: ["Desktop Dev", "Java"],
-      path: "/DesktopDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Fitness Tracking App",
-      creator: "Neha",
-      tags: ["Mobile Dev", "Kotlin"],
-      path: "/MobileDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Natural Language Processing",
-      creator: "Sandeep",
-      tags: ["ML Engineer", "NLTK"],
-      path: "/MLEngineering.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Data Visualization Basics",
-      creator: "Usha",
-      tags: ["Data Scientist", "Matplotlib"],
-      path: "/DataScientist.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Stream Processing Pipeline",
-      creator: "Vinod",
-      tags: ["Data Engineer", "Flink"],
-      path: "/DataEngineer.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Generative AI Model",
-      creator: "Ishita",
-      tags: ["AI Researcher", "GANs"],
-      path: "/AIResearch.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Security Vulnerability Assessment",
-      creator: "Rajesh",
-      tags: ["Security Engineer", "Penetration Testing"],
-      path: "/SecurityEngineering.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "HTML5 Semantics",
-      creator: "Lata",
-      tags: ["Front End", "HTML5"],
-      path: "/FrontEndDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "RESTful API Security",
-      creator: "Mukesh",
-      tags: ["Back End", "JWT"],
-      path: "/BackEndDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Real-time Chat Application",
-      creator: "Gayatri",
-      tags: ["Full Stack", "Socket.io"],
-      path: "/FullStackWebDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Game Development Framework",
-      creator: "Vishal",
-      tags: ["Desktop Dev", "Unity"],
-      path: "/DesktopDev.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Mobile Photo Gallery",
-      creator: "Archana",
-      tags: ["Mobile Dev", "Xamarin"],
-      path: "/MobileDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Time Series Forecasting",
-      creator: "Kishore",
-      tags: ["ML Engineer", "LSTM"],
-      path: "/MLEngineering.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "A/B Testing Analysis",
-      creator: "Priyanka",
-      tags: ["Data Scientist", "Hypothesis Testing"],
-      path: "/DataScientist.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Data Lake Architecture",
-      creator: "Satish",
-      tags: ["Data Engineer", "Hadoop"],
-      path: "/DataEngineer.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Multi-Agent System",
-      creator: "Madhuri",
-      tags: ["AI Researcher", "Multi-Agent"],
-      path: "/AIResearch.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Load Balancer Configuration",
-      creator: "Ashok",
-      tags: ["Site Reliability Engineer", "Nginx"],
-      path: "/SiteReliabilityEngineer.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Progressive Web App",
-      creator: "Chitra",
-      tags: ["Front End", "PWA"],
-      path: "/FrontEndDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Event-Driven Architecture",
-      creator: "Deepak",
-      tags: ["Back End", "Event Sourcing"],
-      path: "/BackEndDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Learning Management System",
-      creator: "Vidya",
-      tags: ["Full Stack", "Django"],
-      path: "/FullStackWebDev.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Simple Database GUI",
-      creator: "Mohan",
-      tags: ["Desktop Dev", "Tkinter"],
-      path: "/DesktopDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Augmented Reality App",
-      creator: "Shilpa",
-      tags: ["Mobile Dev", "ARKit"],
-      path: "/MobileDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Object Detection System",
-      creator: "Naveen",
-      tags: ["ML Engineer", "YOLO"],
-      path: "/MLEngineering.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Exploratory Data Analysis",
-      creator: "Radha",
-      tags: ["Data Scientist", "Pandas"],
-      path: "/DataScientist.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Change Data Capture",
-      creator: "Sunil",
-      tags: ["Data Engineer", "Debezium"],
-      path: "/DataEngineer.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Neural Architecture Search",
-      creator: "Smita",
-      tags: ["AI Researcher", "AutoML"],
-      path: "/AIResearch.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Container Orchestration",
-      creator: "Raju",
-      tags: ["DevOps Engineer", "Kubernetes"],
-      path: "/DevOpsEngineer.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Form Validation Library",
-      creator: "Kavita",
-      tags: ["Front End", "Validation"],
-      path: "/FrontEndDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Message Queue Implementation",
-      creator: "Anil",
-      tags: ["Back End", "RabbitMQ"],
-      path: "/BackEndDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Blockchain Application",
-      creator: "Preeti",
-      tags: ["Full Stack", "Web3"],
-      path: "/FullStackWebDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "3D Graphics Application",
-      creator: "Yogesh",
-      tags: ["Desktop Dev", "OpenGL"],
-      path: "/DesktopDev.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Location-Based Service",
-      creator: "Anusha",
-      tags: ["Mobile Dev", "GPS"],
-      path: "/MobileDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Anomaly Detection Model",
-      creator: "Subash",
-      tags: ["ML Engineer", "Isolation Forest"],
-      path: "/MLEngineering.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Customer Segmentation",
-      creator: "Rekha",
-      tags: ["Data Scientist", "Clustering"],
-      path: "/DataScientist.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Data Quality Framework",
-      creator: "Pavan",
-      tags: ["Data Engineer", "Great Expectations"],
-      path: "/DataEngineer.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Federated Learning System",
-      creator: "Nisha",
-      tags: ["AI Researcher", "Federated Learning"],
-      path: "/AIResearch.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Terraform Infrastructure",
-      creator: "Kiran",
-      tags: ["Cloud Engineer", "Terraform"],
-      path: "/CloudEngineering.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Component Library",
-      creator: "Geetha",
-      tags: ["Front End", "Storybook"],
-      path: "/FrontEndDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Scalable Web Service",
-      creator: "Ramesh",
-      tags: ["Back End", "Load Balancing"],
-      path: "/BackEndDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Content Management System",
-      creator: "Seema",
-      tags: ["Full Stack", "Strapi"],
-      path: "/FullStackWebDev.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Image Viewer Application",
-      creator: "Ganesh",
-      tags: ["Desktop Dev", "Qt"],
-      path: "/DesktopDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Push Notification Service",
-      creator: "Savita",
-      tags: ["Mobile Dev", "Firebase"],
-      path: "/MobileDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Speech Recognition System",
-      creator: "Bala",
-      tags: ["ML Engineer", "Speech Processing"],
-      path: "/MLEngineering.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Statistical Modeling",
-      creator: "Vandana",
-      tags: ["Data Scientist", "Regression"],
-      path: "/DataScientist.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Streaming Analytics",
-      creator: "Mahesh",
-      tags: ["Data Engineer", "Storm"],
-      path: "/DataEngineer.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Quantum Computing Algorithm",
-      creator: "Pallavi",
-      tags: ["AI Researcher", "Quantum ML"],
-      path: "/AIResearch.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Application Security Testing",
-      creator: "Santosh",
-      tags: ["Application Security Engineer", "SAST"],
-      path: "/SecurityEngineering.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Accessibility Compliance",
-      creator: "Mala",
-      tags: ["Front End", "WCAG"],
-      path: "/FrontEndDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Caching Strategy Implementation",
-      creator: "Bharat",
-      tags: ["Back End", "Redis"],
-      path: "/BackEndDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Multi-tenant SaaS Platform",
-      creator: "Indira",
-      tags: ["Full Stack", "Multi-tenancy"],
-      path: "/FullStackWebDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Cross-platform GUI Framework",
-      creator: "Dilip",
-      tags: ["Desktop Dev", "Flutter Desktop"],
-      path: "/DesktopDev.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Offline-first Mobile App",
-      creator: "Bharati",
-      tags: ["Mobile Dev", "Offline Storage"],
-      path: "/MobileDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "AutoML Pipeline",
-      creator: "Venkat",
-      tags: ["ML Engineer", "Pipeline Automation"],
-      path: "/MLEngineering.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Predictive Analytics Model",
-      creator: "Shobha",
-      tags: ["Data Scientist", "Forecasting"],
-      path: "/DataScientist.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Data Mesh Architecture",
-      creator: "Jagdish",
-      tags: ["Data Engineer", "Data Mesh"],
-      path: "/DataEngineer.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Explainable AI System",
-      creator: "Sushma",
-      tags: ["AI Researcher", "XAI"],
-      path: "/AIResearch.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Service Mesh Setup",
-      creator: "Naresh",
-      tags: ["Site Reliability Engineer", "Istio"],
-      path: "/SiteReliabilityEngineering.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Micro-frontend Architecture",
-      creator: "Sanjana",
-      tags: ["Front End", "Module Federation"],
-      path: "/FrontEndDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Event Streaming Platform",
-      creator: "Balaji",
-      tags: ["Back End", "Apache Kafka"],
-      path: "/BackEndDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Headless CMS Implementation",
-      creator: "Padma",
-      tags: ["Full Stack", "Headless CMS"],
-      path: "/FullStackWebDev.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "System Tray Application",
-      creator: "Ramana",
-      tags: ["Desktop Dev", "System Integration"],
-      path: "/DesktopDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "IoT Mobile Dashboard",
-      creator: "Sunitha",
-      tags: ["Mobile Dev", "IoT"],
-      path: "/MobileDev.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Distributed ML Training",
-      creator: "Chandrashekhar",
-      tags: ["ML Engineer", "Distributed Computing"],
-      path: "/MLEngineering.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "Data Profiling Tool",
-      creator: "Latha",
-      tags: ["Data Scientist", "Data Profiling"],
-      path: "/DataScientist.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Real-time ETL Pipeline",
-      creator: "Srikanth",
-      tags: ["Data Engineer", "Real-time Processing"],
-      path: "/DataEngineer.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Neuromorphic Computing Model",
-      creator: "Shweta",
-      tags: ["AI Researcher", "Neuromorphic"],
-      path: "/AIResearch.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Zero Trust Security Model",
-      creator: "Praveen",
-      tags: ["Security Engineer", "Zero Trust"],
-      path: "/SecurityEngineering.png",
-    },
-    {
-      difficulty: "Easy",
-      title: "State Management Library",
-      creator: "Anjali",
-      tags: ["Front End", "State Management"],
-      path: "/FrontEndDev.png",
-    },
-    {
-      difficulty: "Med.",
-      title: "Serverless API Gateway",
-      creator: "Sudhir",
-      tags: ["Cloud Engineer", "Serverless"],
-      path: "/CloudEngineering.png",
-    },
-    {
-      difficulty: "Hard",
-      title: "Multi-modal AI System",
-      creator: "Kavitha",
-      tags: ["AI Researcher", "Multi-modal"],
-      path: "/AIResearch.png",
-    },
-  ]
+  useEffect(() => {
+    setCardData(cardDataJson)
+  }, [])
 
-  // Process card data with character limits
   const processedCardData = useMemo(() => {
     return cardData.map((card) => ({
       ...card,
       title: truncateText(card.title, TITLE_CHAR_LIMIT),
       tags: truncateTags(card.tags),
-      originalTitle: card.title, // Keep original for search purposes
-      originalTags: card.tags, // Keep original for search purposes
+      originalTitle: card.title,
+      originalTags: card.tags,
     }))
-  }, [])
+  }, [cardData])
 
-  // Get all unique topics from card data
   const allTopics = useMemo(() => {
     const topics = new Set()
     cardData.forEach((card) => {
       card.tags.forEach((tag) => topics.add(tag))
     })
     return Array.from(topics).sort()
-  }, [])
+  }, [cardData])
 
-  // Filter topics based on search
+  // CHANGE 2: Added filtered topics based on search functionality
   const filteredTopics = useMemo(() => {
     if (!topicsSearch.trim()) return allTopics
     return allTopics.filter((topic) => topic.toLowerCase().includes(topicsSearch.toLowerCase()))
   }, [allTopics, topicsSearch])
+
+  const allStatuses = ["Solved", "Unsolved", "Attempted"]
+  const allLanguages = ["JavaScript", "Python", "Java", "C++", "Dart", "Go", "Rust"]
 
   const filteredCards = useMemo(() => {
     let filtered = processedCardData
@@ -816,14 +110,32 @@ export default function SearchBar() {
       )
     }
 
-    // Apply difficulty filter
-    if (selectedDifficulties.length > 0) {
-      filtered = filtered.filter((card) => selectedDifficulties.includes(card.difficulty))
-    }
+    // Apply filters based on match type
+    if (matchType === "All") {
+      // All filters must match
+      if (selectedDifficulties.length > 0) {
+        filtered = filtered.filter((card) => selectedDifficulties.includes(card.difficulty))
+      }
+      if (selectedTopics.length > 0) {
+        filtered = filtered.filter((card) => selectedTopics.some((topic) => card.originalTags.includes(topic)))
+      }
+      if (selectedStatus.length > 0) {
+        filtered = filtered.filter((card) => selectedStatus.includes(card.status))
+      }
+      if (selectedLanguages.length > 0) {
+        filtered = filtered.filter((card) => selectedLanguages.includes(card.language))
+      }
+    } else {
+      // Any filter can match
+      filtered = filtered.filter((card) => {
+        const matchesDifficulty = selectedDifficulties.length === 0 || selectedDifficulties.includes(card.difficulty)
+        const matchesTopics =
+          selectedTopics.length === 0 || selectedTopics.some((topic) => card.originalTags.includes(topic))
+        const matchesStatus = selectedStatus.length === 0 || selectedStatus.includes(card.status)
+        const matchesLanguage = selectedLanguages.length === 0 || selectedLanguages.includes(card.language)
 
-    // Apply topics filter
-    if (selectedTopics.length > 0) {
-      filtered = filtered.filter((card) => selectedTopics.some((topic) => card.originalTags.includes(topic)))
+        return matchesDifficulty || matchesTopics || matchesStatus || matchesLanguage
+      })
     }
 
     // Apply sorting
@@ -860,7 +172,6 @@ export default function SearchBar() {
         return getDifficultyOrder(b.difficulty) - getDifficultyOrder(a.difficulty)
       })
     } else {
-      // Apply default alphabetical sorting
       filtered = [...filtered].sort((a, b) => {
         const aVal = a.originalTitle.toLowerCase()
         const bVal = b.originalTitle.toLowerCase()
@@ -869,7 +180,17 @@ export default function SearchBar() {
     }
 
     return filtered
-  }, [searchTerm, selectedDifficulties, selectedTopics, selectedFilter, sortOrder, processedCardData])
+  }, [
+    searchTerm,
+    selectedDifficulties,
+    selectedTopics,
+    selectedStatus,
+    selectedLanguages,
+    selectedFilter,
+    sortOrder,
+    processedCardData,
+    matchType,
+  ])
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredCards.length / cardsPerPage)
@@ -878,21 +199,18 @@ export default function SearchBar() {
   const currentCards = filteredCards.slice(startIndex, endIndex)
 
   // Reset to first page when filters change
-  useMemo(() => {
+  useEffect(() => {
     setCurrentPage(1)
-  }, [searchTerm, selectedDifficulties, selectedTopics, selectedFilter])
+  }, [searchTerm, selectedDifficulties, selectedTopics, selectedStatus, selectedLanguages, selectedFilter])
 
-  // Calculate pagination range (show 5 pages at a time)
+  // Calculate pagination range
   const getPaginationRange = () => {
     const maxPagesToShow = 5
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2))
     const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1)
-
-    // Adjust start page if we're near the end
     if (endPage - startPage + 1 < maxPagesToShow) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1)
     }
-
     return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
   }
 
@@ -913,21 +231,113 @@ export default function SearchBar() {
     setIsFilterOpen(false)
   }
 
-  const handleDifficultyToggle = (difficulty) => {
-    setSelectedDifficulties((prev) =>
-      prev.includes(difficulty) ? prev.filter((d) => d !== difficulty) : [...prev, difficulty],
-    )
-  }
-
-  const handleTopicToggle = (topic) => {
-    setSelectedTopics((prev) => (prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]))
-  }
-
   const handleAdvancedFilterToggle = () => {
-    if (isAdvancedFilterOpen) {
-      setFilterView("main")
-    }
     setIsAdvancedFilterOpen(!isAdvancedFilterOpen)
+  }
+
+  // Handle advanced filter changes
+  const handleAdvancedFilterChange = (filterType, field, value) => {
+    setAdvancedFilters((prev) => ({
+      ...prev,
+      [filterType]: {
+        ...prev[filterType],
+        [field]: value,
+      },
+    }))
+  }
+
+  // CHANGE 3: Added new function to handle topic chip selection/deselection
+  const handleTopicChipToggle = (topic) => {
+    setAdvancedFilters((prev) => ({
+      ...prev,
+      topics: {
+        ...prev.topics,
+        values: prev.topics.values.includes(topic)
+          ? prev.topics.values.filter((t) => t !== topic)
+          : [...prev.topics.values, topic],
+      },
+    }))
+  }
+
+  // CHANGE 4: Updated save function to handle topics array instead of single value
+  const handleSaveAsSmartList = () => {
+    // Reset existing filters
+    setSelectedDifficulties([])
+    setSelectedTopics([])
+    setSelectedStatus([])
+    setSelectedLanguages([])
+
+    // Apply filters based on advanced filter selections
+    const newDifficulties = []
+    const newTopics = []
+    const newStatuses = []
+    const newLanguages = []
+
+    // Process each advanced filter
+    Object.entries(advancedFilters).forEach(([filterType, filterData]) => {
+      if (filterType === "topics") {
+        // CHANGE 4a: Special handling for topics array
+        if (filterData.values && filterData.values.length > 0) {
+          const shouldInclude = filterData.condition === "is"
+          if (shouldInclude) {
+            newTopics.push(...filterData.values)
+          }
+        }
+      } else if (filterData.value) {
+        const shouldInclude = filterData.condition === "is"
+
+        switch (filterType) {
+          case "difficulty":
+            if (shouldInclude) {
+              newDifficulties.push(filterData.value)
+            }
+            break
+          case "status":
+            if (shouldInclude) {
+              newStatuses.push(filterData.value)
+            }
+            break
+          case "language":
+            if (shouldInclude) {
+              newLanguages.push(filterData.value)
+            }
+            break
+        }
+      }
+    })
+
+    // Update the main filter states
+    setSelectedDifficulties(newDifficulties)
+    setSelectedTopics(newTopics)
+    setSelectedStatus(newStatuses)
+    setSelectedLanguages(newLanguages)
+
+    // Close the advanced filter dropdown
+    setIsAdvancedFilterOpen(false)
+
+    console.log("Smart list saved with filters:", {
+      difficulties: newDifficulties,
+      topics: newTopics,
+      statuses: newStatuses,
+      languages: newLanguages,
+      matchType,
+    })
+  }
+
+  // CHANGE 5: Updated reset function to handle topics array
+  const handleResetFilters = () => {
+    setSelectedDifficulties([])
+    setSelectedTopics([])
+    setSelectedStatus([])
+    setSelectedLanguages([])
+    setTopicsSearch("")
+    setMatchType("All")
+    setAdvancedFilters({
+      status: { condition: "is", value: "" },
+      difficulty: { condition: "is", value: "" },
+      topics: { condition: "is", values: [] }, // Reset to empty array
+      language: { condition: "is", value: "" },
+    })
   }
 
   return (
@@ -949,16 +359,12 @@ export default function SearchBar() {
             className="search-input5"
           />
         </div>
-
         <div className="filter-buttons5">
           {/* Simple Filter Button */}
           <div className="custom-filter-dropdown5" ref={filterRef}>
             <button className="filter-icon-btn5" onClick={() => setIsFilterOpen(!isFilterOpen)}>
-              <svg className="filter-icon5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
-              </svg>
+              <BiSort style={{ width: "32px", height: "32px" }} />
             </button>
-
             {isFilterOpen && (
               <div className="filter-dropdown-menu5">
                 <div
@@ -1001,12 +407,12 @@ export default function SearchBar() {
                   </svg>
                 </div>
                 <div
-                  className={`filter-dropdown-item5 ${selectedFilter === "Easy to Hard" ? "selected" : ""}`}
-                  onClick={() => handleFilterSelect("easy-to-hard", "Easy to Hard")}
+                  className={`filter-dropdown-item5 ${selectedFilter === "Popular Questions" ? "selected" : ""}`}
+                  onClick={() => handleFilterSelect("popular", "Popular Questions")}
                 >
                   <span>Popular Questions</span>
                   <svg
-                    className={`tick-mark5 ${selectedFilter === "Easy to Hard" ? "" : "hidden"}`}
+                    className={`tick-mark5 ${selectedFilter === "Popular Questions" ? "" : "hidden"}`}
                     viewBox="0 0 24 24"
                     fill="currentColor"
                   >
@@ -1017,162 +423,222 @@ export default function SearchBar() {
             )}
           </div>
 
-          {/* Advanced Filter Button (replacing sort) */}
+          {/* Advanced Filter Button */}
           <div className="advanced-filter-dropdown5" ref={advancedFilterRef}>
             <button className="filter-btn5" onClick={handleAdvancedFilterToggle}>
-              <MdSort />
+              <FaFilter style={{ width: "16px", height: "16px" }} />
             </button>
-
             {isAdvancedFilterOpen && (
               <div className="advanced-filter-menu5">
-                {filterView === "main" && (
-                  <>
-                    <div className="filter-section5 clickable" onClick={() => setFilterView("difficulty")}>
-                      <div className="filter-section-title5">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                        Difficulty
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          style={{ marginLeft: "auto" }}
-                        >
-                          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
-                        </svg>
-                      </div>
-                      
-                    </div>
-                    <div className="filter-section5 clickable" onClick={() => setFilterView("difficulty")}>
-                      <div className="filter-section-title5">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                        </svg>
-                        Status
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          style={{ marginLeft: "auto" }}
-                        >
-                          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
-                        </svg>
-                      </div>
-                      
-                    </div>
-                    <div className="filter-section5 clickable" onClick={() => setFilterView("topics")}>
-                      <div className="filter-section-title5">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 2 2 2h11c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z" />
-                        </svg>
-                        Topics
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          style={{ marginLeft: "auto" }}
-                        >
-                          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </>
-                )}
+                {/* Header */}
+                <div className="advanced-filter-header5">
+                  <div className="match-selector5">
+                    <span>Match</span>
+                    <select
+                      value={matchType}
+                      onChange={(e) => setMatchType(e.target.value)}
+                      className="match-dropdown5"
+                    >
+                      <option value="All">All</option>
+                      <option value="Any">Any</option>
+                    </select>
+                  </div>
+                  <span className="filter-description5">of the following filters:</span>
+                </div>
 
-                {filterView === "difficulty" && (
-                  <>
-                    <div className="filter-header5">
-                      <button className="back-button5" onClick={() => setFilterView("main")}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                        </svg>
-                        Back
-                      </button>
-                      <span className="filter-title5">Difficulty</span>
+                {/* Status Filter */}
+                <div className="filter-group5">
+                  <div className="filter-group-header5">
+                    <div className="filter-icon5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                      </svg>
                     </div>
-                    <div className="filter-section5">
-                      <div className="difficulty-options5">
-                        <div
-                          className={`difficulty-option5 easy ${selectedDifficulties.includes("Easy") ? "selected" : ""}`}
-                          onClick={() => handleDifficultyToggle("Easy")}
-                        >
-                          <span>Easy</span>
-                          <svg
-                            className={`tick-mark5 ${selectedDifficulties.includes("Easy") ? "" : "hidden"}`}
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                          </svg>
-                        </div>
-                        <div
-                          className={`difficulty-option5 medium ${selectedDifficulties.includes("Med.") ? "selected" : ""}`}
-                          onClick={() => handleDifficultyToggle("Med.")}
-                        >
-                          <span>Med.</span>
-                          <svg
-                            className={`tick-mark5 ${selectedDifficulties.includes("Med.") ? "" : "hidden"}`}
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                          </svg>
-                        </div>
-                        <div
-                          className={`difficulty-option5 hard ${selectedDifficulties.includes("Hard") ? "selected" : ""}`}
-                          onClick={() => handleDifficultyToggle("Hard")}
-                        >
-                          <span>Hard</span>
-                          <svg
-                            className={`tick-mark5 ${selectedDifficulties.includes("Hard") ? "" : "hidden"}`}
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
+                    <span className="filter-label5">Status</span>
+                    <select
+                      className="filter-condition5"
+                      value={advancedFilters.status.condition}
+                      onChange={(e) => handleAdvancedFilterChange("status", "condition", e.target.value)}
+                    >
+                      <option value="is">is</option>
+                      <option value="is not">is not</option>
+                    </select>
+                    <select
+                      className="filter-value5"
+                      value={advancedFilters.status.value}
+                      onChange={(e) => handleAdvancedFilterChange("status", "value", e.target.value)}
+                    >
+                      <option value="">Select status...</option>
+                      {allStatuses.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      className="remove-filter5"
+                      onClick={() => handleAdvancedFilterChange("status", "value", "")}
+                    >
+                      —
+                    </button>
+                  </div>
+                </div>
 
-                {filterView === "topics" && (
-                  <>
-                    <div className="filter-header5">
-                      <button className="back-button5" onClick={() => setFilterView("main")}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                        </svg>
-                        Back
-                      </button>
-                      <span className="filter-title5">Topics</span>
+                {/* Difficulty Filter */}
+                <div className="filter-group5">
+                  <div className="filter-group-header5">
+                    <div className="filter-icon5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
                     </div>
-                    <div className="filter-section5">
-                      <input
-                        type="text"
-                        placeholder="Search topics..."
-                        value={topicsSearch}
-                        onChange={(e) => setTopicsSearch(e.target.value)}
-                        className="topics-search5"
-                      />
-                      <div className="topics-grid5">
+                    <span className="filter-label5">Difficulty</span>
+                    <select
+                      className="filter-condition5"
+                      value={advancedFilters.difficulty.condition}
+                      onChange={(e) => handleAdvancedFilterChange("difficulty", "condition", e.target.value)}
+                    >
+                      <option value="is">is</option>
+                      <option value="is not">is not</option>
+                    </select>
+                    <select
+                      className="filter-value5"
+                      value={advancedFilters.difficulty.value}
+                      onChange={(e) => handleAdvancedFilterChange("difficulty", "value", e.target.value)}
+                    >
+                      <option value="">Select difficulty...</option>
+                      <option value="Easy">Easy</option>
+                      <option value="Med.">Medium</option>
+                      <option value="Hard">Hard</option>
+                    </select>
+                    <button
+                      className="remove-filter5"
+                      onClick={() => handleAdvancedFilterChange("difficulty", "value", "")}
+                    >
+                      —
+                    </button>
+                  </div>
+                </div>
+
+                {/* CHANGE 6: Completely replaced Topics Filter section with Chip Interface */}
+                <div className="filter-group5">
+                  <div className="filter-group-header5">
+                    <div className="filter-icon5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 2 2 2h11c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z" />
+                      </svg>
+                    </div>
+                    <span className="filter-label5">Topics</span>
+                    <select
+                      className="filter-condition5"
+                      value={advancedFilters.topics.condition}
+                      onChange={(e) => handleAdvancedFilterChange("topics", "condition", e.target.value)}
+                    >
+                      <option value="is">is</option>
+                      <option value="is not">is not</option>
+                    </select>
+                    {/* CHANGE 6a: Added topics chip container with search and chips */}
+                    <div className="topics-chip-container5">
+                      {/* Topics Search */}
+                      <div className="topics-search-wrapper5">
+                        <svg className="topics-search-icon5" viewBox="0 0 20 20" fill="currentColor">
+                          <path
+                            fillRule="evenodd"
+                            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <input
+                          type="text"
+                          placeholder="search"
+                          value={topicsSearch}
+                          onChange={(e) => setTopicsSearch(e.target.value)}
+                          className="topics-search-input5"
+                        />
+                      </div>
+
+                      {/* Topics Chips */}
+                      <div className="topics-chips-grid5">
                         {filteredTopics.map((topic) => (
-                          <div
+                          <button
                             key={topic}
-                            className={`topic-tag5 ${selectedTopics.includes(topic) ? "selected" : ""}`}
-                            onClick={() => handleTopicToggle(topic)}
+                            className={`topic-chip5 ${advancedFilters.topics.values.includes(topic) ? "selected" : ""}`}
+                            onClick={() => handleTopicChipToggle(topic)}
                           >
                             {topic}
-                          </div>
+                            {/* CHANGE 6b: Added count indicator for selected chips */}
+                            {advancedFilters.topics.values.includes(topic) && (
+                              <span className="topic-chip-count5">
+                                +{advancedFilters.topics.values.filter((t) => t === topic).length}
+                              </span>
+                            )}
+                          </button>
                         ))}
                       </div>
                     </div>
-                  </>
-                )}
+                    {/* CHANGE 6c: Updated remove button to clear topics array */}
+                    <button
+                      className="remove-filter5"
+                      onClick={() => handleAdvancedFilterChange("topics", "values", [])}
+                    >
+                      —
+                    </button>
+                  </div>
+                </div>
+
+                {/* Language Filter */}
+                <div className="filter-group5">
+                  <div className="filter-group-header5">
+                    <div className="filter-icon5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" />
+                      </svg>
+                    </div>
+                    <span className="filter-label5">Language</span>
+                    <select
+                      className="filter-condition5"
+                      value={advancedFilters.language.condition}
+                      onChange={(e) => handleAdvancedFilterChange("language", "condition", e.target.value)}
+                    >
+                      <option value="is">is</option>
+                      <option value="is not">is not</option>
+                    </select>
+                    <select
+                      className="filter-value5"
+                      value={advancedFilters.language.value}
+                      onChange={(e) => handleAdvancedFilterChange("language", "value", e.target.value)}
+                    >
+                      <option value="">Select language...</option>
+                      {allLanguages.map((language) => (
+                        <option key={language} value={language}>
+                          {language}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      className="remove-filter5"
+                      onClick={() => handleAdvancedFilterChange("language", "value", "")}
+                    >
+                      —
+                    </button>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="advanced-filter-footer5">
+                  <button className="save-smart-list-btn5" onClick={handleSaveAsSmartList}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
+                    </svg>
+                    Save as Smart List
+                  </button>
+                  <button className="reset-btn5" onClick={handleResetFilters}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                    </svg>
+                    Reset
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -1182,9 +648,12 @@ export default function SearchBar() {
       {/* Results info */}
       {filteredCards.length > 0 && (
         <div className="results-info5">
-          <p className="results-text5">
-            Showing {startIndex + 1}-{Math.min(endIndex, filteredCards.length)} of {filteredCards.length} results
-          </p>
+          <ShinyText
+            text={`Showing ${startIndex + 1}-${Math.min(endIndex, filteredCards.length)} of ${filteredCards.length} results`}
+            disabled={false}
+            speed={3}
+            className="custom-class"
+          />
         </div>
       )}
 
@@ -1209,7 +678,6 @@ export default function SearchBar() {
             <ChevronLeft size={16} />
             Previous
           </button>
-
           <div className="pagination-numbers5">
             {getPaginationRange()[0] > 1 && (
               <>
@@ -1219,7 +687,6 @@ export default function SearchBar() {
                 {getPaginationRange()[0] > 2 && <span className="pagination-ellipsis">...</span>}
               </>
             )}
-
             {getPaginationRange().map((page) => (
               <button
                 key={page}
@@ -1229,7 +696,6 @@ export default function SearchBar() {
                 {page}
               </button>
             ))}
-
             {getPaginationRange()[getPaginationRange().length - 1] < totalPages && (
               <>
                 {getPaginationRange()[getPaginationRange().length - 1] < totalPages - 1 && (
@@ -1241,7 +707,6 @@ export default function SearchBar() {
               </>
             )}
           </div>
-
           <button
             className="pagination-btn5 pagination-nav5"
             onClick={handleNextPage}
