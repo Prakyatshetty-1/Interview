@@ -536,3 +536,14 @@
     gap: 12px;
   }
 }
+.joinanimation{
+  height: 300px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background-color:rgba(15, 16, 31, 0.6) ;
+  
+}
+.custom-scroll-text{
+  color: #A259FF;
+}
