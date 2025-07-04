@@ -23,13 +23,23 @@ export default function SearchBar() {
   const [selectedLanguages, setSelectedLanguages] = useState([])
   const [topicsSearch, setTopicsSearch] = useState("")
   const [matchType, setMatchType] = useState("All") // "All" or "Any"
+  const [isTopicsExpanded, setIsTopicsExpanded] = useState(false)
+  const [isTopicsModalOpen, setIsTopicsModalOpen] = useState(false)
 
-  // CHANGE 1: Updated advanced filter form state - changed topics to use array instead of single value
+  // Advanced filter form state with support for "is not" conditions
   const [advancedFilters, setAdvancedFilters] = useState({
     status: { condition: "is", value: "" },
     difficulty: { condition: "is", value: "" },
-    topics: { condition: "is", values: [] }, // Changed from 'value' to 'values' array
+    topics: { condition: "is", values: [] },
     language: { condition: "is", value: "" },
+  })
+
+  // Track which filters are using "is not" condition
+  const [excludeFilters, setExcludeFilters] = useState({
+    status: false,
+    difficulty: false,
+    topics: false,
+    language: false,
   })
 
   const filterRef = useRef(null)
@@ -89,7 +99,6 @@ export default function SearchBar() {
     return Array.from(topics).sort()
   }, [cardData])
 
-  // CHANGE 2: Added filtered topics based on search functionality
   const filteredTopics = useMemo(() => {
     if (!topicsSearch.trim()) return allTopics
     return allTopics.filter((topic) => topic.toLowerCase().includes(topicsSearch.toLowerCase()))
@@ -98,6 +107,7 @@ export default function SearchBar() {
   const allStatuses = ["Solved", "Unsolved", "Attempted"]
   const allLanguages = ["JavaScript", "Python", "Java", "C++", "Dart", "Go", "Rust"]
 
+  // FIXED: Updated filtering logic to properly handle "is not" conditions
   const filteredCards = useMemo(() => {
     let filtered = processedCardData
 
@@ -114,25 +124,68 @@ export default function SearchBar() {
     if (matchType === "All") {
       // All filters must match
       if (selectedDifficulties.length > 0) {
-        filtered = filtered.filter((card) => selectedDifficulties.includes(card.difficulty))
+        if (excludeFilters.difficulty) {
+          // Exclude selected difficulties
+          filtered = filtered.filter((card) => !selectedDifficulties.includes(card.difficulty))
+        } else {
+          // Include only selected difficulties
+          filtered = filtered.filter((card) => selectedDifficulties.includes(card.difficulty))
+        }
       }
+
       if (selectedTopics.length > 0) {
-        filtered = filtered.filter((card) => selectedTopics.some((topic) => card.originalTags.includes(topic)))
+        if (excludeFilters.topics) {
+          // Exclude cards that have ANY of the selected topics
+          filtered = filtered.filter((card) => !selectedTopics.some((topic) => card.originalTags.includes(topic)))
+        } else {
+          // Include cards that have ANY of the selected topics
+          filtered = filtered.filter((card) => selectedTopics.some((topic) => card.originalTags.includes(topic)))
+        }
       }
+
       if (selectedStatus.length > 0) {
-        filtered = filtered.filter((card) => selectedStatus.includes(card.status))
+        if (excludeFilters.status) {
+          // Exclude selected statuses
+          filtered = filtered.filter((card) => !selectedStatus.includes(card.status))
+        } else {
+          // Include only selected statuses
+          filtered = filtered.filter((card) => selectedStatus.includes(card.status))
+        }
       }
+
       if (selectedLanguages.length > 0) {
-        filtered = filtered.filter((card) => selectedLanguages.includes(card.language))
+        if (excludeFilters.language) {
+          // Exclude selected languages
+          filtered = filtered.filter((card) => !selectedLanguages.includes(card.language))
+        } else {
+          // Include only selected languages
+          filtered = filtered.filter((card) => selectedLanguages.includes(card.language))
+        }
       }
     } else {
       // Any filter can match
       filtered = filtered.filter((card) => {
-        const matchesDifficulty = selectedDifficulties.length === 0 || selectedDifficulties.includes(card.difficulty)
+        const matchesDifficulty =
+          selectedDifficulties.length === 0 ||
+          (excludeFilters.difficulty
+            ? !selectedDifficulties.includes(card.difficulty)
+            : selectedDifficulties.includes(card.difficulty))
+
         const matchesTopics =
-          selectedTopics.length === 0 || selectedTopics.some((topic) => card.originalTags.includes(topic))
-        const matchesStatus = selectedStatus.length === 0 || selectedStatus.includes(card.status)
-        const matchesLanguage = selectedLanguages.length === 0 || selectedLanguages.includes(card.language)
+          selectedTopics.length === 0 ||
+          (excludeFilters.topics
+            ? !selectedTopics.some((topic) => card.originalTags.includes(topic))
+            : selectedTopics.some((topic) => card.originalTags.includes(topic)))
+
+        const matchesStatus =
+          selectedStatus.length === 0 ||
+          (excludeFilters.status ? !selectedStatus.includes(card.status) : selectedStatus.includes(card.status))
+
+        const matchesLanguage =
+          selectedLanguages.length === 0 ||
+          (excludeFilters.language
+            ? !selectedLanguages.includes(card.language)
+            : selectedLanguages.includes(card.language))
 
         return matchesDifficulty || matchesTopics || matchesStatus || matchesLanguage
       })
@@ -190,6 +243,7 @@ export default function SearchBar() {
     sortOrder,
     processedCardData,
     matchType,
+    excludeFilters, // Added dependency
   ])
 
   // Calculate pagination
@@ -246,7 +300,6 @@ export default function SearchBar() {
     }))
   }
 
-  // CHANGE 3: Added new function to handle topic chip selection/deselection
   const handleTopicChipToggle = (topic) => {
     setAdvancedFilters((prev) => ({
       ...prev,
@@ -259,13 +312,21 @@ export default function SearchBar() {
     }))
   }
 
-  // CHANGE 4: Updated save function to handle topics array instead of single value
+  // FIXED: Updated save function to properly handle "is not" conditions
   const handleSaveAsSmartList = () => {
     // Reset existing filters
     setSelectedDifficulties([])
     setSelectedTopics([])
     setSelectedStatus([])
     setSelectedLanguages([])
+
+    // Reset exclude filters
+    const newExcludeFilters = {
+      status: false,
+      difficulty: false,
+      topics: false,
+      language: false,
+    }
 
     // Apply filters based on advanced filter selections
     const newDifficulties = []
@@ -276,31 +337,25 @@ export default function SearchBar() {
     // Process each advanced filter
     Object.entries(advancedFilters).forEach(([filterType, filterData]) => {
       if (filterType === "topics") {
-        // CHANGE 4a: Special handling for topics array
         if (filterData.values && filterData.values.length > 0) {
-          const shouldInclude = filterData.condition === "is"
-          if (shouldInclude) {
-            newTopics.push(...filterData.values)
-          }
+          newTopics.push(...filterData.values)
+          newExcludeFilters.topics = filterData.condition === "is not"
         }
       } else if (filterData.value) {
-        const shouldInclude = filterData.condition === "is"
+        const isExclude = filterData.condition === "is not"
 
         switch (filterType) {
           case "difficulty":
-            if (shouldInclude) {
-              newDifficulties.push(filterData.value)
-            }
+            newDifficulties.push(filterData.value)
+            newExcludeFilters.difficulty = isExclude
             break
           case "status":
-            if (shouldInclude) {
-              newStatuses.push(filterData.value)
-            }
+            newStatuses.push(filterData.value)
+            newExcludeFilters.status = isExclude
             break
           case "language":
-            if (shouldInclude) {
-              newLanguages.push(filterData.value)
-            }
+            newLanguages.push(filterData.value)
+            newExcludeFilters.language = isExclude
             break
         }
       }
@@ -311,20 +366,24 @@ export default function SearchBar() {
     setSelectedTopics(newTopics)
     setSelectedStatus(newStatuses)
     setSelectedLanguages(newLanguages)
+    setExcludeFilters(newExcludeFilters)
 
     // Close the advanced filter dropdown
     setIsAdvancedFilterOpen(false)
+    // Close the topics modal as well
+    setIsTopicsModalOpen(false)
 
     console.log("Smart list saved with filters:", {
       difficulties: newDifficulties,
       topics: newTopics,
       statuses: newStatuses,
       languages: newLanguages,
+      excludeFilters: newExcludeFilters,
       matchType,
     })
   }
 
-  // CHANGE 5: Updated reset function to handle topics array
+  // Updated reset function
   const handleResetFilters = () => {
     setSelectedDifficulties([])
     setSelectedTopics([])
@@ -332,10 +391,17 @@ export default function SearchBar() {
     setSelectedLanguages([])
     setTopicsSearch("")
     setMatchType("All")
+    setIsTopicsExpanded(false) // Add this line
+    setExcludeFilters({
+      status: false,
+      difficulty: false,
+      topics: false,
+      language: false,
+    })
     setAdvancedFilters({
       status: { condition: "is", value: "" },
       difficulty: { condition: "is", value: "" },
-      topics: { condition: "is", values: [] }, // Reset to empty array
+      topics: { condition: "is", values: [] },
       language: { condition: "is", value: "" },
     })
   }
@@ -520,7 +586,7 @@ export default function SearchBar() {
                   </div>
                 </div>
 
-                {/* CHANGE 6: Completely replaced Topics Filter section with Chip Interface */}
+                {/* Topics Filter with Modal */}
                 <div className="filter-group5">
                   <div className="filter-group-header5">
                     <div className="filter-icon5">
@@ -537,49 +603,22 @@ export default function SearchBar() {
                       <option value="is">is</option>
                       <option value="is not">is not</option>
                     </select>
-                    {/* CHANGE 6a: Added topics chip container with search and chips */}
-                    <div className="topics-chip-container5">
-                      {/* Topics Search */}
-                      <div className="topics-search-wrapper5">
-                        <svg className="topics-search-icon5" viewBox="0 0 20 20" fill="currentColor">
-                          <path
-                            fillRule="evenodd"
-                            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <input
-                          type="text"
-                          placeholder="search"
-                          value={topicsSearch}
-                          onChange={(e) => setTopicsSearch(e.target.value)}
-                          className="topics-search-input5"
-                        />
-                      </div>
 
-                      {/* Topics Chips */}
-                      <div className="topics-chips-grid5">
-                        {filteredTopics.map((topic) => (
-                          <button
-                            key={topic}
-                            className={`topic-chip5 ${advancedFilters.topics.values.includes(topic) ? "selected" : ""}`}
-                            onClick={() => handleTopicChipToggle(topic)}
-                          >
-                            {topic}
-                            {/* CHANGE 6b: Added count indicator for selected chips */}
-                            {advancedFilters.topics.values.includes(topic) && (
-                              <span className="topic-chip-count5">
-                                +{advancedFilters.topics.values.filter((t) => t === topic).length}
-                              </span>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    {/* CHANGE 6c: Updated remove button to clear topics array */}
+                    {/* Topics Modal Trigger Button */}
+                    <button className="topics-modal-trigger5" onClick={() => setIsTopicsModalOpen(true)}>
+                      {advancedFilters.topics.values.length > 0
+                        ? `${advancedFilters.topics.values.length} selected`
+                        : "Select topics..."}
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 10l5 5 5-5z" />
+                      </svg>
+                    </button>
+
                     <button
                       className="remove-filter5"
-                      onClick={() => handleAdvancedFilterChange("topics", "values", [])}
+                      onClick={() => {
+                        handleAdvancedFilterChange("topics", "values", [])
+                      }}
                     >
                       —
                     </button>
@@ -637,6 +676,63 @@ export default function SearchBar() {
                       <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
                     </svg>
                     Reset
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Topics Selection Panel - positioned beside filter */}
+            {isTopicsModalOpen && (
+              <div className="topics-panel-beside5">
+                <div className="topics-modal-header5">
+                  <div className="topics-modal-search-wrapper5">
+                    <svg className="topics-modal-search-icon5" viewBox="0 0 20 20" fill="currentColor">
+                      <path
+                        fillRule="evenodd"
+                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="search"
+                      value={topicsSearch}
+                      onChange={(e) => setTopicsSearch(e.target.value)}
+                      className="topics-modal-search-input5"
+                    />
+                  </div>
+                  <button className="topics-modal-close5" onClick={() => setIsTopicsModalOpen(false)}>
+                    ×
+                  </button>
+                </div>
+
+                <div className="topics-modal-grid5">
+                  {filteredTopics.map((topic) => (
+                    <button
+                      key={topic}
+                      className={`topics-modal-chip5 ${advancedFilters.topics.values.includes(topic) ? "selected" : ""}`}
+                      onClick={() => handleTopicChipToggle(topic)}
+                    >
+                      {topic}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="topics-modal-footer5">
+                  <button
+                    className="topics-modal-reset5"
+                    onClick={() => {
+                      handleAdvancedFilterChange("topics", "values", [])
+                      setTopicsSearch("")
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                    </svg>
+                    Reset
+                  </button>
+                  <button className="topics-modal-done5" onClick={() => setIsTopicsModalOpen(false)}>
+                    Done
                   </button>
                 </div>
               </div>
