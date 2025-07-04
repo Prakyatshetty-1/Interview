@@ -1,5 +1,6 @@
 import "./HeroSection.css"
 import { useNavigate } from "react-router-dom";
+import ScrollVelocity from '../react-bits/ScrollVelocity';
 
 export default function HeroSection() {
 
@@ -81,6 +82,16 @@ No sign-up fees.<br /> No hidden costs. Just smarter interviews, instantly.
           </div>
         </div>
       </div>
+      <div className="joinanimation">
+      <ScrollVelocity
+        texts={['Join Askora', 'Start Now']} 
+        velocity={100} 
+        className="custom-scroll-text"
+      />
+
+
+      </div>
+      
 
       {/* Footer Section - Connected directly without any gap */}
       <footer className="footer">
