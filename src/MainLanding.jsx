@@ -5,7 +5,6 @@ import PricingPage from './components/PricingPage';
 import Features from './components/Features';
 import CommunityPage from './components/CommunityPage';
 import HeroSection from './components/HeroSection';
-import Community from './react-bits/ScrollStack';
 
 function MainLanding(){
     return (

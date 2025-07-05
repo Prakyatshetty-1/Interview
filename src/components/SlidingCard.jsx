@@ -1,8 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import Card from "./Card"
 import "./SlidingCard.css"
+import cardDataJson from "../data/CardData.json"
+
 
 const ChevronLeft = () => (
   <svg className="chevron-icon" viewBox="0 0 24 24">
@@ -16,95 +18,64 @@ const ChevronRight = () => (
   </svg>
 )
 
-const SliderCard = () => {
+const SliderCard = (props) => {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [courseData, setCardData] = useState([])
 
-  // Sample course data - replace with your actual data
-  const courseData = [
-    {
-      difficulty: "Easy",
-      title: "Data Structures and Algorithms",
-      creator: "LeetCode",
-      tags: ["DSA", "Interview"],
-      path: "/placeholder.svg?height=260&width=260",
-      chapters: 13,
-      items: 149,
-      progress: 0,
-    },
-    {
-      difficulty: "Med",
-      title: "System Design for Interviews and Beyond",
-      creator: "Tech Lead",
-      tags: ["System Design", "Architecture"],
-      path: "/placeholder.svg?height=260&width=260",
-      chapters: 16,
-      items: 81,
-      progress: 0,
-    },
-    {
-      difficulty: "Easy",
-      title: "The LeetCode Beginner's Guide",
-      creator: "LeetCode",
-      tags: ["Beginner", "Coding"],
-      path: "/placeholder.svg?height=260&width=260",
-      chapters: 4,
-      items: 17,
-      progress: 0,
-    },
-    {
-      difficulty: "Hard",
-      title: "Top Interview Questions",
-      creator: "Interview Master",
-      tags: ["Interview", "Hard"],
-      path: "/placeholder.svg?height=260&width=260",
-      chapters: 9,
-      items: 48,
-      progress: 0,
-    },
-    {
-      difficulty: "Med",
-      title: "Dynamic Programming",
-      creator: "Algorithm Expert",
-      tags: ["DP", "Advanced"],
-      path: "/placeholder.svg?height=260&width=260",
-      chapters: 6,
-      items: 55,
-      progress: 0,
-    },
-    {
-      difficulty: "Easy",
-      title: "Arrays 101",
-      creator: "Data Structure Pro",
-      tags: ["Arrays", "Basics"],
-      path: "/placeholder.svg?height=260&width=260",
-      chapters: 6,
-      items: 31,
-      progress: 0,
-    },
-    {
-      difficulty: "Hard",
-      title: "Google Interview Preparation",
-      creator: "Big Tech Prep",
-      tags: ["Google", "Premium"],
-      path: "/placeholder.svg?height=260&width=260",
-      chapters: 9,
-      items: 85,
-      progress: 0,
-    },
-    {
-      difficulty: "Med",
-      title: "SQL Language Mastery",
-      creator: "Database Expert",
-      tags: ["SQL", "Database"],
-      path: "/placeholder.svg?height=260&width=260",
-      chapters: 4,
-      items: 36,
-      progress: 0,
-    },
-  ]
 
-  const cardsPerView = 5 // Show 5 cards at once like in the image
-  const maxIndex = Math.max(0, courseData.length - cardsPerView)
+  useEffect(() => {
+      setCardData(cardDataJson)
+    }, [])
+  
+  useEffect(() => {
+  let filteredData = [...cardDataJson];
+
+  const topCompanies = [
+    "Google",
+    "Microsoft",
+    "Amazon",
+    "Meta",
+    "Apple",
+    "Netflix",
+    "Oracle",
+    "Uber",
+    "Tesla",
+    "Nvidia",
+    "Adobe",
+    "Salesforce"
+  ];
+
+  if (props.tag === "Features") {
+    filteredData = filteredData.slice(0, 20);
+  } else if (props.tag === "Popular") {
+    filteredData.sort((a, b) => b.popularity - a.popularity);
+  } else if (props.tag === "Top Companies") {
+    filteredData.sort((a, b) => {
+      const indexA = topCompanies.indexOf(a.company);
+      const indexB = topCompanies.indexOf(b.company);
+
+      // Items in topCompanies come first, in their given order.
+      if (indexA === -1 && indexB === -1) return 0; // Neither are in top list
+      if (indexA === -1) return 1; // a is lower
+      if (indexB === -1) return -1; // b is lower
+      return indexA - indexB; // sort by topCompanies order
+    });
+  }
+    filteredData = filteredData.slice(0, 10);
+
+
+  setCardData(filteredData);
+}, [props.tag]);
+
+
+
+  
+
+  const cardsPerView = 5 // Show 5 cards at once
+
+  // CHANGE 1: Fixed maxIndex calculation to ensure we can reach the last card
+  // With 10 cards showing 5 at a time, we need 6 positions (0-5) to show all cards
+  const maxIndex = courseData.length - cardsPerView
 
   const slideLeft = () => {
     setCurrentIndex((prev) => Math.max(0, prev - 1))
@@ -118,12 +89,35 @@ const SliderCard = () => {
     setCurrentIndex(index)
   }
 
+  // CHANGE 2: Completely rewrote the transform calculation logic
+  const getTransform = () => {
+    const cardWidth = 260 // Card width
+    const gap = 24 // Gap between cards
+    const cardWithGap = cardWidth + gap // Total space per card = 284px
+
+    if (currentIndex === 0) {
+      // First position: start from 0 (first card fully visible)
+      return 0
+    } else if (currentIndex === maxIndex) {
+      // CHANGE 3: Last position calculation - ensure last card is fully visible
+      // Calculate how much to move left to show the last 'cardsPerView' cards
+      // Total cards that need to be hidden from the left = (totalCards - cardsPerView)
+      // Move left by: hiddenCards * cardWithGap
+      const hiddenCardsFromLeft = courseData.length - cardsPerView-0.4
+      return -(hiddenCardsFromLeft * cardWithGap)
+    } else {
+      // CHANGE 4: Middle positions - show partial cards with proper offset
+      // Move by currentIndex * cardWithGap, plus half card offset for partial view
+      return -(currentIndex * cardWithGap -5 / 2)
+    }
+  }
+
   return (
     <div className="slider-container">
       <div className="slider-wrapper">
         {/* Header Section */}
         <div className="slider-header">
-          <h1 className="slider-title">Featured</h1>
+          <h1 className="slider-title">{props.tag}</h1>
           <button className="more-button">More</button>
         </div>
 
@@ -139,52 +133,34 @@ const SliderCard = () => {
             <ChevronRight />
           </button>
 
-          {/* Cards Slider */}
-          <div className="cards-container">
-            <div
-              className="cards-track"
-              style={{
-                transform: `translateX(-${currentIndex * 284}px)`, // 260px card + 24px gap
-              }}
-            >
-              {courseData.map((course, index) => (
-                <div key={index} className="card-item">
-                  <Card
-                    difficulty={course.difficulty}
-                    title={course.title}
-                    creator={course.creator}
-                    tags={course.tags}
-                    path={course.path}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Slider Content with Fade Effects */}
+          <div className="slider-content">
+            <div className="slider-viewport">
+              {/* Conditional fade overlays - only show when not at first/last position */}
+              {currentIndex > 0 && <div className="fade-overlay fade-left"></div>}
+              {currentIndex < maxIndex && <div className="fade-overlay fade-right"></div>}
 
-          {/* Course Stats Row */}
-          <div className="stats-container">
-            <div
-              className="stats-track"
-              style={{
-                transform: `translateX(-${currentIndex * 284}px)`,
-              }}
-            >
-              {courseData.map((course, index) => (
-                <div key={index} className="stats-item">
-                  <div className="stats-numbers">
-                    <div className="stats-number-group">
-                      <span className="stats-number">{course.chapters}</span>
-                      <span className="stats-number">{course.items}</span>
-                      <span className="stats-progress">{course.progress}%</span>
+              {/* Cards Slider */}
+              <div className="cards-container">
+                <div
+                  className="cards-track"
+                  style={{
+                    transform: `translateX(${getTransform()}px)`,
+                  }}
+                >
+                  {courseData.map((course, index) => (
+                    <div key={index} className="card-item">
+                      <Card
+                        difficulty={course.difficulty}
+                        title={course.title}
+                        creator={course.creator}
+                        tags={course.tags}
+                        path={course.path}
+                      />
                     </div>
-                  </div>
-                  <div className="stats-labels">
-                    <span>Chapters</span>
-                    <span>Items</span>
-                    <span className="progress-label">Progress</span>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </div>

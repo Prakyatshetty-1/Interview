@@ -5,7 +5,6 @@ import TopicFilter from "../components/TopicFilter";
 import Topics from "../components/Topics";
 import Card from "../components/Card";
 import SearchBar from "../components/SearchBar";
-import SliderCard from "../components/SlidingCard";
 
 export default function Dashboard() {
   const items = [
@@ -69,7 +68,6 @@ export default function Dashboard() {
           baseItemSize={60}
           magnification={80}
         />
-        <SliderCard/>
       </div>
     </div>
   );
