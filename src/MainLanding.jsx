@@ -15,7 +15,6 @@ function MainLanding(){
             <div id="about-ai"><AboutAi/></div>
             <div id="Features"><Features/></div>
             <div id="pricing"><PricingPage/></div>
-            <div id="aaa"><Community/></div>
             <div id="community"><CommunityPage/></div>
             <HeroSection/>
         </>
