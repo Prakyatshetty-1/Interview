@@ -1,8 +1,10 @@
+
 "use client"
 
 import "./LandingPage.css"
 import { useEffect, useState } from "react" // CHANGE: Added useState import
 import { useNavigate } from "react-router-dom"
+
 
 function LandingPage() {
   // CHANGE: Added state to control fade-in effect
@@ -10,6 +12,7 @@ function LandingPage() {
 
   useEffect(() => {
     const script = document.createElement("script")
+    script.src = "https://unpkg.com/@splinetool/viewer@1.10.2/build/spline-viewer.js"
     script.type = "module"
     document.body.appendChild(script)
 
@@ -19,9 +22,14 @@ function LandingPage() {
       if (splineViewer) {
         splineViewer.style.width = "100vw"
         splineViewer.style.height = "100vh"
-        
+        splineViewer.style.position = "absolute"
+        splineViewer.style.top = "0"
+        splineViewer.style.left = "0"
+        splineViewer.style.margin = "0"
+        splineViewer.style.padding = "0"
       }
     }
+
 
     // Wait for the script to load and then apply styles
     script.onload = () => {
@@ -43,6 +51,7 @@ function LandingPage() {
   }, [])
 
   const navigate = useNavigate()
+
 
   return (
     // CHANGE: Added conditional class for fade-in effect
@@ -78,6 +87,7 @@ function LandingPage() {
           <br />
           Practice smart. Perform better.
         </p>
+
 
         <div className="button-group">
           <button className="primary-button" onClick={() => navigate("/signup")}>

@@ -701,9 +701,7 @@ export default function SearchBar() {
                       className="topics-modal-search-input5"
                     />
                   </div>
-                  <button className="topics-modal-close5" onClick={() => setIsTopicsModalOpen(false)}>
-                    ×
-                  </button>
+                  
                 </div>
 
                 <div className="topics-modal-grid5">
