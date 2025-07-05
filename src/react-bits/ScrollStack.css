@@ -171,15 +171,12 @@
   margin-bottom: 60px;
 }
 
-.title11 {
+.title {
   font-size: 48px;
   font-weight: 400;
   margin: 0 0 16px 0;
   letter-spacing: -0.02em;
 }
-
-/* Add this to make the gradient visible when opacity is 1 */
-
 
 .subtitle1 {
   font-size: 16px;

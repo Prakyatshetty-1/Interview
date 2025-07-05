@@ -7,7 +7,6 @@ import ScrollFloat from "../react-bits/ScrollFloat"
 import { useNavigate } from "react-router-dom"
 import "./CommunityPage.css"
 
-
 gsap.registerPlugin(ScrollTrigger)
 
 const communityMembers = [
@@ -85,7 +84,6 @@ export default function CommunityPage() {
     }
   }, [])
 
-
   const setupStackAnimation = () => {
   cardRefs.current.forEach((card, index) => {
     if (!card) return
@@ -157,7 +155,6 @@ export default function CommunityPage() {
   const handleGetStarted = () => navigate('/signup')
   const handleLogin = () => navigate('/login')
 
-
   return (
     <div className="community-page">
       <div className="background-elements">
@@ -189,14 +186,12 @@ export default function CommunityPage() {
               platform for global talents.
             </p>
             <div className="hero-buttons">
-
               <button className="get-started-btn" onClick={handleGetStarted}>
                 Get Started
               </button>
               <button className="log-in-btn" onClick={handleLogin}>
                 Log In
               </button>
-
             </div>
           </div>
 

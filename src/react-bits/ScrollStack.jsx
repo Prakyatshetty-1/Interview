@@ -3,13 +3,11 @@
 import { useEffect, useRef } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import "./PricingPage.css"
-import ScrollFloat from "../react-bits/ScrollFloat"
-
-// Register ScrollTrigger plugin
+import './ScrollStack.css'
+import ScrollFloat from "./ScrollFloat"
 gsap.registerPlugin(ScrollTrigger)
 
-export default function Pricing() {
+export default function PricingPage() {
   const basicCardRef = useRef(null)
   const enterpriseCardRef = useRef(null)
   const popularCardRef = useRef(null)
@@ -23,125 +21,89 @@ export default function Pricing() {
 
     if (!basicCard || !enterpriseCard || !popularCard || !section) return
 
-    // Wait for layout to be calculated
-    setTimeout(() => {
-      // Get the natural positions of the cards in the grid
+    gsap.set([basicCard, enterpriseCard, popularCard], {
+      clearProps: "all",
+      willChange: "transform, opacity", // 🚀 Hint GPU to optimize performance
+    })
+
+    const initAnimation = () => {
       const basicRect = basicCard.getBoundingClientRect()
       const enterpriseRect = enterpriseCard.getBoundingClientRect()
       const popularRect = popularCard.getBoundingClientRect()
 
-      // Calculate how much to move each card to center them behind popular card
       const basicMoveX = popularRect.left - basicRect.left
       const enterpriseMoveX = popularRect.left - enterpriseRect.left
 
-      // Set FIXED z-index values that never change
-      gsap.set(basicCard, {
-        zIndex: 1, // Always behind
-      })
+      // 🧹 Remove per-frame zIndex updates to avoid layout thrashing
+      gsap.set(basicCard, { zIndex: 0 })
+      gsap.set(enterpriseCard, { zIndex: 0 })
+      gsap.set(popularCard, { zIndex: 10 })
 
-      gsap.set(enterpriseCard, {
-        zIndex: 2, // Always in middle
-      })
-
-      gsap.set(popularCard, {
-        zIndex: 10, // Always on top
-      })
-
-      // Create the animation timeline
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top center",
-          // CHANGE 1: Increased scroll distance from "top+=200px center" to "top+=400px center"
-          // This makes the animation take longer to complete, making it slower
           end: "top+=400px center",
-          // CHANGE 2: Increased scrub value from 0.1 to 0.4
-          // Higher scrub values create smoother, slower animations tied to scroll
-          scrub: 0.4,
-          onUpdate: (self) => {
-            // Ensure z-index stays fixed during animation
-            gsap.set(basicCard, { zIndex: 1 })
-            gsap.set(enterpriseCard, { zIndex: 2 })
-            gsap.set(popularCard, { zIndex: 10 })
-          },
+          scrub: 0.35, // 🎯 Reduced scrub time for responsiveness
         },
       })
 
-      // Set initial state (stacked)
       tl.set(basicCard, {
         x: basicMoveX,
         y: 0,
-        scale: 0.9,
-        opacity: 0.2,
+        scale: 0.92,
+        opacity: 0,
       })
-        .set(
-          enterpriseCard,
-          {
-            x: enterpriseMoveX,
-            y: 0,
-            scale: 0.9,
-            opacity: 0.2,
-          },
-          0,
-        )
-        .set(
-          popularCard,
-          {
-            x: 0,
-            y: 0,
-            scale: 1.05,
-            opacity: 1,
-          },
-          0,
-        )
+        .set(enterpriseCard, {
+          x: enterpriseMoveX,
+          y: 0,
+          scale: 0.92,
+          opacity: 0,
+        }, 0)
+        .set(popularCard, {
+          x: 0,
+          y: 0,
+          scale: 1.05,
+          opacity: 1,
+        }, 0)
 
-        // Animate to final positions
+        // 🧊 Use power3.out easing for smooth motion
         .to(basicCard, {
-          x: 0, // Move to natural position
+          x: 0,
           scale: 1,
           opacity: 1,
-          // CHANGE 3: Increased duration from 1 to 1.5 seconds
-          // This makes each individual card animation take longer
-          duration: 1.5,
-          // CHANGE 4: Changed easing from "power4.out" to "power2.out"
-          // power2.out is gentler and slower than power4.out
-          ease: "power2.out",
+          duration: 1.2,
+          ease: "power3.out",
         })
-        .to(
-          enterpriseCard,
-          {
-            x: 0, // Move to natural position
-            scale: 1,
-            opacity: 1,
-            // CHANGE 5: Increased duration from 1 to 1.5 seconds (same as basic card)
-            duration: 1.5,
-            // CHANGE 6: Changed easing from "power4.out" to "power2.out" (same as basic card)
-            ease: "power2.out",
-          },
-          0,
-        ) // Start at the same time
-        .to(
-          popularCard,
-          {
-            scale: 1.05, // Keep popular card scale
-            // CHANGE 7: Increased duration from 1 to 1.5 seconds (consistent with other cards)
-            duration: 1.5,
-            // CHANGE 8: Changed easing from "power4.out" to "power2.out" (consistent with other cards)
-            ease: "power2.out",
-          },
-          0,
-        )
-    }, 100)
+        .to(enterpriseCard, {
+          x: 0,
+          scale: 1,
+          opacity: 1,
+          duration: 1.2,
+          ease: "power3.out",
+        }, 0)
+        .to(popularCard, {
+          scale: 1.05,
+          duration: 1.2,
+          ease: "power3.out",
+        }, 0)
 
-    // Cleanup function
+      section.classList.add("gsap-initialized")
+    }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(initAnimation)
+    })
+
     return () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
+      section.classList.remove("gsap-initialized")
     }
   }, [])
 
   return (
     <section ref={sectionRef} className="pricing-section">
-      {/* Animated Background Elements - Only for this section */}
+        {/* Animated Background Elements - Only for this section */}
       <div className="pricing-bg-orbs">
         <div className="pricing-or1 pricing-orb1"></div>
         <div className="pricing-orb pricing-orb2"></div>
