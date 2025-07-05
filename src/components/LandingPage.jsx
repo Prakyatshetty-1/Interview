@@ -10,7 +10,6 @@ function LandingPage() {
 
   useEffect(() => {
     const script = document.createElement("script")
-    // script.src = "https://unpkg.com/@splinetool/viewer@1.10.2/build/spline-viewer.js"
     script.type = "module"
     document.body.appendChild(script)
 
@@ -20,11 +19,7 @@ function LandingPage() {
       if (splineViewer) {
         splineViewer.style.width = "100vw"
         splineViewer.style.height = "100vh"
-        splineViewer.style.position = "absolute"
-        splineViewer.style.top = "0"
-        splineViewer.style.left = "0"
-        splineViewer.style.margin = "0"
-        splineViewer.style.padding = "0"
+        
       }
     }
 
