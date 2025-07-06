@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Preference from './pages/Preference';
 import Dashboard from './pages/Dashboard';
 import Welcome from './pages/Welcome';
+import InterviewPage from './pages/InterviewPage';
 import './App.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path='/login' element={<Login/>}/>
         <Route path='/Preference' element={<Preference/>}/>
         <Route path='/dashboard' element={<Welcome/>}/>
+        <Route path='/Interview' element={<InterviewPage/>}/>
       </Routes>
     </Router>
   );

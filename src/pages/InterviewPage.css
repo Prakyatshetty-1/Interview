@@ -1,0 +1,11 @@
+.body-container2 {
+ position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    background-color: rgba(15, 16, 31, 0.6);
+}
+.containersall{
+    margin-top: 7%;
+}
