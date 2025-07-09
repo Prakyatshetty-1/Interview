@@ -5,8 +5,8 @@
     "creator": "Arjun",
     "tags": ["Front End", "React"],
     "path": "/FrontEndDev.png",
-    "popularity": 85,
-    "company": "Google",
+    "popularity": 45,
+    "company": "Adobe",
     "paid": false
   },
   {
@@ -16,7 +16,7 @@
     "tags": ["Back End", "Node.js"],
     "path": "/BackEndDev.png",
     "popularity": 72,
-    "company": "TCS",
+    "company": "TechSolutions Inc",
     "paid": true
   },
   {
@@ -35,8 +35,8 @@
     "creator": "Sneha",
     "tags": ["Desktop Dev", "Electron"],
     "path": "/DesktopDev.png",
-    "popularity": 55,
-    "company": "Wipro",
+    "popularity": 53,
+    "company": "DevSoft",
     "paid": false
   },
   {
@@ -45,8 +45,8 @@
     "creator": "Vikram",
     "tags": ["Mobile Dev", "Flutter"],
     "path": "/MobileDev.png",
-    "popularity": 78,
-    "company": "Amazon",
+    "popularity": 61,
+    "company": "AppWorks",
     "paid": false
   },
   {
@@ -55,8 +55,8 @@
     "creator": "Ananya",
     "tags": ["ML Engineer", "Deep Learning"],
     "path": "/MLEngineering.png",
-    "popularity": 92,
-    "company": "Infosys",
+    "popularity": 79,
+    "company": "Google",
     "paid": true
   },
   {
@@ -65,9 +65,9 @@
     "creator": "Karthik",
     "tags": ["Data Scientist", "Python"],
     "path": "/DataScientist.png",
-    "popularity": 65,
-    "company": "Meta",
-    "paid": true
+    "popularity": 57,
+    "company": "DataInsights",
+    "paid": false
   },
   {
     "difficulty": "Med.",
@@ -75,9 +75,9 @@
     "creator": "Meera",
     "tags": ["Data Engineer", "Apache Spark"],
     "path": "/DataEngineer.png",
-    "popularity": 70,
-    "company": "Accenture",
-    "paid": false
+    "popularity": 64,
+    "company": "Amazon",
+    "paid": true
   },
   {
     "difficulty": "Hard",
@@ -85,8 +85,8 @@
     "creator": "Rohan",
     "tags": ["AI Researcher", "PyTorch"],
     "path": "/AIResearch.png",
-    "popularity": 88,
-    "company": "Apple",
+    "popularity": 81,
+    "company": "Meta",
     "paid": true
   },
   {
@@ -95,8 +95,8 @@
     "creator": "Divya",
     "tags": ["DevOps Engineer", "Docker"],
     "path": "/DevOpsEngineer.png",
-    "popularity": 75,
-    "company": "Cognizant",
+    "popularity": 59,
+    "company": "CloudTech",
     "paid": false
   },
   {
@@ -105,8 +105,8 @@
     "creator": "Amit",
     "tags": ["Front End", "CSS"],
     "path": "/FrontEndDev.png",
-    "popularity": 60,
-    "company": "Netflix",
+    "popularity": 42,
+    "company": "WebCrafters",
     "paid": false
   },
   {
@@ -115,8 +115,8 @@
     "creator": "Nidhi",
     "tags": ["Back End", "Kubernetes"],
     "path": "/BackEndDev.png",
-    "popularity": 82,
-    "company": "HCL",
+    "popularity": 76,
+    "company": "Netflix",
     "paid": true
   },
   {
@@ -125,8 +125,8 @@
     "creator": "Suresh",
     "tags": ["Full Stack", "Vue.js"],
     "path": "/FullStackWebDev.png",
-    "popularity": 67,
-    "company": "IBM",
+    "popularity": 63,
+    "company": "ShopEasy",
     "paid": false
   },
   {
@@ -135,8 +135,8 @@
     "creator": "Pooja",
     "tags": ["Desktop Dev", "Python"],
     "path": "/DesktopDev.png",
-    "popularity": 45,
-    "company": "Oracle",
+    "popularity": 38,
+    "company": "CodeForge",
     "paid": false
   },
   {
@@ -145,8 +145,8 @@
     "creator": "Ajay",
     "tags": ["Mobile Dev", "React Native"],
     "path": "/MobileDev.png",
-    "popularity": 73,
-    "company": "TechMahindra",
+    "popularity": 67,
+    "company": "Apple",
     "paid": true
   },
   {
@@ -155,8 +155,8 @@
     "creator": "Shruti",
     "tags": ["ML Engineer", "OpenCV"],
     "path": "/MLEngineering.png",
-    "popularity": 90,
-    "company": "Uber",
+    "popularity": 84,
+    "company": "Nvidia",
     "paid": true
   },
   {
@@ -165,8 +165,8 @@
     "creator": "Manoj",
     "tags": ["Data Scientist", "R"],
     "path": "/DataScientist.png",
-    "popularity": 58,
-    "company": "Capgemini",
+    "popularity": 47,
+    "company": "StatAnalytics",
     "paid": false
   },
   {
@@ -175,9 +175,9 @@
     "creator": "Kavya",
     "tags": ["Data Engineer", "Kafka"],
     "path": "/DataEngineer.png",
-    "popularity": 77,
-    "company": "Tesla",
-    "paid": true
+    "popularity": 71,
+    "company": "StreamTech",
+    "paid": false
   },
   {
     "difficulty": "Hard",
@@ -185,9 +185,9 @@
     "creator": "Arun",
     "tags": ["AI Researcher", "Transformers"],
     "path": "/AIResearch.png",
-    "popularity": 95,
-    "company": "Mindtree",
-    "paid": false
+    "popularity": 88,
+    "company": "Google",
+    "paid": true
   },
   {
     "difficulty": "Med.",
@@ -195,8 +195,8 @@
     "creator": "Ravi",
     "tags": ["Site Reliability Engineer", "Prometheus"],
     "path": "/SiteReliabilityEngineer.png",
-    "popularity": 69,
-    "company": "Nvidia",
+    "popularity": 65,
+    "company": "Oracle",
     "paid": true
   },
   {
@@ -205,8 +205,8 @@
     "creator": "Lakshmi",
     "tags": ["Front End", "JavaScript"],
     "path": "/FrontEndDev.png",
-    "popularity": 80,
-    "company": "LTI",
+    "popularity": 51,
+    "company": "WebDev Inc",
     "paid": false
   },
   {
@@ -215,9 +215,9 @@
     "creator": "Sanjay",
     "tags": ["Back End", "GraphQL"],
     "path": "/BackEndDev.png",
-    "popularity": 74,
-    "company": "Adobe",
-    "paid": true
+    "popularity": 69,
+    "company": "API Masters",
+    "paid": false
   },
   {
     "difficulty": "Hard",
@@ -225,9 +225,9 @@
     "creator": "Deepika",
     "tags": ["Full Stack", "Next.js"],
     "path": "/FullStackWebDev.png",
-    "popularity": 84,
-    "company": "Deloitte",
-    "paid": false
+    "popularity": 77,
+    "company": "Meta",
+    "paid": true
   },
   {
     "difficulty": "Med.",
@@ -235,9 +235,9 @@
     "creator": "Varun",
     "tags": ["Desktop Dev", "C#"],
     "path": "/DesktopDev.png",
-    "popularity": 62,
-    "company": "Salesforce",
-    "paid": true
+    "popularity": 56,
+    "company": "SoftSys",
+    "paid": false
   },
   {
     "difficulty": "Easy",
@@ -245,8 +245,788 @@
     "creator": "Sunita",
     "tags": ["Mobile Dev", "Swift"],
     "path": "/MobileDev.png",
-    "popularity": 71,
-    "company": "EPAM",
+    "popularity": 49,
+    "company": "Apple",
+    "paid": true
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Recommendation System",
+    "creator": "Prakash",
+    "tags": ["ML Engineer", "Scikit-learn"],
+    "path": "/MLEngineering.png",
+    "popularity": 82,
+    "company": "Amazon",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Business Intelligence Dashboard",
+    "creator": "Rashmi",
+    "tags": ["Data Scientist", "Tableau"],
+    "path": "/DataScientist.png",
+    "popularity": 66,
+    "company": "DataViz",
     "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Data Warehouse Design",
+    "creator": "Gopal",
+    "tags": ["Data Engineer", "Snowflake"],
+    "path": "/DataEngineer.png",
+    "popularity": 73,
+    "company": "CloudData",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Reinforcement Learning Agent",
+    "creator": "Rohan",
+    "tags": ["AI Researcher", "Gym"],
+    "path": "/AIResearch.png",
+    "popularity": 85,
+    "company": "DeepMind",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "AWS EC2 Setup",
+    "creator": "Nitin",
+    "tags": ["Cloud Engineer", "AWS"],
+    "path": "/CloudEngineering.png",
+    "popularity": 54,
+    "company": "Amazon",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Responsive Web Design",
+    "creator": "Jyoti",
+    "tags": ["Front End", "Bootstrap"],
+    "path": "/FrontEndDev.png",
+    "popularity": 58,
+    "company": "DesignHub",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Distributed Database System",
+    "creator": "Harsh",
+    "tags": ["Back End", "MongoDB"],
+    "path": "/BackEndDev.png",
+    "popularity": 78,
+    "company": "MongoDB Inc",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Project Management Tool",
+    "creator": "Swati",
+    "tags": ["Full Stack", "Angular"],
+    "path": "/FullStackWebDev.png",
+    "popularity": 62,
+    "company": "ManagePro",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Text Editor Application",
+    "creator": "Rohit",
+    "tags": ["Desktop Dev", "Java"],
+    "path": "/DesktopDev.png",
+    "popularity": 43,
+    "company": "JavaSoft",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Fitness Tracking App",
+    "creator": "Neha",
+    "tags": ["Mobile Dev", "Kotlin"],
+    "path": "/MobileDev.png",
+    "popularity": 65,
+    "company": "FitTech",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Natural Language Processing",
+    "creator": "Sandeep",
+    "tags": ["ML Engineer", "NLTK"],
+    "path": "/MLEngineering.png",
+    "popularity": 83,
+    "company": "Google",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Data Visualization Basics",
+    "creator": "Usha",
+    "tags": ["Data Scientist", "Matplotlib"],
+    "path": "/DataScientist.png",
+    "popularity": 52,
+    "company": "VizAnalytics",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Stream Processing Pipeline",
+    "creator": "Vinod",
+    "tags": ["Data Engineer", "Flink"],
+    "path": "/DataEngineer.png",
+    "popularity": 70,
+    "company": "StreamWorks",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Generative AI Model",
+    "creator": "Ishita",
+    "tags": ["AI Researcher", "GANs"],
+    "path": "/AIResearch.png",
+    "popularity": 87,
+    "company": "OpenAI",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Security Vulnerability Assessment",
+    "creator": "Rajesh",
+    "tags": ["Security Engineer", "Penetration Testing"],
+    "path": "/SecurityEngineering.png",
+    "popularity": 74,
+    "company": "SecureNet",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "HTML5 Semantics",
+    "creator": "Lata",
+    "tags": ["Front End", "HTML5"],
+    "path": "/FrontEndDev.png",
+    "popularity": 40,
+    "company": "WebFundamentals",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "RESTful API Security",
+    "creator": "Mukesh",
+    "tags": ["Back End", "JWT"],
+    "path": "/BackEndDev.png",
+    "popularity": 68,
+    "company": "APISecure",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Real-time Chat Application",
+    "creator": "Gayatri",
+    "tags": ["Full Stack", "Socket.io"],
+    "path": "/FullStackWebDev.png",
+    "popularity": 75,
+    "company": "ChatTech",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Game Development Framework",
+    "creator": "Vishal",
+    "tags": ["Desktop Dev", "Unity"],
+    "path": "/DesktopDev.png",
+    "popularity": 63,
+    "company": "GameDev Studios",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Mobile Photo Gallery",
+    "creator": "Archana",
+    "tags": ["Mobile Dev", "Xamarin"],
+    "path": "/MobileDev.png",
+    "popularity": 46,
+    "company": "PhotoApps",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Time Series Forecasting",
+    "creator": "Kishore",
+    "tags": ["ML Engineer", "LSTM"],
+    "path": "/MLEngineering.png",
+    "popularity": 80,
+    "company": "Tesla",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "A/B Testing Analysis",
+    "creator": "Priyanka",
+    "tags": ["Data Scientist", "Hypothesis Testing"],
+    "path": "/DataScientist.png",
+    "popularity": 67,
+    "company": "OptimizeIt",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Data Lake Architecture",
+    "creator": "Satish",
+    "tags": ["Data Engineer", "Hadoop"],
+    "path": "/DataEngineer.png",
+    "popularity": 72,
+    "company": "DataLake Inc",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Multi-Agent System",
+    "creator": "Madhuri",
+    "tags": ["AI Researcher", "Multi-Agent"],
+    "path": "/AIResearch.png",
+    "popularity": 86,
+    "company": "DeepMind",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Load Balancer Configuration",
+    "creator": "Ashok",
+    "tags": ["Site Reliability Engineer", "Nginx"],
+    "path": "/SiteReliabilityEngineer.png",
+    "popularity": 55,
+    "company": "NetSys",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Progressive Web App",
+    "creator": "Chitra",
+    "tags": ["Front End", "PWA"],
+    "path": "/FrontEndDev.png",
+    "popularity": 64,
+    "company": "WebProgressive",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Event-Driven Architecture",
+    "creator": "Deepak",
+    "tags": ["Back End", "Event Sourcing"],
+    "path": "/BackEndDev.png",
+    "popularity": 79,
+    "company": "Uber",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Learning Management System",
+    "creator": "Vidya",
+    "tags": ["Full Stack", "Django"],
+    "path": "/FullStackWebDev.png",
+    "popularity": 71,
+    "company": "EduTech",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Simple Database GUI",
+    "creator": "Mohan",
+    "tags": ["Desktop Dev", "Tkinter"],
+    "path": "/DesktopDev.png",
+    "popularity": 41,
+    "company": "DataTools",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Augmented Reality App",
+    "creator": "Shilpa",
+    "tags": ["Mobile Dev", "ARKit"],
+    "path": "/MobileDev.png",
+    "popularity": 73,
+    "company": "AR Innovations",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Object Detection System",
+    "creator": "Naveen",
+    "tags": ["ML Engineer", "YOLO"],
+    "path": "/MLEngineering.png",
+    "popularity": 84,
+    "company": "Nvidia",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Exploratory Data Analysis",
+    "creator": "Radha",
+    "tags": ["Data Scientist", "Pandas"],
+    "path": "/DataScientist.png",
+    "popularity": 50,
+    "company": "DataExplore",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Change Data Capture",
+    "creator": "Sunil",
+    "tags": ["Data Engineer", "Debezium"],
+    "path": "/DataEngineer.png",
+    "popularity": 69,
+    "company": "DataFlow",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Neural Architecture Search",
+    "creator": "Smita",
+    "tags": ["AI Researcher", "AutoML"],
+    "path": "/AIResearch.png",
+    "popularity": 89,
+    "company": "Google",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Container Orchestration",
+    "creator": "Raju",
+    "tags": ["DevOps Engineer", "Kubernetes"],
+    "path": "/DevOpsEngineer.png",
+    "popularity": 76,
+    "company": "KubeSystems",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Form Validation Library",
+    "creator": "Kavita",
+    "tags": ["Front End", "Validation"],
+    "path": "/FrontEndDev.png",
+    "popularity": 44,
+    "company": "FormMaster",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Message Queue Implementation",
+    "creator": "Anil",
+    "tags": ["Back End", "RabbitMQ"],
+    "path": "/BackEndDev.png",
+    "popularity": 70,
+    "company": "QueueTech",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Blockchain Application",
+    "creator": "Preeti",
+    "tags": ["Full Stack", "Web3"],
+    "path": "/FullStackWebDev.png",
+    "popularity": 82,
+    "company": "BlockChain Inc",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "3D Graphics Application",
+    "creator": "Yogesh",
+    "tags": ["Desktop Dev", "OpenGL"],
+    "path": "/DesktopDev.png",
+    "popularity": 65,
+    "company": "GraphicsPro",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Location-Based Service",
+    "creator": "Anusha",
+    "tags": ["Mobile Dev", "GPS"],
+    "path": "/MobileDev.png",
+    "popularity": 48,
+    "company": "LocateMe",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Anomaly Detection Model",
+    "creator": "Subash",
+    "tags": ["ML Engineer", "Isolation Forest"],
+    "path": "/MLEngineering.png",
+    "popularity": 83,
+    "company": "Salesforce",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Customer Segmentation",
+    "creator": "Rekha",
+    "tags": ["Data Scientist", "Clustering"],
+    "path": "/DataScientist.png",
+    "popularity": 68,
+    "company": "MarketInsight",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Data Quality Framework",
+    "creator": "Pavan",
+    "tags": ["Data Engineer", "Great Expectations"],
+    "path": "/DataEngineer.png",
+    "popularity": 71,
+    "company": "QualityData",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Federated Learning System",
+    "creator": "Nisha",
+    "tags": ["AI Researcher", "Federated Learning"],
+    "path": "/AIResearch.png",
+    "popularity": 87,
+    "company": "Google",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Terraform Infrastructure",
+    "creator": "Kiran",
+    "tags": ["Cloud Engineer", "Terraform"],
+    "path": "/CloudEngineering.png",
+    "popularity": 57,
+    "company": "InfraCloud",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Component Library",
+    "creator": "Geetha",
+    "tags": ["Front End", "Storybook"],
+    "path": "/FrontEndDev.png",
+    "popularity": 62,
+    "company": "UIComponents",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Scalable Web Service",
+    "creator": "Ramesh",
+    "tags": ["Back End", "Load Balancing"],
+    "path": "/BackEndDev.png",
+    "popularity": 80,
+    "company": "Netflix",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Content Management System",
+    "creator": "Seema",
+    "tags": ["Full Stack", "Strapi"],
+    "path": "/FullStackWebDev.png",
+    "popularity": 67,
+    "company": "ContentPro",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Image Viewer Application",
+    "creator": "Ganesh",
+    "tags": ["Desktop Dev", "Qt"],
+    "path": "/DesktopDev.png",
+    "popularity": 39,
+    "company": "ImageSoft",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Push Notification Service",
+    "creator": "Savita",
+    "tags": ["Mobile Dev", "Firebase"],
+    "path": "/MobileDev.png",
+    "popularity": 70,
+    "company": "NotifyMe",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Speech Recognition System",
+    "creator": "Bala",
+    "tags": ["ML Engineer", "Speech Processing"],
+    "path": "/MLEngineering.png",
+    "popularity": 85,
+    "company": "Apple",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Statistical Modeling",
+    "creator": "Vandana",
+    "tags": ["Data Scientist", "Regression"],
+    "path": "/DataScientist.png",
+    "popularity": 53,
+    "company": "StatModels",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Streaming Analytics",
+    "creator": "Mahesh",
+    "tags": ["Data Engineer", "Storm"],
+    "path": "/DataEngineer.png",
+    "popularity": 74,
+    "company": "StreamAnalytics",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Quantum Computing Algorithm",
+    "creator": "Pallavi",
+    "tags": ["AI Researcher", "Quantum ML"],
+    "path": "/AIResearch.png",
+    "popularity": 90,
+    "company": "Google",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Application Security Testing",
+    "creator": "Santosh",
+    "tags": ["Application Security Engineer", "SAST"],
+    "path": "/SecurityEngineering.png",
+    "popularity": 75,
+    "company": "SecurApp",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Accessibility Compliance",
+    "creator": "Mala",
+    "tags": ["Front End", "WCAG"],
+    "path": "/FrontEndDev.png",
+    "popularity": 47,
+    "company": "AccessAll",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Caching Strategy Implementation",
+    "creator": "Bharat",
+    "tags": ["Back End", "Redis"],
+    "path": "/BackEndDev.png",
+    "popularity": 72,
+    "company": "CacheFast",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Multi-tenant SaaS Platform",
+    "creator": "Indira",
+    "tags": ["Full Stack", "Multi-tenancy"],
+    "path": "/FullStackWebDev.png",
+    "popularity": 81,
+    "company": "Salesforce",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Cross-platform GUI Framework",
+    "creator": "Dilip",
+    "tags": ["Desktop Dev", "Flutter Desktop"],
+    "path": "/DesktopDev.png",
+    "popularity": 66,
+    "company": "CrossPlatform",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Offline-first Mobile App",
+    "creator": "Bharati",
+    "tags": ["Mobile Dev", "Offline Storage"],
+    "path": "/MobileDev.png",
+    "popularity": 55,
+    "company": "OfflineApps",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "AutoML Pipeline",
+    "creator": "Venkat",
+    "tags": ["ML Engineer", "Pipeline Automation"],
+    "path": "/MLEngineering.png",
+    "popularity": 86,
+    "company": "Microsoft",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Predictive Analytics Model",
+    "creator": "Shobha",
+    "tags": ["Data Scientist", "Forecasting"],
+    "path": "/DataScientist.png",
+    "popularity": 73,
+    "company": "PredictX",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Data Mesh Architecture",
+    "creator": "Jagdish",
+    "tags": ["Data Engineer", "Data Mesh"],
+    "path": "/DataEngineer.png",
+    "popularity": 77,
+    "company": "MeshData",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Explainable AI System",
+    "creator": "Sushma",
+    "tags": ["AI Researcher", "XAI"],
+    "path": "/AIResearch.png",
+    "popularity": 88,
+    "company": "IBM",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Service Mesh Setup",
+    "creator": "Naresh",
+    "tags": ["Site Reliability Engineer", "Istio"],
+    "path": "/SiteReliabilityEngineering.png",
+    "popularity": 60,
+    "company": "MeshNet",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Micro-frontend Architecture",
+    "creator": "Sanjana",
+    "tags": ["Front End", "Module Federation"],
+    "path": "/FrontEndDev.png",
+    "popularity": 69,
+    "company": "MicroFront",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Event Streaming Platform",
+    "creator": "Balaji",
+    "tags": ["Back End", "Apache Kafka"],
+    "path": "/BackEndDev.png",
+    "popularity": 83,
+    "company": "Confluent",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Headless CMS Implementation",
+    "creator": "Padma",
+    "tags": ["Full Stack", "Headless CMS"],
+    "path": "/FullStackWebDev.png",
+    "popularity": 70,
+    "company": "ContentHeadless",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "System Tray Application",
+    "creator": "Ramana",
+    "tags": ["Desktop Dev", "System Integration"],
+    "path": "/DesktopDev.png",
+    "popularity": 42,
+    "company": "SysTrayApps",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "IoT Mobile Dashboard",
+    "creator": "Sunitha",
+    "tags": ["Mobile Dev", "IoT"],
+    "path": "/MobileDev.png",
+    "popularity": 71,
+    "company": "IoTConnect",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Distributed ML Training",
+    "creator": "Chandrashekhar",
+    "tags": ["ML Engineer", "Distributed Computing"],
+    "path": "/MLEngineering.png",
+    "popularity": 87,
+    "company": "Nvidia",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Data Profiling Tool",
+    "creator": "Latha",
+    "tags": ["Data Scientist", "Data Profiling"],
+    "path": "/DataScientist.png",
+    "popularity": 54,
+    "company": "ProfileData",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Real-time ETL Pipeline",
+    "creator": "Srikanth",
+    "tags": ["Data Engineer", "Real-time Processing"],
+    "path": "/DataEngineer.png",
+    "popularity": 75,
+    "company": "RealTimeETL",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Neuromorphic Computing Model",
+    "creator": "Shweta",
+    "tags": ["AI Researcher", "Neuromorphic"],
+    "path": "/AIResearch.png",
+    "popularity": 89,
+    "company": "Intel",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Zero Trust Security Model",
+    "creator": "Praveen",
+    "tags": ["Security Engineer", "Zero Trust"],
+    "path": "/SecurityEngineering.png",
+    "popularity": 76,
+    "company": "ZeroTrustSec",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "State Management Library",
+    "creator": "Anjali",
+    "tags": ["Front End", "State Management"],
+    "path": "/FrontEndDev.png",
+    "popularity": 58,
+    "company": "StateMaster",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Serverless API Gateway",
+    "creator": "Sudhir",
+    "tags": ["Cloud Engineer", "Serverless"],
+    "path": "/CloudEngineering.png",
+    "popularity": 74,
+    "company": "ServerlessTech",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Multi-modal AI System",
+    "creator": "Kavitha",
+    "tags": ["AI Researcher", "Multi-modal"],
+    "path": "/AIResearch.png",
+    "popularity": 90,
+    "company": "Microsoft",
+    "paid": true
   }
 ]

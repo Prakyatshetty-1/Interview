@@ -1,0 +1,94 @@
+.cardfol-background{
+    width: 260px;
+    height: 260px;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: none;
+    margin-top: 20px;
+}
+.card-content-section{
+     display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+}
+.bott{
+    position: absolute;
+    bottom: 20px;
+    margin-left: 20px;
+}
+.cardfoldertitle{
+    color: white;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.2;
+}
+.numberofquestion1{
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 400;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+.profile-avatars {
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar-container {
+            position: relative;
+            margin-left: -12px;
+            z-index: 2;
+        }
+
+        .avatar-container:first-child {
+            margin-left: 0;
+            z-index: 1;
+        }
+
+        .avatar-container:nth-child(2) {
+            z-index: 2;
+        }
+
+        .avatar-container:nth-child(3) {
+            z-index: 3;
+        }
+        .avatar-container:nth-child(4) {
+            z-index: 4;
+        }
+        .avatar-container:nth-child(5) {
+            z-index: 5;
+        }
+
+        .avatar {
+            width: 27px;
+            height: 27px;
+            border-radius: 50%;
+            border: 2px solid ;
+            object-fit: cover;
+            background-color: #ddd;
+            display: block;
+        }
+.avatar-container:nth-child(1) .avatar {
+    border-color: #667eea;
+}
+
+.avatar-container:nth-child(2) .avatar {
+    border-color: #764ba2;
+}
+
+.avatar-container:nth-child(3) .avatar {
+    border-color: #f093fb;
+}
+
+.avatar-container:nth-child(4) .avatar {
+    border-color: #f5576c;
+}
+
+.avatar-container:nth-child(5) .avatar {
+    border-color: #4facfe;
+}
+       
