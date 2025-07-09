@@ -1,6 +1,6 @@
 import './CardFolder.css';
 
-export default function CardFolder(){
+export default function CardFolder(props){
     return (
         <>
           <div className="cardfol-background" style={{ 
@@ -10,7 +10,7 @@ export default function CardFolder(){
               {/* Bottom section */}
               <div className="card-bottom-section">
                 <div className='bott'>
-                  <h2 className="cardfoldertitle">Google Interview</h2>
+                  <h2 className="cardfoldertitle">{props.title}</h2>
                   <p className='numberofquestion1'>145 Packs</p>
                   <div className="profile-avatars">
                     <div className="avatar-container">
