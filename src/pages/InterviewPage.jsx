@@ -101,7 +101,7 @@ function InterviewPage() {
       </div>
       
       <div className="containersall">
-   
+      <CardFolder/>
       <SlidingCard tag="Featured" />
       <SlidingCard tag="Top Companies" />
       <SlidingCard tag="Popular" />

@@ -1,425 +1,94 @@
-.card-folder {
-  width: 320px;
-  height: 400px;
-  cursor: pointer;
-  perspective: 1000px;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  margin: 16px;
-  position: relative;
+.cardfol-background{
+    width: 260px;
+    height: 260px;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: none;
+    margin-top: 20px;
+}
+.card-content-section{
+     display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+}
+.bott{
+    position: absolute;
+    bottom: 20px;
+    margin-left: 20px;
+}
+.cardfoldertitle{
+    color: white;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.2;
+}
+.numberofquestion1{
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 400;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+.profile-avatars {
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar-container {
+            position: relative;
+            margin-left: -12px;
+            z-index: 2;
+        }
+
+        .avatar-container:first-child {
+            margin-left: 0;
+            z-index: 1;
+        }
+
+        .avatar-container:nth-child(2) {
+            z-index: 2;
+        }
+
+        .avatar-container:nth-child(3) {
+            z-index: 3;
+        }
+        .avatar-container:nth-child(4) {
+            z-index: 4;
+        }
+        .avatar-container:nth-child(5) {
+            z-index: 5;
+        }
+
+        .avatar {
+            width: 27px;
+            height: 27px;
+            border-radius: 50%;
+            border: 2px solid ;
+            object-fit: cover;
+            background-color: #ddd;
+            display: block;
+        }
+.avatar-container:nth-child(1) .avatar {
+    border-color: #667eea;
 }
 
-.card-folder-inner {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  border-radius: 20px;
-  overflow: hidden;
-  background: linear-gradient(145deg, #1a1a2e, #16213e);
-  box-shadow: 
-    0 10px 30px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  transform-style: preserve-3d;
+.avatar-container:nth-child(2) .avatar {
+    border-color: #764ba2;
 }
 
-/* Background Image */
-.card-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 60%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  filter: brightness(0.8) saturate(1.2);
-  transition: all 0.4s ease;
+.avatar-container:nth-child(3) .avatar {
+    border-color: #f093fb;
 }
 
-.card-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.1) 0%,
-    rgba(0, 0, 0, 0.3) 40%,
-    rgba(0, 0, 0, 0.8) 100%
-  );
-  transition: all 0.4s ease;
+.avatar-container:nth-child(4) .avatar {
+    border-color: #f5576c;
 }
 
-.card-shimmer {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 70%
-  );
-  transform: translateX(-100%) translateY(-100%);
-  transition: transform 0.6s ease;
+.avatar-container:nth-child(5) .avatar {
+    border-color: #4facfe;
 }
-
-/* Content Section */
-.card-content {
-  position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 20px;
-  z-index: 2;
-}
-
-/* Top Section */
-.card-top-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-
-.category-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 8px 12px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.category-icon {
-  font-size: 12px;
-}
-
-.category-text {
-  font-size: 12px;
-  color: white;
-  font-weight: 500;
-}
-
-.job-count-badge {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: rgba(96, 165, 250, 0.2);
-  backdrop-filter: blur(10px);
-  padding: 8px 12px;
-  border-radius: 16px;
-  border: 1px solid rgba(96, 165, 250, 0.3);
-  min-width: 60px;
-}
-
-.job-count {
-  font-size: 18px;
-  font-weight: 700;
-  color: #60a5fa;
-  line-height: 1;
-}
-
-.job-text {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.8);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Main Content */
-.card-main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.company-logo-placeholder {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-  border-radius: 50%;
-  margin: 0 auto 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-}
-
-.logo-shine {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 40%,
-    rgba(255, 255, 255, 0.2) 50%,
-    transparent 60%
-  );
-  transform: translateX(-100%) translateY(-100%);
-  transition: transform 0.6s ease;
-}
-
-.company-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 8px 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  transition: all 0.3s ease;
-}
-
-.company-description {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0;
-  line-height: 1.5;
-  transition: all 0.3s ease;
-}
-
-/* Bottom Section */
-.card-bottom-section {
-  margin-top: 20px;
-}
-
-.action-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: linear-gradient(135deg, #60a5fa, #3b82f6);
-  color: white;
-  padding: 12px 24px;
-  border-radius: 30px;
-  font-weight: 600;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3);
-  position: relative;
-  overflow: hidden;
-}
-
-.action-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
-}
-
-.button-text {
-  position: relative;
-  z-index: 1;
-}
-
-.arrow-icon {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  stroke-width: 2;
-  fill: none;
-  transition: transform 0.3s ease;
-  position: relative;
-  z-index: 1;
-}
-
-/* Floating Elements */
-.floating-elements {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.floating-dot {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background: rgba(96, 165, 250, 0.6);
-  border-radius: 50%;
-  animation: float 4s ease-in-out infinite;
-}
-
-.dot-1 {
-  top: 20%;
-  left: 20%;
-  animation-delay: 0s;
-}
-
-.dot-2 {
-  top: 60%;
-  right: 20%;
-  animation-delay: 1.5s;
-}
-
-.dot-3 {
-  bottom: 30%;
-  left: 30%;
-  animation-delay: 3s;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
-  50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
-}
-
-/* Border Glow */
-.border-glow {
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(45deg, #60a5fa, #3b82f6, #8b5cf6, #60a5fa);
-  border-radius: 22px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: -1;
-  animation: borderRotate 4s linear infinite;
-}
-
-@keyframes borderRotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Hover Effects */
-.card-folder:hover .card-folder-inner {
-  transform: translateY(-8px) rotateX(5deg);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
-}
-
-.card-folder:hover .card-background {
-  filter: brightness(1.1) saturate(1.4);
-  transform: scale(1.05);
-}
-
-.card-folder:hover .card-overlay {
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.05) 0%,
-    rgba(0, 0, 0, 0.2) 40%,
-    rgba(0, 0, 0, 0.7) 100%
-  );
-}
-
-.card-folder:hover .card-shimmer {
-  transform: translateX(100%) translateY(100%);
-}
-
-.card-folder:hover .company-logo-placeholder {
-  transform: scale(1.1);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.card-folder:hover .logo-shine {
-  transform: translateX(100%) translateY(100%);
-}
-
-.card-folder:hover .company-title {
-  transform: translateY(-2px);
-  color: #ffffff;
-}
-
-.card-folder:hover .action-button {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(96, 165, 250, 0.4);
-}
-
-.card-folder:hover .action-button::before {
-  left: 100%;
-}
-
-.card-folder:hover .arrow-icon {
-  transform: translateX(4px);
-}
-
-.card-folder:hover .border-glow {
-  opacity: 1;
-}
-
-.card-folder:hover .category-badge {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-.card-folder:hover .job-count-badge {
-  background: rgba(96, 165, 250, 0.3);
-  transform: translateY(-2px);
-}
-
-/* Click Effect */
-.card-folder.clicked .card-folder-inner {
-  transform: translateY(-4px) rotateX(2deg) scale(0.98);
-}
-
-.card-folder.clicked .action-button {
-  transform: translateY(-1px) scale(0.95);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .card-folder {
-    width: 280px;
-    height: 360px;
-    margin: 12px;
-  }
-  
-  .card-content {
-    padding: 16px;
-  }
-  
-  .company-title {
-    font-size: 28px;
-  }
-  
-  .company-description {
-    font-size: 13px;
-  }
-  
-  .action-button {
-    padding: 10px 20px;
-    font-size: 13px;
-  }
-}
-
-@media (max-width: 480px) {
-  .card-folder {
-    width: 100%;
-    max-width: 300px;
-    height: 340px;
-  }
-  
-  .company-title {
-    font-size: 24px;
-  }
-  
-  .company-logo-placeholder {
-    width: 60px;
-    height: 60px;
-  }
-}
+       
