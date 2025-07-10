@@ -1,16 +1,16 @@
 import './CardFolder.css';
 
-export default function CardFolder(){
+export default function CardFolder(props){
     return (
         <>
           <div className="cardfol-background" style={{ 
-            backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(./Google.png)` 
+            backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(./Adobe.png)` 
           }}>
             <div className="card-content-section">
               {/* Bottom section */}
               <div className="card-bottom-section">
                 <div className='bott'>
-                  <h2 className="cardfoldertitle">Google Interview</h2>
+                  <h2 className="cardfoldertitle">{props.title}</h2>
                   <p className='numberofquestion1'>145 Packs</p>
                   <div className="profile-avatars">
                     <div className="avatar-container">

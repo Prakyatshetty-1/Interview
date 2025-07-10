@@ -9,3 +9,14 @@
 .containersall{
     margin-top: 7%;
 }
+.headsecc{
+    color:white;
+    margin-left: 140px;
+    margin-bottom: 80px;
+}
+.headsecc p{
+   color: rgba(202, 202, 202, 0.8);
+}
+.headsecc h1{
+    font-weight: 400;
+}

@@ -101,11 +101,17 @@ function InterviewPage() {
       </div>
       
       <div className="containersall">
-      <CardFolder/>
+        <div className="headsecc">
+          <p>Welcome to</p>
+          <h1>Askora Interview</h1>
+        </div>
+      <SlidingCard tag="Recently Viewed" />
+      <SlidingCard tag="Recommended" />
       <SlidingCard tag="Featured" />
       <SlidingCard tag="Top Companies" />
       <SlidingCard tag="Popular" />
       <SlidingCard tag="Paid" />
+      <CardFolder/>
       </div>
       <Dock
         items={items}
