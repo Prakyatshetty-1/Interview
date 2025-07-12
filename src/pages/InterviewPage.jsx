@@ -1,6 +1,5 @@
 import SlidingCard from "../components/SlidingCard";
 import Dock from "../react-bits/Dock";
-import CardFolder from "../components/CardFolder";
 import './InterviewPage.css';
 const items = [
   {
@@ -101,6 +100,12 @@ function InterviewPage() {
       </div>
       
       <div className="containersall">
+        <div className="headsecc">
+          <p>Welcome to</p>
+          <h1>Askora Interview</h1>
+        </div>
+      <SlidingCard tag="Recently Viewed" />
+      <SlidingCard tag="Recommended" />
       <SlidingCard tag="Featured" />
       <SlidingCard tag="Top Companies" />
       <SlidingCard tag="Popular" />
