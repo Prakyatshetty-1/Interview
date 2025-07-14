@@ -103,7 +103,7 @@ function InterviewPage() {
       <div className="containersall">
         <div className="headsecc">
           <p>Welcome to</p>
-          <h1>Askora Interview</h1>
+         <div className="flexing"><h1>Askora </h1><h1 className="purple">Interview</h1></div> 
         </div>
       <SlidingCard tag="Recently Viewed" />
       <SlidingCard tag="Recommended" />

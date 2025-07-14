@@ -1,16 +1,66 @@
 import React from 'react';
 import './AboutAi.css';
 import ScrollFloat from '../react-bits/ScrollFloat';
+import { MdArrowOutward } from "react-icons/md";
 
 const AboutAi = () => {
   return (
     <div className="about-ai-container">
       {/* Enhanced background orbs for consistency */}
-
-
-      <div className="about-ai-wrapper">
-        <div className="about-ai-layout">
-          {/* Spline 3D Model Container */}
+      <div className="about-ai-content-box">
+        <div className="infoboxleft">
+          <div className="uppercontentdivs">
+            <div className="statbox">
+              
+                
+            </div>
+            
+            <div className="watchvideo">
+              
+            </div>
+          </div>
+          <div className="titlecontentdiv">
+            
+            <h1 className='uppertitlecon'>Experience the</h1>
+            <div className='middletitlecon'>
+              <h1>future of</h1>
+              <button class="buttonforaboutai">
+  Learn More
+</button>
+              <button class="buttonforaboutai1">
+<MdArrowOutward style={{ color: '#151515', fontSize: '25px',fontWeight:'300' }} />
+</button>
+            </div>
+            <div className="bottomtitlecon">
+              <h1>interviewing</h1>
+              <div className="card-avatars">
+                    <div className="cardavatar-container">
+                      <img src="./profile1.jpg" alt="Profile 1" className="cardavatar" />
+                    </div>
+                    <div className="avatar-container">
+                      <img src="./profile2.jpg" alt="Profile 2" className="cardavatar" />
+                    </div>
+                    <div className="avatar-container">
+                      <img src="./profile3.jpg" alt="Profile 3" className="cardavatar" />
+                    </div>
+                    
+                    
+                  </div>
+            </div>
+          </div>
+          <div className="lowercontentdiv">
+            <p>Explore next-gen interview intelligence with Askora — an AI voice bot built to
+              <br/>
+              simulate real interview pressure. Speak, listen, and respond in natural flow.  
+              <br/>
+              Askora adapts in real-time using speech tech and context-based questioning to  
+              <br/>
+             sharpen your skills for high-stakes professional success.
+            </p>
+          </div>
+        </div>
+        <div className="imgboxright">
+          <img src='/AboutAiBack.png'/>\
           <iframe
             src='https://my.spline.design/voiceinteractionanimation-2TyeWSP24w6QzdGddVpF30we/'
             frameBorder='0'
@@ -18,45 +68,27 @@ const AboutAi = () => {
             height='100%'
             title="Askora Voice Interaction Animation"
           ></iframe>
-
-          {/* Content Section */}
-          <div className="about-ai-content-section">
-            {/* Main Title */}
-            <ScrollFloat
-              animationDuration={1}
-              ease='back.inOut(2)'
-              scrollStart='center bottom+=10%'
-              scrollEnd='bottom bottom-=60%'
-              stagger={0.03}
-              textClassName="about-ai-main-title"
-            >
-              INTRODUCING
-              <br />
-              ASKORA
-            </ScrollFloat>
-
-            {/* Description */}
-            <p className="about-ai-main-description">
-              
-              Experience realistic mock interviews with an intelligent voice bot that speaks, listens, and responds — just like a real interviewer.
-              <br />
-              <br />
-              Askora creates a high-pressure, real-world interview atmosphere using advanced speech synthesis, natural language understanding,
-              and context-aware questioning.
-            </p>
-
-            {/* Features Section */}
-            <div className="about-ai-features-section">
-              <div className="about-ai-features-text">
-                Machine Learning • Deep Learning • Neural Networks • Computer Vision • Natural Language Processing
-              </div>
+          <div className="contentboximg">
+            <div className="sameboxdiv">
+            <h1 className="joinourplat">join our
+              <br/>
+              platform
+            </h1>
+            <div class="vertical-line"></div>
+            <p>& learn<br/> how to <br/>start</p>
+            <div className="buttonsforai">
+              <button class="buttonforaboutai2"></button>
+              <button class="buttonforaboutai3">
+<MdArrowOutward style={{ color: 'white', fontSize: '25px',fontWeight:'300' }} />
+</button>
+            </div>
+           
             </div>
           </div>
         </div>
       </div>
 
-      {/* Hide spline overflow */}
-      <div className="hidespline"></div>
+      
     </div>
   );
 };

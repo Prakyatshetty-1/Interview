@@ -20,3 +20,11 @@
 .headsecc h1{
     font-weight: 400;
 }
+.purple{
+    font-weight: 400;
+    color: #7c3aed;
+}
+.flexing{
+    display: flex;
+    gap :10px;
+}
