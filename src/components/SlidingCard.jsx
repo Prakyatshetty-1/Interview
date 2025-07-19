@@ -66,16 +66,42 @@ const SliderCard = (props) => {
 
     if (props.tag === "Featured") {
       const categories=[
-        {title: "Front End"},
-        {title: "Back End"},
-        {title: "Full Stack"},
-        {title: "Mobile Dev"},
-        {title: "ML Engineering"},
-        {title: "AIML"},
-        {title: "JAVA"},
-        {title: "Data Scientist"},
-        {title: "Data Engineer"},
-        {title: "UIUX"},
+        {
+          title: "Front End",
+          path:"/FrontEndDev.png"
+        },
+        {
+          title: "Back End",
+          path:"/BackEndDev.png"
+        },
+        {
+          title: "Full Stack",
+          path:"/FullStackWebDev.png"
+        },
+        {
+          title: "Mobile Dev",
+          path:"/MobileDev.png"
+        },
+        {
+          title: "ML Engineering",
+          path:"/MLEngineering.png"
+        },
+        {
+          title: "AIML",
+          path:"/AIResearch.png"
+        },
+        {
+          title: "JAVA",
+          path:""
+        },
+        {
+          title: "Data Engineer",
+          path:"/DataEngineer.png"
+        },
+        {
+          title: "UIUX",
+          path:"/DesktopDev.png"
+        },
 
       ]
 
@@ -84,20 +110,54 @@ const SliderCard = (props) => {
       filteredData.sort((a, b) => b.popularity - a.popularity);
     } else if (props.tag === "Top Companies") {
       const categories=[
-        {title: "Google"},
-        {title: "Microsoft"},
-        {title: "Amazon"},
-        {title: "Meta"},
-        {title: "Apple"},
-        {title: "Netflix"},
-        {title: "Oracle"},
-        {title: "Uber"},
-        {title: "Tesla"},
-        {title: "Adobe"},
+        {
+          title: "Google",
+          path:"/Google.png"
+        },
+        {
+          title: "Microsoft",
+          path:"/Microsoft.png"
+        },
+        {
+          title: "Amazon",
+          path:"/Amazon.png"
+        },
+        {
+          title: "Meta",
+          path:"/Meta.png"
+        },
+        {
+          title: "Apple",
+          path:"/Apple.png"
+        },
+        {
+          title: "Netflix",
+          path:"/Netflix.png"
+        },
+        {
+          title: "Oracle",
+          path:"/Oracle.png"
+        },
+        {
+          title: "Uber",
+          path:"/Uber.png"
+        },
+        {
+          title: "Tesla",
+          path:"/DesktopDev.png"
+        },
+        {
+          title: "Adobe",
+          path:"/Adobe.png"
+        },
 
       ]
 
       filteredData = categories;
+    }
+    else if (props.tag === "Paid"){
+      filteredData = cardDataJson.filter(item => item.paid === true);
+
     }
     filteredData = filteredData.slice(0, 10);
 
@@ -112,14 +172,17 @@ const SliderCard = (props) => {
   const slideLeft = () => {
     if (isTransitioning) return
     setIsTransitioning(true)
-    setCurrentIndex((prev) => Math.max(0, prev - 1))
+    setCurrentIndex((prev) => Math.max(0, prev -1))
     setTimeout(() => setIsTransitioning(false), 500)
   }
 
-  const slideRight = () => {
+  const slideRight = (index) => {
     if (isTransitioning) return
     setIsTransitioning(true)
-    setCurrentIndex((prev) => Math.min(maxIndex, prev + 1))
+    if(index===0)
+      setCurrentIndex((prev) => Math.min(maxIndex, prev + 0.8))
+    else
+      setCurrentIndex((prev) => Math.min(maxIndex, prev + 1))
     setTimeout(() => setIsTransitioning(false), 500)
   }
 
@@ -166,7 +229,7 @@ const SliderCard = (props) => {
         <div className="slider-main">
           {/* Left Navigation Arrow */}
           <button
-            onClick={slideLeft}
+            onClick={()=>slideLeft}
             disabled={currentIndex === 0 || isTransitioning}
             className="nav-arrow nav-arrow-left"
           >
@@ -175,8 +238,8 @@ const SliderCard = (props) => {
 
           {/* Right Navigation Arrow */}
           <button
-            onClick={slideRight}
-            disabled={currentIndex >= maxIndex || isTransitioning}
+            onClick={()=>slideRight(currentIndex)}
+            disabled={currentIndex >= maxIndex-0.5 || isTransitioning}
             className="nav-arrow nav-arrow-right"
           >
             <ChevronRight />
@@ -207,6 +270,7 @@ const SliderCard = (props) => {
                     >
                       <CardFolder
                         title={ course.title}
+                        path={course.path}
                       />
                     </div>
                   ))}

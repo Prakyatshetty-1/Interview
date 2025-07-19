@@ -4,7 +4,7 @@ export default function CardFolder(props){
     return (
         <>
           <div className="cardfol-background" style={{ 
-            backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(./Google.png)` 
+            backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(${props.path})` 
           }}>
             <div className="card-content-section">
               {/* Bottom section */}
