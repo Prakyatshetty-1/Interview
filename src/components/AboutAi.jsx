@@ -24,10 +24,10 @@ const AboutAi = () => {
             <h1 className='uppertitlecon'>Experience the</h1>
             <div className='middletitlecon'>
               <h1>future of</h1>
-              <button class="buttonforaboutai">
+              <button className="buttonforaboutai">
   Learn More
 </button>
-              <button class="buttonforaboutai1">
+              <button className="buttonforaboutai1">
 <MdArrowOutward style={{ color: '#151515', fontSize: '25px',fontWeight:'300' }} />
 </button>
             </div>
@@ -35,13 +35,13 @@ const AboutAi = () => {
               <h1>interviewing</h1>
               <div className="card-avatars">
                     <div className="cardavatar-container">
-                      <img src="./profile1.jpg" alt="Profile 1" className="cardavatar" />
+                      <img src="/profilepic2.png" alt="Profile 1" className="cardavatar" />
                     </div>
                     <div className="avatar-container">
-                      <img src="./profile2.jpg" alt="Profile 2" className="cardavatar" />
+                      <img src="/profilepic1.png" alt="Profile 2" className="cardavatar" />
                     </div>
                     <div className="avatar-container">
-                      <img src="./profile3.jpg" alt="Profile 3" className="cardavatar" />
+                      <img src="/profilepic3.png" alt="Profile 3" className="cardavatar" />
                     </div>
                     
                     
@@ -74,11 +74,11 @@ const AboutAi = () => {
               <br/>
               platform
             </h1>
-            <div class="vertical-line"></div>
+            <div className="vertical-line"></div>
             <p>& learn<br/> how to <br/>start</p>
             <div className="buttonsforai">
-              <button class="buttonforaboutai2"></button>
-              <button class="buttonforaboutai3">
+              <button className="buttonforaboutai2"></button>
+              <button className="buttonforaboutai3">
 <MdArrowOutward style={{ color: 'white', fontSize: '25px',fontWeight:'300' }} />
 </button>
             </div>

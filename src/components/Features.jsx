@@ -14,77 +14,55 @@ export default function Features() {
     <div className={`gradient-grid ${isLoaded ? "loaded" : ""}`}>
       <div className="pricing-bg-orbss">
         <div className="pricing-orbb pricing-orbs1"></div>
-        
       </div>
-      <h1 className="Title">Key Features of Askora</h1>
-      <div className="grid-container">
-        {/* Top left block */}
-        <div className="grid-item top-left">
-          <div className="content">
-            <div className="text-container horizontal">
-              <div className="text primary">
-                <h1>Webflow Development</h1>
-                <p>Create stunning, responsive websites that engage your audience and drive results.</p>
+      <div className="featurecontainer">
+        <div className="featurebox1">
+          <h1>Grow <br/> Faster</h1>
+        </div>
+        <div className="otherfeatherbox">
+          <div className="topotherfeaturebox">
+            <div className="texttopboxouter">
+              <div className="textboxuppertext">
+                <h1>We build</h1>
+                <div className="circleforfeature"></div>
               </div>
-              <div className="text secondary right-align">
-                Professional web solutions tailored to your business needs and goals.
+              <div className="textboxmiddletext">
+                <h1>digital</h1>
+                <div className="verticalline"></div>
+                </div>
+              <div className="textboxbottomtext">
+                <h1>ex<span className="textpurple">periences.</span></h1>
+              </div>
+            </div>
+            <div className="rocketbox">
+              <div className="ubox">
+                <h1 className="uptext">Best</h1>
+                <h1 className="dntext">The Plan</h1>
+              </div>
+              <img src="./features1.png"/>
+            </div>
+          </div>
+          <div className="bottomotherfeaturebox">
+            <div className="bottomotherboxouter">
+              <div className="bottomboxouter1">
+                  <h1>Experience Smooth UI</h1>
+                  <div className="glare"></div>
+                <div className="mockup"></div>
+              </div>
+              <div className="bottomboxouter2">
+                <div className="bottomboxbox"></div>
+                <img src="/star.png"></img>
+                <h1>All around<br/> the globe</h1>
+                <p>500 clients accross <br/> 15 countries</p>
+                <div className="bottomboxcircle1"></div>
+                <div className="bottomboxcircle2"></div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Top right block */}
-        <div className="grid-item top-right">
-          <div className="content">
-            <div className="text-container vertical">
-              <div className="text primary">
-                <h1>MOBILE APPS</h1>
-                <p>Build powerful mobile applications that connect with users on any device.</p>
-              </div>
-              <div className="text secondary">Native and cross-platform solutions for iOS and Android.</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom left block */}
-        <div className="grid-item bottom-left">
-          <div className="content">
-            <div className="text-container vertical">
-              <div className="text primary">
-                <h1>UI/UX DESIGN</h1>
-                <p>Design beautiful interfaces that provide exceptional user experiences.</p>
-              </div>
-              <div className="text secondary">User-centered design that converts visitors into customers.</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Middle block (blue accent) */}
-        <div className="grid-item middle">
-          <div className="content">
-            <div className="text-container vertical">
-              <div className="text primary">
-                <p>Strategic guidance for your digital transformation.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom right block */}
-        <div className="grid-item bottom-right">
-          <div className="content">
-            <div className="text-container horizontal">
-              <div className="text primary">
-                <h1>E-COMMERCE</h1>
-                <p>Build powerful online stores that drive sales and grow your business.</p>
-              </div>
-              <div className="text secondary right-align">
-                Complete e-commerce solutions with secure payment processing.
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
+      
     </div>
   )
 }
