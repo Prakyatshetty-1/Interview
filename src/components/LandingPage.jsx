@@ -33,7 +33,7 @@ function LandingPage() {
 
     // Wait for the script to load and then apply styles
     script.onload = () => {
-      setTimeout(handleSplineLoad, 100)
+      setTimeout(handleSplineLoad, 1)
     }
 
     // CHANGE: Trigger fade-in effect after component mounts
@@ -57,7 +57,7 @@ function LandingPage() {
     // CHANGE: Added conditional class for fade-in effect
     <div className={`landing-container ${isLoaded ? "fade-in" : "fade-out"}`}>
       {/* Spline Viewer - Place it first so it's in the background */}
-      <div className="spline-container">
+      {/* <div className="spline-container">
         <spline-viewer
           url="https://prod.spline.design/86DzIrVjpQ1YoHMi/scene.splinecode"
           loading="eager"
@@ -71,7 +71,7 @@ function LandingPage() {
             padding: "0",
           }}
         />
-      </div>
+      </div> */}
 
       {/* Content on top */}
       <div className="content-wrapper">

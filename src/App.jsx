@@ -6,6 +6,7 @@ import Preference from './pages/Preference';
 import Dashboard from './pages/Dashboard';
 import Welcome from './pages/Welcome';
 import InterviewPage from './pages/InterviewPage';
+import VoiceRe from './pages/VoiceRe';
 import './App.css';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path='/Preference' element={<Preference/>}/>
         <Route path='/dashboard' element={<Welcome/>}/>
         <Route path='/Interview' element={<InterviewPage/>}/>
+        <Route path='/VoiceRe' element={<VoiceRe/>}/>
       </Routes>
     </Router>
   );

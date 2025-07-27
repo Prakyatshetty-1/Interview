@@ -229,7 +229,7 @@ const SliderCard = (props) => {
         <div className="slider-main">
           {/* Left Navigation Arrow */}
           <button
-            onClick={()=>slideLeft}
+            onClick={slideLeft}
             disabled={currentIndex === 0 || isTransitioning}
             className="nav-arrow nav-arrow-left"
           >
