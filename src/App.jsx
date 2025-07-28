@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Welcome from './pages/Welcome';
 import InterviewPage from './pages/InterviewPage';
 import VoiceRe from './pages/VoiceRe';
+import WaveCircle from './pages/SavePage';
 import './App.css';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path='/dashboard' element={<Welcome/>}/>
         <Route path='/Interview' element={<InterviewPage/>}/>
         <Route path='/VoiceRe' element={<VoiceRe/>}/>
+        <Route path='/savepage' element={<WaveCircle/>}/>
       </Routes>
     </Router>
   );

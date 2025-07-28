@@ -1,676 +1,548 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Mic, MicOff, Volume2, VolumeX, AlertCircle, ChevronDown } from "lucide-react";
-import './Voice.css'
-// UI Components
-const Button = ({ children, onClick, variant = "default", size = "default", className = "", type = "button", ...props }) => {
-  const baseClass = "btn-base";
-  const variantClass = `btn-${variant}`;
-  const sizeClass = size === "lg" ? "btn-lg" : "btn-default-size";
-  
-  return (
-    <button
-      type={type}
-      className={`${baseClass} ${variantClass} ${sizeClass} ${className}`}
-      onClick={onClick}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
+"use client"
 
-const Card = ({ children, className = "" }) => (
-  <div className={`card ${className}`}>
-    {children}
-  </div>
-);
+import { useState, useEffect, useRef } from "react"
+import { Mic, MicOff, VolumeX, AlertCircle, Sparkles, Loader2 } from "lucide-react"
+import "./Voice.css"
 
-const CardHeader = ({ children, className = "" }) => (
-  <div className={`card-header ${className}`}>
-    {children}
-  </div>
-);
-
-const CardTitle = ({ children, className = "" }) => (
-  <h3 className={`card-title ${className}`}>
-    {children}
-  </h3>
-);
-
-const CardContent = ({ children, className = "" }) => (
-  <div className={`card-content ${className}`}>
-    {children}
-  </div>
-);
-
-const Input = ({ className = "", ...props }) => (
-  <input
-    className={`input ${className}`}
-    {...props}
-  />
-);
-
-const Label = ({ children, htmlFor, className = "" }) => (
-  <label
-    htmlFor={htmlFor}
-    className={`label ${className}`}
-  >
-    {children}
-  </label>
-);
-
-const WorkingSelect = ({ value, onValueChange, children, placeholder = "Select..." }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(value || "");
-  
-  useEffect(() => {
-    setSelectedValue(value || "");
-  }, [value]);
-  
-  const options = React.Children.toArray(children).map(child => ({
-    value: child.props.value,
-    label: child.props.children
-  }));
-  
-  const selectedOption = options.find(opt => opt.value === selectedValue);
-  
-  const handleSelect = (optionValue) => {
-    setSelectedValue(optionValue);
-    onValueChange && onValueChange(optionValue);
-    setIsOpen(false);
-  };
-  
-  return (
-    <div className="select-container">
-      <button
-        type="button"
-        className="select-trigger"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span className={selectedOption ? "select-value" : "select-placeholder"}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-        <ChevronDown className="h-4 w-4 opacity-50" />
-      </button>
-      {isOpen && (
-        <div className="select-content">
-          {options.map(option => (
-            <div
-              key={option.value}
-              className="select-item"
-              onClick={() => handleSelect(option.value)}
-            >
-              {option.label}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const SelectItem = ({ value, children }) => {
-  return React.createElement('div', { value }, children);
-};
-
-const Textarea = ({ className = "", rows = 3, ...props }) => (
-  <textarea
-    className={`textarea ${className}`}
-    rows={rows}
-    {...props}
-  />
-);
-
-const Badge = ({ children, variant = "default", className = "" }) => {
-  const variantClass = `badge-${variant}`;
-  
-  return (
-    <div className={`badge ${variantClass} ${className}`}>
-      {children}
-    </div>
-  );
-};
-
-// Toast hook simulation
-const useToast = () => {
-  return {
-    toast: ({ title, description, variant }) => {
-      alert(`${title}: ${description}`);
-    }
-  };
-};
-
-// Main Component
-export default function InterviewCreator() {
-  const [step, setStep] = useState("initial");
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [questions, setQuestions] = useState([]);
-  const [totalQuestions, setTotalQuestions] = useState(0);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [transcript, setTranscript] = useState("");
-  const [speechSupported, setSpeechSupported] = useState(false);
-  const [interviewDetails, setInterviewDetails] = useState({
+function VoiceRe() {
+  // Original states
+  const [showInstructionsModal, setShowInstructionsModal] = useState(true)
+  const [showCreateItemModal, setShowCreateItemModal] = useState(false)
+  const [inputValue, setInputValue] = useState("")
+  const [displayContent, setDisplayContent] = useState("")
+  const [isRecording, setIsRecording] = useState(false)
+  const [formData, setFormData] = useState({
     title: "",
     category: "",
-    difficulty: "",
-    duration: "",
-    description: "",
-  });
+    companies: "",
+    difficulty: "easy",
+  })
 
-  const recognitionRef = useRef(null);
-  const { toast } = useToast();
+  // Voice and AI states
+  const [isListening, setIsListening] = useState(false)
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const [transcript, setTranscript] = useState("")
+  const [speechSupported, setSpeechSupported] = useState(false)
+  const [geminiResponse, setGeminiResponse] = useState("")
+  const [isGeminiLoading, setIsGeminiLoading] = useState(false)
+  const [voiceMode, setVoiceMode] = useState(false)
 
+  const recognitionRef = useRef(null)
+
+  // Gemini API Integration
+  const callGeminiAPI = async (prompt) => {
+    const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY
+
+    if (!geminiApiKey) {
+      alert("Gemini API key not configured. Please add REACT_APP_GEMINI_API_KEY to your .env file.")
+      return
+    }
+
+    setIsGeminiLoading(true)
+    setGeminiResponse("")
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `You are an AI assistant helping with interview preparation. The user said: "${prompt}". Please provide a helpful, professional response related to interview questions, career advice, or general guidance. Keep your response concise and actionable.`,
+                  },
+                ],
+              },
+            ],
+          }),
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      const geminiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received from Gemini."
+
+      setGeminiResponse(geminiText)
+
+      // Optional: Speak the Gemini response
+      if (voiceMode) {
+        setTimeout(() => {
+          speak(`AI Assistant says: ${geminiText}`)
+        }, 500)
+      }
+    } catch (error) {
+      console.error("Gemini API Error:", error)
+      setGeminiResponse("Error: Unable to get response from Gemini API.")
+      alert("Failed to get response from AI. Please check your API key and try again.")
+    } finally {
+      setIsGeminiLoading(false)
+    }
+  }
+
+  // Speech Recognition Setup
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (SpeechRecognition) {
-      setSpeechSupported(true);
-      console.log("✅ Speech Recognition is supported");
+      setSpeechSupported(true)
+      console.log("✅ Speech Recognition is supported")
 
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = "en-US";
+      recognitionRef.current = new SpeechRecognition()
+      recognitionRef.current.continuous = false
+      recognitionRef.current.interimResults = false
+      recognitionRef.current.lang = "en-US"
 
       recognitionRef.current.onstart = () => {
-        console.log("🎤 Speech recognition started");
-        setIsListening(true);
-      };
+        console.log("🎤 Speech recognition started")
+        setIsListening(true)
+      }
 
       recognitionRef.current.onresult = (event) => {
-        const result = event.results[0][0].transcript;
-        console.log("🗣️ Speech result:", result);
-        setTranscript(result);
-        handleVoiceInput(result);
-      };
+        const result = event.results[0][0].transcript
+        console.log("🗣️ Speech result:", result)
+        setTranscript(result)
+        setInputValue(result)
+
+        // Call Gemini API with the transcript if voice mode is enabled
+        if (result.trim() && voiceMode) {
+          callGeminiAPI(result)
+        }
+      }
 
       recognitionRef.current.onend = () => {
-        console.log("🛑 Speech recognition ended");
-        setIsListening(false);
-      };
+        console.log("🛑 Speech recognition ended")
+        setIsListening(false)
+      }
 
       recognitionRef.current.onerror = (event) => {
-        console.error("❌ Speech recognition error:", event.error);
-        setIsListening(false);
-
-        let message = "Speech recognition failed. ";
+        console.error("❌ Speech recognition error:", event.error)
+        setIsListening(false)
+        let message = "Speech recognition failed. "
         switch (event.error) {
           case "not-allowed":
-            message += "Please allow microphone access.";
-            break;
+            message += "Please allow microphone access."
+            break
           case "no-speech":
-            message += "No speech was detected. Try again.";
-            break;
+            message += "No speech was detected. Try again."
+            break
           case "network":
-            message += "Network error occurred.";
-            break;
+            message += "Network error occurred."
+            break
           default:
-            message += "Please try again.";
+            message += "Please try again."
         }
-
-        toast({
-          title: "Speech Error",
-          description: message,
-          variant: "destructive",
-        });
-      };
+        alert(message)
+      }
     } else {
-      console.log("❌ Speech Recognition not supported");
-      setSpeechSupported(false);
+      console.log("❌ Speech Recognition not supported")
+      setSpeechSupported(false)
     }
-  }, [toast]);
+  }, [voiceMode])
 
   const speak = (text) => {
     if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.8;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-
-      window.speechSynthesis.speak(utterance);
+      window.speechSynthesis.cancel()
+      const utterance = new SpeechSynthesisUtterance(text)
+      utterance.rate = 0.8
+      utterance.pitch = 1
+      utterance.volume = 1
+      utterance.onstart = () => setIsSpeaking(true)
+      utterance.onend = () => setIsSpeaking(false)
+      window.speechSynthesis.speak(utterance)
     }
-  };
+  }
 
   const startListening = async () => {
-    console.log("🔴 Start listening button clicked");
-
+    console.log("🔴 Start listening button clicked")
     if (!speechSupported) {
-      toast({
-        title: "Not Supported",
-        description: "Speech recognition is not supported in your browser. Please use Chrome or Edge.",
-        variant: "destructive",
-      });
-      return;
+      alert("Speech recognition is not supported in your browser. Please use Chrome or Edge.")
+      return
     }
 
     if (!recognitionRef.current) {
-      toast({
-        title: "Error",
-        description: "Speech recognition not initialized.",
-        variant: "destructive",
-      });
-      return;
+      alert("Speech recognition not initialized.")
+      return
     }
 
     if (isListening) {
-      console.log("🛑 Stopping speech recognition");
-      recognitionRef.current.stop();
-      return;
+      console.log("🛑 Stopping speech recognition")
+      recognitionRef.current.stop()
+      return
     }
 
     try {
-      console.log("🎤 Starting speech recognition...");
-      recognitionRef.current.start();
+      console.log("🎤 Starting speech recognition...")
+      recognitionRef.current.start()
     } catch (error) {
-      console.error("Error starting recognition:", error);
-      toast({
-        title: "Error",
-        description: "Failed to start speech recognition. Please try again.",
-        variant: "destructive",
-      });
+      console.error("Error starting recognition:", error)
+      alert("Failed to start speech recognition. Please try again.")
     }
-  };
+  }
 
-  const handleVoiceInput = (text) => {
-    const cleanText = text.trim();
-    if (!cleanText) return;
+  const handleStart = () => {
+    setIsRecording(true)
+    setDisplayContent(inputValue)
 
-    switch (step) {
-      case "asking-count":
-        const numbers = cleanText.match(/\d+/g);
-        const count = numbers ? parseInt(numbers[0]) : 0;
-
-        if (count > 0 && count <= 20) {
-          setTotalQuestions(count);
-          setStep("collecting-questions");
-          setCurrentQuestionIndex(0);
-          setTimeout(() => {
-            speak(`Perfect! I'll collect ${count} questions. Please tell me your first question.`);
-          }, 1000);
-        } else {
-          setTimeout(() => {
-            speak("Please say a number between 1 and 20.");
-          }, 500);
-        }
-        break;
-
-      case "collecting-questions":
-        const newQuestion = {
-          id: Date.now(),
-          text: cleanText,
-        };
-        setQuestions((prev) => [...prev, newQuestion]);
-
-        const nextIndex = currentQuestionIndex + 1;
-        if (nextIndex < totalQuestions) {
-          setCurrentQuestionIndex(nextIndex);
-          setTimeout(() => {
-            speak(`Got it! Now tell me question number ${nextIndex + 1}.`);
-          }, 1000);
-        } else {
-          setStep("details-form");
-          setTimeout(() => {
-            speak("Excellent! All questions collected. Please fill out the form below.");
-          }, 1000);
-        }
-        break;
+    if (voiceMode && inputValue.trim()) {
+      speak(`Recording started. Your content: ${inputValue}`)
     }
-  };
+  }
 
-  const handleTextInput = (text) => {
-    if (text.trim()) {
-      setTranscript(text);
-      handleVoiceInput(text);
+  const handleStop = () => {
+    setIsRecording(false)
+
+    if (voiceMode) {
+      speak("Recording stopped.")
     }
-  };
+  }
 
-  const startInterview = () => {
-    setStep("asking-count");
-    setTimeout(() => {
-      speak("Hello! How many interview questions would you like to create? Please say a number between 1 and 20.");
-    }, 500);
-  };
+  const handleDone = () => {
+    if (displayContent.trim()) {
+      setShowCreateItemModal(true)
 
-  const handleDetailsSubmit = () => {
-    if (!interviewDetails.title || !interviewDetails.category || !interviewDetails.difficulty) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
+      if (voiceMode) {
+        speak("Opening creation form. Please fill in the details.")
+      }
+    }
+  }
+
+  const handleFormChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+  }
+
+  const handleCreate = (e) => {
+    e.preventDefault()
+
+    // Basic validation
+    if (!formData.title.trim() || !formData.category.trim()) {
+      alert("Please fill in all required fields")
+      return
     }
 
-    setStep("completed");
-    speak("Your interview pack has been created successfully!");
-  };
+    // Simulate saving (you can replace this with actual API call)
+    console.log("Creating item with data:", {
+      ...formData,
+      content: displayContent,
+      geminiResponse: geminiResponse,
+      createdAt: new Date().toISOString(),
+    })
 
-  const resetInterview = () => {
-    setStep("initial");
-    setQuestions([]);
-    setTotalQuestions(0);
-    setCurrentQuestionIndex(0);
-    setTranscript("");
-    setInterviewDetails({
+    // Reset everything
+    setFormData({
       title: "",
       category: "",
-      difficulty: "",
-      duration: "",
-      description: "",
-    });
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+      companies: "",
+      difficulty: "easy",
+    })
+    setShowCreateItemModal(false)
+    setInputValue("")
+    setDisplayContent("")
+    setIsRecording(false)
+    setGeminiResponse("")
+    setTranscript("")
+
+    if (voiceMode) {
+      speak("Interview item created successfully!")
     }
-  };
+  }
+
+  const handleCloseCreateModal = () => {
+    setFormData({
+      title: "",
+      category: "",
+      companies: "",
+      difficulty: "easy",
+    })
+    setShowCreateItemModal(false)
+  }
 
   return (
-    <div className="container">
-      <div className="max-w-4xl">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Create Interview Pack</h1>
-          <p className="text-lg text-gray-600">AI-powered interview question creator</p>
-
-          {!speechSupported && (
-            <div className="alert-warning mt-4">
-              <AlertCircle className="h-5 w-5 text-yellow-600" />
-              <p className="text-sm text-yellow-800">
-                Speech recognition not supported. Please use Chrome or Edge browser.
-              </p>
+    <div className="interview-container">
+      {/* Instructions Modal */}
+      {showInstructionsModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h2 className="modal-title">Welcome to the AI-Powered Interview Creator!</h2>
             </div>
-          )}
-        </div>
-
-        {step === "initial" && (
-          <Card className="max-w-2xl">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Ready to Start?</CardTitle>
-              <p className="text-gray-600">Create your interview questions using voice or text input</p>
-            </CardHeader>
-            <CardContent className="text-center">
-              <Button onClick={startInterview} size="lg" className="btn-default">
-                <Volume2 className="mr-2 h-5 w-5" />
-                Start Creating Interview
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {(step === "asking-count" || step === "collecting-questions") && (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Volume2 className="h-5 w-5" />
-                  Voice Input
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center space-y-4">
-                  {speechSupported && (
-                    <div className="flex justify-center gap-4">
-                      <Button
-                        onClick={startListening}
-                        variant={isListening ? "destructive" : "default"}
-                        size="lg"
-                        className="min-w-48"
-                      >
-                        {isListening ? (
-                          <>
-                            <MicOff className="mr-2 h-5 w-5" />
-                            Stop Listening
-                          </>
-                        ) : (
-                          <>
-                            <Mic className="mr-2 h-5 w-5" />
-                            Start Speaking
-                          </>
-                        )}
-                      </Button>
-
-                      {isSpeaking && (
-                        <Button onClick={() => window.speechSynthesis && window.speechSynthesis.cancel()} variant="outline" size="lg">
-                          <VolumeX className="mr-2 h-5 w-5" />
-                          Stop AI
-                        </Button>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="max-w-md">
-                    <Label htmlFor="text-input" className="text-sm text-gray-600">
-                      {speechSupported ? "Or type your response:" : "Type your response:"}
-                    </Label>
-                    <div className="flex gap-2 mt-2">
-                      <Input
-                        id="text-input"
-                        placeholder={step === "asking-count" ? "Enter number (e.g., 5)" : "Type your question here"}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            const value = e.currentTarget.value.trim();
-                            if (value) {
-                              handleTextInput(value);
-                              e.currentTarget.value = "";
-                            }
-                          }
-                        }}
-                      />
-                      <Button
-                        onClick={() => {
-                          const input = document.getElementById("text-input");
-                          const value = input && input.value.trim();
-                          if (value) {
-                            handleTextInput(value);
-                            input.value = "";
-                          }
-                        }}
-                        variant="outline"
-                      >
-                        Submit
-                      </Button>
-                    </div>
-                  </div>
-
-                  {transcript && (
-                    <div className="transcript-display">
-                      <p className="text-sm text-green-600 mb-1">You said:</p>
-                      <p className="font-medium text-green-800">"{transcript}"</p>
-                    </div>
-                  )}
-
-                  <div className="text-sm text-gray-500">
-                    {step === "asking-count" && "How many questions do you want? (1-20)"}
-                    {step === "collecting-questions" && `Question ${currentQuestionIndex + 1} of ${totalQuestions}`}
-                  </div>
-
-                  {isListening && (
-                    <div className="pulse-indicator">
-                      <div className="pulse-dot"></div>
-                    </div>
-                  )}
+            <div className="modal-content">
+              <div className="instructions">
+                <p>Follow these simple steps to get started:</p>
+                <ul>
+                  <li>
+                    <strong>Enable Voice Mode</strong> for AI-powered assistance (optional)
+                  </li>
+                  <li>
+                    <strong>Enter your text</strong> in the input field or use voice input
+                  </li>
+                  <li>
+                    Click <strong>"Start"</strong> to begin recording and display your content
+                  </li>
+                  <li>
+                    Click <strong>"Stop"</strong> to pause the recording
+                  </li>
+                  <li>Review your content and AI responses in the display area</li>
+                  <li>
+                    When satisfied, click <strong>"Done"</strong> to save your work
+                  </li>
+                  <li>
+                    Fill in the required details and click <strong>"Create"</strong> to complete
+                  </li>
+                </ul>
+                <div className="note">
+                  <strong>Note:</strong> Voice mode requires microphone access and works best in Chrome or Edge
+                  browsers.
                 </div>
-              </CardContent>
-            </Card>
-
-            {questions.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    Questions Collected ({questions.length}/{totalQuestions})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {questions.map((question, index) => (
-                      <div key={question.id} className="question-item">
-                        <Badge variant="secondary">{index + 1}</Badge>
-                        <p className="flex-1">{question.text}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="confirm-button" onClick={() => setShowInstructionsModal(false)}>
+                Got it, let's start!
+              </button>
+            </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {step === "details-form" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Interview Details</CardTitle>
-              <p className="text-gray-600">Complete your interview pack</p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="title">Interview Title *</Label>
-                    <Input
-                      id="title"
-                      value={interviewDetails.title}
-                      onChange={(e) => setInterviewDetails((prev) => ({ ...prev, title: e.target.value }))}
-                      placeholder="e.g., Senior Developer Interview"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="category">Category *</Label>
-                    <WorkingSelect
-                      value={interviewDetails.category}
-                      onValueChange={(value) => setInterviewDetails((prev) => ({ ...prev, category: value }))}
-                      placeholder="Select category"
-                    >
-                      <SelectItem value="technical">Technical</SelectItem>
-                      <SelectItem value="behavioral">Behavioral</SelectItem>
-                      <SelectItem value="leadership">Leadership</SelectItem>
-                      <SelectItem value="product">Product</SelectItem>
-                      <SelectItem value="design">Design</SelectItem>
-                      <SelectItem value="sales">Sales</SelectItem>
-                      <SelectItem value="marketing">Marketing</SelectItem>
-                      <SelectItem value="general">General</SelectItem>
-                    </WorkingSelect>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="difficulty">Difficulty Level *</Label>
-                    <WorkingSelect
-                      value={interviewDetails.difficulty}
-                      onValueChange={(value) => setInterviewDetails((prev) => ({ ...prev, difficulty: value }))}
-                      placeholder="Select difficulty"
-                    >
-                      <SelectItem value="entry">Entry Level</SelectItem>
-                      <SelectItem value="intermediate">Intermediate</SelectItem>
-                      <SelectItem value="senior">Senior</SelectItem>
-                      <SelectItem value="expert">Expert</SelectItem>
-                    </WorkingSelect>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="duration">Expected Duration</Label>
-                    <WorkingSelect
-                      value={interviewDetails.duration}
-                      onValueChange={(value) => setInterviewDetails((prev) => ({ ...prev, duration: value }))}
-                      placeholder="Select duration"
-                    >
-                      <SelectItem value="30">30 minutes</SelectItem>
-                      <SelectItem value="45">45 minutes</SelectItem>
-                      <SelectItem value="60">1 hour</SelectItem>
-                      <SelectItem value="90">1.5 hours</SelectItem>
-                      <SelectItem value="120">2 hours</SelectItem>
-                    </WorkingSelect>
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={interviewDetails.description}
-                    onChange={(e) => setInterviewDetails((prev) => ({ ...prev, description: e.target.value }))}
-                    placeholder="Brief description of the interview..."
-                    rows={3}
+      {/* Create Item Modal */}
+      {showCreateItemModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h2 className="modal-title">Create New Interview Item</h2>
+            </div>
+            <form onSubmit={handleCreate}>
+              <div className="modal-content">
+                <div className="form-group">
+                  <label className="label" htmlFor="title">
+                    Title <span className="required">*</span>
+                  </label>
+                  <input
+                    id="title"
+                    type="text"
+                    className="form-input"
+                    value={formData.title}
+                    onChange={(e) => handleFormChange("title", e.target.value)}
+                    placeholder="Enter title..."
+                    required
                   />
                 </div>
 
-                <div className="questions-summary">
-                  <h4 className="font-medium mb-2">Questions Summary</h4>
-                  <p className="text-sm text-gray-600 mb-2">Total Questions: {questions.length}</p>
-                  <div className="max-h-32 overflow-y-auto space-y-1">
-                    {questions.map((question, index) => (
-                      <div key={question.id} className="text-sm">
-                        <span className="font-medium">{index + 1}.</span> {question.text}
-                      </div>
-                    ))}
-                  </div>
+                <div className="form-group">
+                  <label className="label" htmlFor="category">
+                    Category <span className="required">*</span>
+                  </label>
+                  <input
+                    id="category"
+                    type="text"
+                    className="form-input"
+                    value={formData.category}
+                    onChange={(e) => handleFormChange("category", e.target.value)}
+                    placeholder="Enter category..."
+                    required
+                  />
                 </div>
 
-                <div className="flex gap-4">
-                  <Button 
-                    onClick={handleDetailsSubmit} 
-                    className="flex-1"
-                    variant="default"
+                <div className="form-group">
+                  <label className="label" htmlFor="companies">
+                    Companies
+                  </label>
+                  <input
+                    id="companies"
+                    type="text"
+                    className="form-input"
+                    value={formData.companies}
+                    onChange={(e) => handleFormChange("companies", e.target.value)}
+                    placeholder="Enter companies (comma separated)..."
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="label" htmlFor="difficulty">
+                    Difficulty Level
+                  </label>
+                  <select
+                    id="difficulty"
+                    className="form-select"
+                    value={formData.difficulty}
+                    onChange={(e) => handleFormChange("difficulty", e.target.value)}
                   >
-                    Create Interview Pack
-                  </Button>
-                  <Button onClick={resetInterview} variant="outline">
-                    Start Over
-                  </Button>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
-        {step === "completed" && (
-          <Card className="max-w-2xl">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl text-green-600">Interview Pack Created! 🎉</CardTitle>
-              <p className="text-gray-600">Your interview is ready to use</p>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="interview-result">
-                <h3 className="font-bold text-lg mb-4">{interviewDetails.title}</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Category:</span> {interviewDetails.category}
-                  </div>
-                  <div>
-                    <span className="font-medium">Difficulty:</span> {interviewDetails.difficulty}
-                  </div>
-                  <div>
-                    <span className="font-medium">Duration:</span>{" "}
-                    {interviewDetails.duration ? `${interviewDetails.duration} minutes` : "Not specified"}
-                  </div>
-                  <div>
-                    <span className="font-medium">Questions:</span> {questions.length}
-                  </div>
+                <div className="form-group">
+                  <label className="label">Content Preview</label>
+                  <div className="content-preview">{displayContent || "No content to preview"}</div>
                 </div>
-                {interviewDetails.description && (
-                  <div className="mt-4">
-                    <span className="font-medium">Description:</span>
-                    <p className="text-gray-700 mt-1">{interviewDetails.description}</p>
+
+                {geminiResponse && (
+                  <div className="form-group">
+                    <label className="label">AI Assistant Response</label>
+                    <div className="content-preview ai-response">{geminiResponse}</div>
                   </div>
                 )}
               </div>
-
-              <div className="flex gap-4">
-                <Button onClick={resetInterview} className="flex-1" variant="outline">
-                  Create Another Interview
-                </Button>
-                <Button className="flex-1" variant="default">View Interview Pack</Button>
+              <div className="modal-footer">
+                <button type="button" className="cancel-button" onClick={handleCloseCreateModal}>
+                  Cancel
+                </button>
+                <button type="submit" className="create-button">
+                  Create Item
+                </button>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Left Section (Decorative/Placeholder) */}
+      <div className="interview-left-section">
+        <iframe
+          src="https://my.spline.design/voiceinteractionanimation-2TyeWSP24w6QzdGddVpF30we/"
+          frameBorder="0"
+          width="100%"
+          height="100%"
+          title="Askora Voice Interaction Animation"
+        ></iframe>
+      </div>
+
+      {/* Right Section (Main UI) */}
+      <div className="interview-right-section">
+        <div className="interview-content-wrapper">
+          {/* AI Configuration Panel */}
+          <div className="ai-config-panel">
+            <div className="config-row">
+              <div className="config-item">
+                <label className="config-label">
+                  <input type="checkbox" checked={voiceMode} onChange={(e) => setVoiceMode(e.target.checked)} />
+                  <span className="checkmark"></span>
+                  Enable Voice Mode & AI Assistance
+                </label>
+              </div>
+            </div>
+
+            {!speechSupported && voiceMode && (
+              <div className="warning-message">
+                <AlertCircle className="warning-icon" size={16} />
+                Speech recognition not supported. Please use Chrome or Edge browser.
+              </div>
+            )}
+          </div>
+
+          {/* Start/Stop Buttons */}
+          <div className="button-group">
+            <button className={`control-button ${isRecording ? "active-button" : ""}`} onClick={handleStart}>
+              Start
+            </button>
+            <button
+              className={`control-button ${!isRecording ? "disabled-button" : ""}`}
+              onClick={handleStop}
+              disabled={!isRecording}
+            >
+              Stop
+            </button>
+          </div>
+
+          {/* Input Section with Voice Controls */}
+          <div className="input-section">
+            {voiceMode && speechSupported && (
+              <div className="voice-controls">
+                <button className={`voice-button ${isListening ? "listening" : ""}`} onClick={startListening}>
+                  {isListening ? (
+                    <>
+                      <MicOff size={20} />
+                      Stop Listening
+                    </>
+                  ) : (
+                    <>
+                      <Mic size={20} />
+                      Start Voice Input
+                    </>
+                  )}
+                </button>
+
+                {isSpeaking && (
+                  <button
+                    className="voice-button stop-speaking"
+                    onClick={() => window.speechSynthesis && window.speechSynthesis.cancel()}
+                  >
+                    <VolumeX size={20} />
+                    Stop AI Voice
+                  </button>
+                )}
+
+                {isListening && (
+                  <div className="listening-indicator">
+                    <div className="pulse-dot"></div>
+                    <span>Listening...</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <input
+              type="text"
+              placeholder={voiceMode ? "Type here or use voice input..." : "Enter text here..."}
+              className="main-input"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+            />
+
+            {transcript && (
+              <div className="transcript-display">
+                <span className="transcript-label">Voice Input:</span>
+                <span className="transcript-text">"{transcript}"</span>
+              </div>
+            )}
+          </div>
+
+          {/* AI Response Section */}
+          {voiceMode && (transcript || isGeminiLoading || geminiResponse) && (
+            <div className="ai-response-section">
+              <div className="ai-response-header">
+                <Sparkles className="ai-icon" size={20} />
+                <span>AI Assistant Response</span>
+              </div>
+
+              {isGeminiLoading ? (
+                <div className="loading-response">
+                  <Loader2 className="loading-spinner" size={20} />
+                  <span>Getting response from AI...</span>
+                </div>
+              ) : geminiResponse ? (
+                <div className="ai-response-content">{geminiResponse}</div>
+              ) : null}
+            </div>
+          )}
+
+          {/* Display Div */}
+          <div className="display-div">
+            <div className="display-content">{displayContent || "Your content will appear here..."}</div>
+            <button
+              className={`done-button ${!displayContent ? "disabled-button" : ""}`}
+              onClick={handleDone}
+              disabled={!displayContent}
+            >
+              Done
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  );
+  )
 }
+
+export default VoiceRe
