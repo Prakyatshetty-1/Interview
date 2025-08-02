@@ -3,7 +3,12 @@
 import { useState, useEffect } from "react"
 import "./SlidingCard.css"
 import CardFolder from './CardFolder'
+import Card from './Card'
 import cardDataJson from "../data/CardData.json"
+
+// Character limits configuration
+const TITLE_CHAR_LIMIT = 20
+const TAG_CHAR_LIMIT = 10
 
 const ChevronLeft = () => (
   <svg className="chevron-icon" viewBox="0 0 24 24">
@@ -17,11 +22,24 @@ const ChevronRight = () => (
   </svg>
 )
 
+const ArrowRight = () => (
+  <svg className="more-arrow" viewBox="0 0 24 24">
+    <path d="M5 12h14M12 5l7 7-7 7" />
+  </svg>
+)
+
 const SliderCard = (props) => {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [courseData, setCardData] = useState([])
+  const [courseData, setCourseData] = useState([])
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+
+  // Helper function to truncate text with ellipsis
+  const truncateText = (text, limit) => {
+    if (!text) return ""
+    if (text.length <= limit) return text
+    return text.substring(0, limit) + "..."
+  }
 
   // Intersection Observer for scroll animations
   useEffect(() => {
@@ -43,128 +61,105 @@ const SliderCard = (props) => {
   }, [props.tag])
 
   useEffect(() => {
-    setCardData(cardDataJson)
+    setCourseData(cardDataJson)
   }, [])
 
   useEffect(() => {
-    let filteredData = [...cardDataJson];
-
-    const topCompanies = [
-      "Google",
-      "Microsoft",
-      "Amazon",
-      "Meta",
-      "Apple",
-      "Netflix",
-      "Oracle",
-      "Uber",
-      "Tesla",
-      "Nvidia",
-      "Adobe",
-      "Salesforce"
-    ];
+    let filteredData = [...cardDataJson]
 
     if (props.tag === "Featured") {
-      const categories=[
+      const categories = [
         {
           title: "Front End",
-          path:"/FrontEndDev.png"
+          path: "/FrontEndDev.png"
         },
         {
           title: "Back End",
-          path:"/BackEndDev.png"
+          path: "/BackEndDev.png"
         },
         {
           title: "Full Stack",
-          path:"/FullStackWebDev.png"
+          path: "/FullStackWebDev.png"
         },
         {
           title: "Mobile Dev",
-          path:"/MobileDev.png"
+          path: "/MobileDev.png"
         },
         {
           title: "ML Engineering",
-          path:"/MLEngineering.png"
+          path: "/MLEngineering.png"
         },
         {
           title: "AIML",
-          path:"/AIResearch.png"
+          path: "/AIResearch.png"
         },
         {
           title: "JAVA",
-          path:""
+          path: ""
         },
         {
           title: "Data Engineer",
-          path:"/DataEngineer.png"
+          path: "/DataEngineer.png"
         },
         {
           title: "UIUX",
-          path:"/DesktopDev.png"
+          path: "/DesktopDev.png"
         },
-
       ]
-
-      filteredData = categories;
+      filteredData = categories
     } else if (props.tag === "Popular") {
-      filteredData.sort((a, b) => b.popularity - a.popularity);
+      filteredData.sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
     } else if (props.tag === "Top Companies") {
-      const categories=[
+      const categories = [
         {
           title: "Google",
-          path:"/Google.png"
+          path: "/Google.png"
         },
         {
           title: "Microsoft",
-          path:"/Microsoft.png"
+          path: "/Microsoft.png"
         },
         {
           title: "Amazon",
-          path:"/Amazon.png"
+          path: "/Amazon.png"
         },
         {
           title: "Meta",
-          path:"/Meta.png"
+          path: "/Meta.png"
         },
         {
           title: "Apple",
-          path:"/Apple.png"
+          path: "/Apple.png"
         },
         {
           title: "Netflix",
-          path:"/Netflix.png"
+          path: "/Netflix.png"
         },
         {
           title: "Oracle",
-          path:"/Oracle.png"
+          path: "/Oracle.png"
         },
         {
           title: "Uber",
-          path:"/Uber.png"
+          path: "/Uber.png"
         },
         {
           title: "Tesla",
-          path:"/DesktopDev.png"
+          path: "/DesktopDev.png"
         },
         {
           title: "Adobe",
-          path:"/Adobe.png"
+          path: "/Adobe.png"
         },
-
       ]
-
-      filteredData = categories;
+      filteredData = categories
+    } else if (props.tag === "Paid") {
+      filteredData = cardDataJson.filter(item => item.paid === true)
     }
-    else if (props.tag === "Paid"){
-      filteredData = cardDataJson.filter(item => item.paid === true);
 
-    }
-    filteredData = filteredData.slice(0, 10);
-
-
-    setCardData(filteredData);
-  }, [props.tag]);
-
+    filteredData = filteredData.slice(0, 10)
+    setCourseData(filteredData)
+  }, [props.tag])
 
   const cardsPerView = 5
   const maxIndex = courseData.length - cardsPerView
@@ -172,17 +167,18 @@ const SliderCard = (props) => {
   const slideLeft = () => {
     if (isTransitioning) return
     setIsTransitioning(true)
-    setCurrentIndex((prev) => Math.max(0, prev -1))
+    setCurrentIndex((prev) => Math.max(0, prev - 1))
     setTimeout(() => setIsTransitioning(false), 500)
   }
 
   const slideRight = (index) => {
     if (isTransitioning) return
     setIsTransitioning(true)
-    if(index===0)
+    if (index === 0) {
       setCurrentIndex((prev) => Math.min(maxIndex, prev + 0.8))
-    else
+    } else {
       setCurrentIndex((prev) => Math.min(maxIndex, prev + 1))
+    }
     setTimeout(() => setIsTransitioning(false), 500)
   }
 
@@ -197,7 +193,6 @@ const SliderCard = (props) => {
     const cardWidth = 260
     const gap = 24
     const cardWithGap = cardWidth + gap
-
     if (currentIndex === 0) {
       return 0
     } else if (currentIndex === maxIndex) {
@@ -207,6 +202,9 @@ const SliderCard = (props) => {
       return -(currentIndex * cardWithGap - 5 / 2)
     }
   }
+
+  // Determine which card component to use
+  const shouldUseCardFolder = props.tag === "Top Companies" || props.tag === "Featured"
 
   return (
     <div
@@ -219,9 +217,7 @@ const SliderCard = (props) => {
           <h1 className="slider-title">{props.tag}</h1>
           <button className="more-button">
             More
-            <svg className="more-arrow" viewBox="0 0 24 24">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
+            <ArrowRight />
           </button>
         </div>
 
@@ -238,8 +234,8 @@ const SliderCard = (props) => {
 
           {/* Right Navigation Arrow */}
           <button
-            onClick={()=>slideRight(currentIndex)}
-            disabled={currentIndex >= maxIndex-0.5 || isTransitioning}
+            onClick={() => slideRight(currentIndex)}
+            disabled={currentIndex >= maxIndex - 0.5 || isTransitioning}
             className="nav-arrow nav-arrow-right"
           >
             <ChevronRight />
@@ -268,10 +264,22 @@ const SliderCard = (props) => {
                         animationDelay: `${index * 0.1}s`
                       }}
                     >
-                      <CardFolder
-                        title={ course.title}
-                        path={course.path}
-                      />
+                      {shouldUseCardFolder ? (
+                        <CardFolder
+                          title={truncateText(course.title, TITLE_CHAR_LIMIT)}
+                          path={course.path}
+                        />
+                      ) : (
+                        <Card
+                          title={truncateText(course.title, TITLE_CHAR_LIMIT)}
+                          path={course.path}
+                          description={course.description}
+                          tags={course.tags?.map((tag) => truncateText(tag, TAG_CHAR_LIMIT))}
+                          difficulty={course.difficulty}
+                          paid={course.paid}
+                          creator={course.creator}
+                        />
+                      )}
                     </div>
                   ))}
                 </div>

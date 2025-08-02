@@ -2,35 +2,34 @@ import "./CardFolder.css"
 
 export default function CardFolder(props) {
 
-  const handleClick = async () => {
-  const title = props.title;
-  const imageUrl = props.path;
+//   const handleClick = async () => {
+//   const title = props.title;
+//   const imageUrl = props.path;
+//   console.log("Saving:", title, imageUrl);
 
-  console.log("Saving:", title, imageUrl);
+//   try {
+//     const response = await fetch("http://localhost:5000/api/save", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({ title, imageUrl }),
+//     });
 
-  try {
-    const response = await fetch("http://localhost:5000/api/save", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ title, imageUrl }),
-    });
+//     const data = await response.json();
 
-    const data = await response.json();
-
-    if (response.ok) {
-      console.log("Saved successfully:", data);
-      alert("Card saved!");
-    } else {
-      console.error("Save failed:", data);
-      alert("Failed to save card.");
-    }
-  } catch (error) {
-    console.error("Network error:", error);
-    alert("Error saving card.");
-  }
-};
+//     if (response.ok) {
+//       console.log("Saved successfully:", data);
+//       alert("Card saved!");
+//     } else {
+//       console.error("Save failed:", data);
+//       alert("Failed to save card.");
+//     }
+//   } catch (error) {
+//     console.error("Network error:", error);
+//     alert("Error saving card.");
+//   }
+// };
 
   return (
     <>
@@ -67,9 +66,9 @@ export default function CardFolder(props) {
           </div>
         </div>
         {/* Add the save button wrapper here */}
-        <div className="save-button-wrapper">
+        {/* <div className="save-button-wrapper">
           <button onClick={handleClick}> save</button>
-        </div>
+        </div> */}
       </div>
     </>
   )

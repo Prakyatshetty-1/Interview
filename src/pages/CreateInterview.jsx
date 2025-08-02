@@ -1,93 +1,77 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Mic, MicOff, Volume2, VolumeX, AlertCircle, ChevronDown, Sparkles, Loader2 } from "lucide-react";
-import './CreateInterview.css'
+"use client"
+
+import React, { useState, useEffect, useRef } from "react"
+import { Mic, MicOff, Volume2, VolumeX, AlertCircle, ChevronDown } from "lucide-react"
+import "./CreateInterview.css"
 
 // UI Components
-const Button = ({ children, onClick, variant = "default", size = "default", className = "", type = "button", ...props }) => {
-  const baseClass = "btn-base";
-  const variantClass = `btn-${variant}`;
-  const sizeClass = size === "lg" ? "btn-lg" : "btn-default-size";
-  
+const Button = ({
+  children,
+  onClick,
+  variant = "default",
+  size = "default",
+  className = "",
+  type = "button",
+  disabled = false,
+  ...props
+}) => {
+  const baseClass = "btn-base"
+  const variantClass = `btn-${variant}`
+  const sizeClass = size === "lg" ? "btn-lg" : "btn-default-size"
+
   return (
     <button
       type={type}
       className={`${baseClass} ${variantClass} ${sizeClass} ${className}`}
       onClick={onClick}
+      disabled={disabled}
       {...props}
     >
       {children}
     </button>
-  );
-};
+  )
+}
 
-const Card = ({ children, className = "" }) => (
-  <div className={`card ${className}`}>
-    {children}
-  </div>
-);
+const Card = ({ children, className = "" }) => <div className={`card ${className}`}>{children}</div>
 
-const CardHeader = ({ children, className = "" }) => (
-  <div className={`card-header ${className}`}>
-    {children}
-  </div>
-);
+const CardHeader = ({ children, className = "" }) => <div className={`card-header ${className}`}>{children}</div>
 
-const CardTitle = ({ children, className = "" }) => (
-  <h3 className={`card-title ${className}`}>
-    {children}
-  </h3>
-);
+const CardTitle = ({ children, className = "" }) => <h3 className={`card-title ${className}`}>{children}</h3>
 
-const CardContent = ({ children, className = "" }) => (
-  <div className={`card-content ${className}`}>
-    {children}
-  </div>
-);
+const CardContent = ({ children, className = "" }) => <div className={`card-content ${className}`}>{children}</div>
 
-const Input = ({ className = "", ...props }) => (
-  <input
-    className={`input ${className}`}
-    {...props}
-  />
-);
+const Input = ({ className = "", ...props }) => <input className={`input ${className}`} {...props} />
 
 const Label = ({ children, htmlFor, className = "" }) => (
-  <label
-    htmlFor={htmlFor}
-    className={`label ${className}`}
-  >
+  <label htmlFor={htmlFor} className={`label ${className}`}>
     {children}
   </label>
-);
+)
 
-const WorkingSelect = ({ value, onValueChange, children, placeholder = "Select..." }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(value || "");
-  
+const Select = ({ value, onValueChange, children, placeholder = "Select..." }) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [selectedValue, setSelectedValue] = useState(value || "")
+
   useEffect(() => {
-    setSelectedValue(value || "");
-  }, [value]);
-  
-  const options = React.Children.toArray(children).map(child => ({
+    setSelectedValue(value || "")
+  }, [value])
+
+  const options = React.Children.toArray(children).map((child) => ({
     value: child.props.value,
-    label: child.props.children
-  }));
-  
-  const selectedOption = options.find(opt => opt.value === selectedValue);
-  
+    label: child.props.children,
+  }))
+
+  const selectedOption = options.find((opt) => opt.value === selectedValue)
+
   const handleSelect = (optionValue) => {
-    setSelectedValue(optionValue);
-    onValueChange && onValueChange(optionValue);
-    setIsOpen(false);
-  };
-  
+    setSelectedValue(optionValue)
+    onValueChange && onValueChange(optionValue)
+    setIsOpen(false)
+  }
+
   return (
     <div className="select-container">
-      <button
-        type="button"
-        className="select-trigger"
-        onClick={() => setIsOpen(!isOpen)}
-      >
+      <button type="button" className="select-trigger" onClick={() => setIsOpen(!isOpen)}>
         <span className={selectedOption ? "select-value" : "select-placeholder"}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
@@ -95,236 +79,141 @@ const WorkingSelect = ({ value, onValueChange, children, placeholder = "Select..
       </button>
       {isOpen && (
         <div className="select-content">
-          {options.map(option => (
-            <div
-              key={option.value}
-              className="select-item"
-              onClick={() => handleSelect(option.value)}
-            >
+          {options.map((option) => (
+            <div key={option.value} className="select-item" onClick={() => handleSelect(option.value)}>
               {option.label}
             </div>
           ))}
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
 const SelectItem = ({ value, children }) => {
-  return React.createElement('div', { value }, children);
-};
+  return React.createElement("div", { value }, children)
+}
 
 const Textarea = ({ className = "", rows = 3, ...props }) => (
-  <textarea
-    className={`textarea ${className}`}
-    rows={rows}
-    {...props}
-  />
-);
+  <textarea className={`textarea ${className}`} rows={rows} {...props} />
+)
 
 const Badge = ({ children, variant = "default", className = "" }) => {
-  const variantClass = `badge-${variant}`;
-  
-  return (
-    <div className={`badge ${variantClass} ${className}`}>
-      {children}
-    </div>
-  );
-};
+  const variantClass = `badge-${variant}`
 
-// Toast hook simulation
+  return <div className={`badge ${variantClass} ${className}`}>{children}</div>
+}
+
+// Toast simulation
 const useToast = () => {
   return {
     toast: ({ title, description, variant }) => {
-      alert(`${title}: ${description}`);
-    }
-  };
-};
+      alert(`${title}: ${description}`)
+    },
+  }
+}
 
 // Main Component
 export default function CreateInterview() {
-  const [step, setStep] = useState("initial");
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [questions, setQuestions] = useState([]);
-  const [totalQuestions, setTotalQuestions] = useState(0);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [transcript, setTranscript] = useState("");
-  const [speechSupported, setSpeechSupported] = useState(false);
-  const [geminiApiKey, setGeminiApiKey] = useState("");
-  const [geminiResponse, setGeminiResponse] = useState("");
-  const [isGeminiLoading, setIsGeminiLoading] = useState(false);
+  const [step, setStep] = useState("initial")
+  const [isListening, setIsListening] = useState(false)
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const [questions, setQuestions] = useState([])
+  const [totalQuestions, setTotalQuestions] = useState(0)
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [transcript, setTranscript] = useState("")
+  const [speechSupported, setSpeechSupported] = useState(false)
+  const [pendingQuestion, setPendingQuestion] = useState("") // For voice confirmation
+  const [showVoiceConfirmation, setShowVoiceConfirmation] = useState(false)
   const [interviewDetails, setInterviewDetails] = useState({
     title: "",
     category: "",
     difficulty: "",
     duration: "",
     description: "",
-  });
-
-  const recognitionRef = useRef(null);
-  const { toast } = useToast();
-
-  // Gemini API Integration
-  const callGeminiAPI = async (prompt) => {
-    if (!geminiApiKey.trim()) {
-      toast({
-        title: "API Key Missing",
-        description: "Please enter your Gemini API key first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsGeminiLoading(true);
-    setGeminiResponse("");
-
-    try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `You are an AI assistant helping with interview preparation. The user said: "${prompt}". Please provide a helpful, professional response related to interview questions, career advice, or general guidance. Keep your response concise and actionable.`
-            }]
-          }]
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const geminiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received from Gemini.";
-      setGeminiResponse(geminiText);
-
-      // Optional: Speak the Gemini response
-      setTimeout(() => {
-        speak(`Gemini says: ${geminiText}`);
-      }, 500);
-
-    } catch (error) {
-      console.error('Gemini API Error:', error);
-      let errorMessage = "Failed to get response from Gemini. ";
-      
-      if (error.message.includes('403')) {
-        errorMessage += "Please check your API key permissions.";
-      } else if (error.message.includes('400')) {
-        errorMessage += "Invalid request format.";
-      } else if (error.message.includes('429')) {
-        errorMessage += "API quota exceeded. Please try again later.";
-      } else {
-        errorMessage += "Please check your internet connection and API key.";
-      }
-
-      toast({
-        title: "Gemini Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      setGeminiResponse("Error: Unable to get response from Gemini API.");
-    } finally {
-      setIsGeminiLoading(false);
-    }
-  };
+  })
+  const recognitionRef = useRef(null)
+  const { toast } = useToast()
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
+    if (typeof window === "undefined") return
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (SpeechRecognition) {
-      setSpeechSupported(true);
-      console.log("✅ Speech Recognition is supported");
-
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = "en-US";
+      setSpeechSupported(true)
+      console.log("✅ Speech Recognition is supported")
+      recognitionRef.current = new SpeechRecognition()
+      recognitionRef.current.continuous = false
+      recognitionRef.current.interimResults = false
+      recognitionRef.current.lang = "en-US"
 
       recognitionRef.current.onstart = () => {
-        console.log("🎤 Speech recognition started");
-        setIsListening(true);
-      };
+        console.log("🎤 Speech recognition started")
+        setIsListening(true)
+      }
 
       recognitionRef.current.onresult = (event) => {
-        const result = event.results[0][0].transcript;
-        console.log("🗣️ Speech result:", result);
-        setTranscript(result);
-        handleVoiceInput(result);
-        
-        // Call Gemini API with the transcript
-        if (result.trim()) {
-          callGeminiAPI(result);
-        }
-      };
+        const result = event.results[0][0].transcript
+        console.log("🗣️ Speech result:", result)
+        setTranscript(result)
+        handleVoiceInput(result)
+      }
 
       recognitionRef.current.onend = () => {
-        console.log("🛑 Speech recognition ended");
-        setIsListening(false);
-      };
+        console.log("🛑 Speech recognition ended")
+        setIsListening(false)
+      }
 
       recognitionRef.current.onerror = (event) => {
-        console.error("❌ Speech recognition error:", event.error);
-        setIsListening(false);
-
-        let message = "Speech recognition failed. ";
+        console.error("❌ Speech recognition error:", event.error)
+        setIsListening(false)
+        let message = "Speech recognition failed. "
         switch (event.error) {
           case "not-allowed":
-            message += "Please allow microphone access.";
-            break;
+            message += "Please allow microphone access."
+            break
           case "no-speech":
-            message += "No speech was detected. Try again.";
-            break;
+            message += "No speech was detected. Try again."
+            break
           case "network":
-            message += "Network error occurred.";
-            break;
+            message += "Network error occurred."
+            break
           default:
-            message += "Please try again.";
+            message += "Please try again."
         }
-
         toast({
           title: "Speech Error",
           description: message,
           variant: "destructive",
-        });
-      };
+        })
+      }
     } else {
-      console.log("❌ Speech Recognition not supported");
-      setSpeechSupported(false);
+      console.log("❌ Speech Recognition not supported")
+      setSpeechSupported(false)
     }
-  }, [toast]);
+  }, [toast])
 
   const speak = (text) => {
     if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.8;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-
-      window.speechSynthesis.speak(utterance);
+      window.speechSynthesis.cancel()
+      const utterance = new SpeechSynthesisUtterance(text)
+      utterance.rate = 0.8
+      utterance.pitch = 1
+      utterance.volume = 1
+      utterance.onstart = () => setIsSpeaking(true)
+      utterance.onend = () => setIsSpeaking(false)
+      window.speechSynthesis.speak(utterance)
     }
-  };
+  }
 
   const startListening = async () => {
-    console.log("🔴 Start listening button clicked");
-
+    console.log("🔴 Start listening button clicked")
     if (!speechSupported) {
       toast({
         title: "Not Supported",
         description: "Speech recognition is not supported in your browser. Please use Chrome or Edge.",
         variant: "destructive",
-      });
-      return;
+      })
+      return
     }
 
     if (!recognitionRef.current) {
@@ -332,91 +221,137 @@ export default function CreateInterview() {
         title: "Error",
         description: "Speech recognition not initialized.",
         variant: "destructive",
-      });
-      return;
+      })
+      return
     }
 
     if (isListening) {
-      console.log("🛑 Stopping speech recognition");
-      recognitionRef.current.stop();
-      return;
+      console.log("🛑 Stopping speech recognition")
+      recognitionRef.current.stop()
+      return
     }
 
     try {
-      console.log("🎤 Starting speech recognition...");
-      recognitionRef.current.start();
+      console.log("🎤 Starting speech recognition...")
+      recognitionRef.current.start()
     } catch (error) {
-      console.error("Error starting recognition:", error);
+      console.error("Error starting recognition:", error)
       toast({
         title: "Error",
         description: "Failed to start speech recognition. Please try again.",
         variant: "destructive",
-      });
+      })
     }
-  };
+  }
 
   const handleVoiceInput = (text) => {
-    const cleanText = text.trim();
-    if (!cleanText) return;
+    const cleanText = text.trim()
+    if (!cleanText) return
 
     switch (step) {
       case "asking-count":
-        const numbers = cleanText.match(/\d+/g);
-        const count = numbers ? parseInt(numbers[0]) : 0;
-
+        const numbers = cleanText.match(/\d+/g)
+        const count = numbers ? Number.parseInt(numbers[0]) : 0
         if (count > 0 && count <= 20) {
-          setTotalQuestions(count);
-          setStep("collecting-questions");
-          setCurrentQuestionIndex(0);
+          setTotalQuestions(count)
+          setStep("collecting-questions")
+          setCurrentQuestionIndex(0)
           setTimeout(() => {
-            speak(`Perfect! I'll collect ${count} questions. Please tell me your first question.`);
-          }, 1000);
+            speak(`Perfect! I'll collect ${count} questions. Please tell me your first question.`)
+          }, 1000)
         } else {
           setTimeout(() => {
-            speak("Please say a number between 1 and 20.");
-          }, 500);
+            speak("Please say a number between 1 and 20.")
+          }, 500)
         }
-        break;
+        break
 
       case "collecting-questions":
-        const newQuestion = {
-          id: Date.now(),
-          text: cleanText,
-        };
-        setQuestions((prev) => [...prev, newQuestion]);
-
-        const nextIndex = currentQuestionIndex + 1;
-        if (nextIndex < totalQuestions) {
-          setCurrentQuestionIndex(nextIndex);
-          setTimeout(() => {
-            speak(`Got it! Now tell me question number ${nextIndex + 1}.`);
-          }, 1000);
-        } else {
-          setStep("details-form");
-          setTimeout(() => {
-            speak("Excellent! All questions collected. Please fill out the form below.");
-          }, 1000);
-        }
-        break;
+        // Show voice confirmation for questions
+        setPendingQuestion(cleanText)
+        setShowVoiceConfirmation(true)
+        break
     }
-  };
+  }
+
+  const handleSubmitQuestion = () => {
+    const newQuestion = {
+      id: Date.now(),
+      text: pendingQuestion,
+    }
+    setQuestions((prev) => [...prev, newQuestion])
+    const nextIndex = currentQuestionIndex + 1
+
+    setShowVoiceConfirmation(false)
+    setPendingQuestion("")
+    setTranscript("")
+
+    if (nextIndex < totalQuestions) {
+      setCurrentQuestionIndex(nextIndex)
+      setTimeout(() => {
+        speak(`Got it! Now tell me question number ${nextIndex + 1}.`)
+      }, 1000)
+    } else {
+      setStep("details-form")
+      setTimeout(() => {
+        speak("Excellent! All questions collected. Please fill out the form below.")
+      }, 1000)
+    }
+  }
+
+  const handleRetryQuestion = () => {
+    setShowVoiceConfirmation(false)
+    setPendingQuestion("")
+    setTranscript("")
+    setTimeout(() => {
+      speak(`Let's try again. Please tell me question number ${currentQuestionIndex + 1}.`)
+    }, 500)
+  }
 
   const handleTextInput = (text) => {
     if (text.trim()) {
-      setTranscript(text);
-      handleVoiceInput(text);
-      
-      // Call Gemini API with the text input
-      callGeminiAPI(text);
+      setTranscript(text)
+      if (step === "collecting-questions") {
+        // For text input, directly submit without confirmation
+        const newQuestion = {
+          id: Date.now(),
+          text: text.trim(),
+        }
+        setQuestions((prev) => [...prev, newQuestion])
+        const nextIndex = currentQuestionIndex + 1
+
+        if (nextIndex < totalQuestions) {
+          setCurrentQuestionIndex(nextIndex)
+          setTimeout(() => {
+            speak(`Got it! Now tell me question number ${nextIndex + 1}.`)
+          }, 1000)
+        } else {
+          setStep("details-form")
+          setTimeout(() => {
+            speak("Excellent! All questions collected. Please fill out the form below.")
+          }, 1000)
+        }
+      } else {
+        handleVoiceInput(text)
+      }
     }
-  };
+  }
 
   const startInterview = () => {
-    setStep("asking-count");
+    setStep("greeting")
     setTimeout(() => {
-      speak("Hello! How many interview questions would you like to create? Please say a number between 1 and 20.");
-    }, 500);
-  };
+      speak(
+        "Hello! Welcome to the AI-powered interview creator. I'm here to help you create amazing interview questions using voice or text input. Let's get started!",
+      )
+    }, 500)
+  }
+
+  const proceedToQuestionCount = () => {
+    setStep("asking-count")
+    setTimeout(() => {
+      speak("Great! How many interview questions would you like to create? Please say a number between 1 and 20.")
+    }, 500)
+  }
 
   const handleDetailsSubmit = () => {
     if (!interviewDetails.title || !interviewDetails.category || !interviewDetails.difficulty) {
@@ -424,44 +359,42 @@ export default function CreateInterview() {
         title: "Missing Information",
         description: "Please fill in all required fields.",
         variant: "destructive",
-      });
-      return;
+      })
+      return
     }
-
-    setStep("completed");
-    speak("Your interview pack has been created successfully!");
-  };
+    setStep("completed")
+    speak("Your interview pack has been created successfully!")
+  }
 
   const resetInterview = () => {
-    setStep("initial");
-    setQuestions([]);
-    setTotalQuestions(0);
-    setCurrentQuestionIndex(0);
-    setTranscript("");
-    setGeminiResponse("");
-    setIsGeminiLoading(false);
+    setStep("initial")
+    setQuestions([])
+    setTotalQuestions(0)
+    setCurrentQuestionIndex(0)
+    setTranscript("")
+    setPendingQuestion("")
+    setShowVoiceConfirmation(false)
     setInterviewDetails({
       title: "",
       category: "",
       difficulty: "",
       duration: "",
       description: "",
-    });
+    })
     if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+      window.speechSynthesis.cancel()
     }
-  };
+  }
 
   return (
     <div className="container">
       <div className="max-w-4xl">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Create Interview Pack</h1>
+          <h1 className="text-4xl text-gray-900">Create Interview Pack</h1>
           <p className="text-lg text-gray-600">AI-powered interview question creator</p>
-
           {!speechSupported && (
-            <div className="alert-warning mt-4">
-              <AlertCircle className="h-5 w-5 text-yellow-600" />
+            <div className="alert-warning">
+              <AlertCircle className="icon-sm text-yellow-600" />
               <p className="text-sm text-yellow-800">
                 Speech recognition not supported. Please use Chrome or Edge browser.
               </p>
@@ -475,33 +408,33 @@ export default function CreateInterview() {
               <CardTitle className="text-2xl">Ready to Start?</CardTitle>
               <p className="text-gray-600">Create your interview questions using voice or text input</p>
             </CardHeader>
+            <CardContent className="text-center">
+              <Button onClick={startInterview} size="lg" className="btn-default">
+                <Volume2 className="icon mr-2" />
+                Start Creating Interview
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {step === "greeting" && (
+          <Card className="max-w-2xl">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">Welcome! 👋</CardTitle>
+              <p className="text-gray-600">I'm your AI interview assistant</p>
+            </CardHeader>
             <CardContent className="text-center space-y-4">
-              {/* Gemini API Key Input */}
-              <div className="max-w-md mx-auto">
-                <Label htmlFor="api-key" className="text-sm text-gray-600">
-                  Gemini API Key (Required for AI responses)
-                </Label>
-                <Input
-                  id="api-key"
-                  type="password"
-                  value={geminiApiKey}
-                  onChange={(e) => setGeminiApiKey(e.target.value)}
-                  placeholder="Enter your Gemini API key"
-                  className="mt-2"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Get your free API key from <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Google AI Studio</a>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-gray-700 mb-4">
+                  Hello! Welcome to the AI-powered interview creator. I'm here to help you create amazing interview
+                  questions using voice or text input.
+                </p>
+                <p className="text-gray-700">
+                  I'll guide you through the process step by step. Let's create something great together!
                 </p>
               </div>
-              
-              <Button 
-                onClick={startInterview} 
-                size="lg" 
-                className="btn-default"
-                disabled={!geminiApiKey.trim()}
-              >
-                <Volume2 className="mr-2 h-5 w-5" />
-                Start Creating Interview
+              <Button onClick={proceedToQuestionCount} size="lg" className="btn-default">
+                Let's Get Started!
               </Button>
             </CardContent>
           </Card>
@@ -512,7 +445,7 @@ export default function CreateInterview() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Volume2 className="h-5 w-5" />
+                  <Volume2 className="icon" />
                   Voice Input
                 </CardTitle>
               </CardHeader>
@@ -528,20 +461,23 @@ export default function CreateInterview() {
                       >
                         {isListening ? (
                           <>
-                            <MicOff className="mr-2 h-5 w-5" />
+                            <MicOff className="icon mr-2" />
                             Stop Listening
                           </>
                         ) : (
                           <>
-                            <Mic className="mr-2 h-5 w-5" />
+                            <Mic className="icon mr-2" />
                             Start Speaking
                           </>
                         )}
                       </Button>
-
                       {isSpeaking && (
-                        <Button onClick={() => window.speechSynthesis && window.speechSynthesis.cancel()} variant="outline" size="lg">
-                          <VolumeX className="mr-2 h-5 w-5" />
+                        <Button
+                          onClick={() => window.speechSynthesis && window.speechSynthesis.cancel()}
+                          variant="outline"
+                          size="lg"
+                        >
+                          <VolumeX className="icon mr-2" />
                           Stop AI
                         </Button>
                       )}
@@ -558,21 +494,21 @@ export default function CreateInterview() {
                         placeholder={step === "asking-count" ? "Enter number (e.g., 5)" : "Type your question here"}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
-                            const value = e.currentTarget.value.trim();
+                            const value = e.currentTarget.value.trim()
                             if (value) {
-                              handleTextInput(value);
-                              e.currentTarget.value = "";
+                              handleTextInput(value)
+                              e.currentTarget.value = ""
                             }
                           }
                         }}
                       />
                       <Button
                         onClick={() => {
-                          const input = document.getElementById("text-input");
-                          const value = input && input.value.trim();
+                          const input = document.getElementById("text-input")
+                          const value = input && input.value.trim()
                           if (value) {
-                            handleTextInput(value);
-                            input.value = "";
+                            handleTextInput(value)
+                            input.value = ""
                           }
                         }}
                         variant="outline"
@@ -582,10 +518,26 @@ export default function CreateInterview() {
                     </div>
                   </div>
 
-                  {transcript && (
+                  {transcript && !showVoiceConfirmation && (
                     <div className="transcript-display">
                       <p className="text-sm text-green-600 mb-1">You said:</p>
                       <p className="font-medium text-green-800">"{transcript}"</p>
+                    </div>
+                  )}
+
+                  {showVoiceConfirmation && (
+                    <div className="voice-confirmation">
+                      <p className="voice-confirmation-text">I heard you say:</p>
+                      <div className="question-preview">"{pendingQuestion}"</div>
+                      <p className="text-sm text-gray-600 mb-4">Is this correct?</p>
+                      <div className="voice-confirmation-buttons">
+                        <Button onClick={handleSubmitQuestion} variant="success">
+                          Submit Question
+                        </Button>
+                        <Button onClick={handleRetryQuestion} variant="outline">
+                          Retry
+                        </Button>
+                      </div>
                     </div>
                   )}
 
@@ -602,34 +554,6 @@ export default function CreateInterview() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Gemini AI Response Box */}
-            {(transcript || isGeminiLoading) && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-purple-600" />
-                    Gemini AI Response
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isGeminiLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                      <span className="text-gray-600">Getting response from Gemini...</span>
-                    </div>
-                  ) : geminiResponse ? (
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                      <div className="prose prose-sm max-w-none">
-                        <div className="whitespace-pre-wrap text-gray-800">
-                          {geminiResponse}
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-                </CardContent>
-              </Card>
-            )}
 
             {questions.length > 0 && (
               <Card>
@@ -661,7 +585,7 @@ export default function CreateInterview() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md-grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="title">Interview Title *</Label>
                     <Input
@@ -672,10 +596,9 @@ export default function CreateInterview() {
                       required
                     />
                   </div>
-
                   <div>
                     <Label htmlFor="category">Category *</Label>
-                    <WorkingSelect
+                    <Select
                       value={interviewDetails.category}
                       onValueChange={(value) => setInterviewDetails((prev) => ({ ...prev, category: value }))}
                       placeholder="Select category"
@@ -688,12 +611,11 @@ export default function CreateInterview() {
                       <SelectItem value="sales">Sales</SelectItem>
                       <SelectItem value="marketing">Marketing</SelectItem>
                       <SelectItem value="general">General</SelectItem>
-                    </WorkingSelect>
+                    </Select>
                   </div>
-
                   <div>
                     <Label htmlFor="difficulty">Difficulty Level *</Label>
-                    <WorkingSelect
+                    <Select
                       value={interviewDetails.difficulty}
                       onValueChange={(value) => setInterviewDetails((prev) => ({ ...prev, difficulty: value }))}
                       placeholder="Select difficulty"
@@ -702,12 +624,11 @@ export default function CreateInterview() {
                       <SelectItem value="intermediate">Intermediate</SelectItem>
                       <SelectItem value="senior">Senior</SelectItem>
                       <SelectItem value="expert">Expert</SelectItem>
-                    </WorkingSelect>
+                    </Select>
                   </div>
-
                   <div>
                     <Label htmlFor="duration">Expected Duration</Label>
-                    <WorkingSelect
+                    <Select
                       value={interviewDetails.duration}
                       onValueChange={(value) => setInterviewDetails((prev) => ({ ...prev, duration: value }))}
                       placeholder="Select duration"
@@ -717,10 +638,9 @@ export default function CreateInterview() {
                       <SelectItem value="60">1 hour</SelectItem>
                       <SelectItem value="90">1.5 hours</SelectItem>
                       <SelectItem value="120">2 hours</SelectItem>
-                    </WorkingSelect>
+                    </Select>
                   </div>
                 </div>
-
                 <div>
                   <Label htmlFor="description">Description</Label>
                   <Textarea
@@ -731,9 +651,8 @@ export default function CreateInterview() {
                     rows={3}
                   />
                 </div>
-
                 <div className="questions-summary">
-                  <h4 className="font-medium mb-2">Questions Summary</h4>
+                  <h4 className="font-medium mb-4">Questions Summary</h4>
                   <p className="text-sm text-gray-600 mb-2">Total Questions: {questions.length}</p>
                   <div className="max-h-32 overflow-y-auto space-y-1">
                     {questions.map((question, index) => (
@@ -743,13 +662,8 @@ export default function CreateInterview() {
                     ))}
                   </div>
                 </div>
-
                 <div className="flex gap-4">
-                  <Button 
-                    onClick={handleDetailsSubmit} 
-                    className="flex-1"
-                    variant="default"
-                  >
+                  <Button onClick={handleDetailsSubmit} className="flex-1" variant="default">
                     Create Interview Pack
                   </Button>
                   <Button onClick={resetInterview} variant="outline">
@@ -792,17 +706,18 @@ export default function CreateInterview() {
                   </div>
                 )}
               </div>
-
               <div className="flex gap-4">
-                <Button onClick={resetInterview} className="flex-1" variant="outline">
+                <Button onClick={resetInterview} className="flex-1 bg-transparent" variant="outline">
                   Create Another Interview
                 </Button>
-                <Button className="flex-1" variant="default">View Interview Pack</Button>
+                <Button className="flex-1" variant="default">
+                  View Interview Pack
+                </Button>
               </div>
             </CardContent>
           </Card>
         )}
       </div>
     </div>
-  );
+  )
 }

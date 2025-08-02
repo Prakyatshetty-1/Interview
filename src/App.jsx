@@ -6,6 +6,7 @@ import Preference from './pages/Preference';
 import Dashboard from './pages/Dashboard';
 import Welcome from './pages/Welcome';
 import InterviewPage from './pages/InterviewPage';
+import CreateInterview from './pages/CreateInterview';
 import VoiceRe from './pages/VoiceRe';
 import WaveCircle from './pages/SavePage';
 import './App.css';
@@ -20,8 +21,7 @@ function App() {
         <Route path='/Preference' element={<Preference/>}/>
         <Route path='/dashboard' element={<Welcome/>}/>
         <Route path='/Interview' element={<InterviewPage/>}/>
-        <Route path='/VoiceRe' element={<VoiceRe/>}/>
-        <Route path='/savepage' element={<WaveCircle/>}/>
+        <Route path='/VoiceRe' element={<CreateInterview/>}/>
       </Routes>
     </Router>
   );
