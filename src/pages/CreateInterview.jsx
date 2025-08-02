@@ -1,8 +1,17 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from "react"
-import { Mic, MicOff, Volume2, VolumeX, AlertCircle, ChevronDown, Settings } from "lucide-react"
+import { Mic, MicOff, Volume2, VolumeX, AlertCircle, ChevronDown } from "lucide-react"
 import "./CreateInterview.css"
+
+// Simple Toast hook replacement
+const useToast = () => {
+  return {
+    toast: ({ title, description, variant }) => {
+      alert(`${title}: ${description}`)
+    },
+  }
+}
 
 // UI Components
 const Button = ({
@@ -18,7 +27,6 @@ const Button = ({
   const baseClass = "btn-base"
   const variantClass = `btn-${variant}`
   const sizeClass = size === "lg" ? "btn-lg" : "btn-default-size"
-
   return (
     <button
       type={type}
@@ -33,15 +41,10 @@ const Button = ({
 }
 
 const Card = ({ children, className = "" }) => <div className={`card ${className}`}>{children}</div>
-
 const CardHeader = ({ children, className = "" }) => <div className={`card-header ${className}`}>{children}</div>
-
 const CardTitle = ({ children, className = "" }) => <h3 className={`card-title ${className}`}>{children}</h3>
-
 const CardContent = ({ children, className = "" }) => <div className={`card-content ${className}`}>{children}</div>
-
 const Input = ({ className = "", ...props }) => <input className={`input ${className}`} {...props} />
-
 const Label = ({ children, htmlFor, className = "" }) => (
   <label htmlFor={htmlFor} className={`label ${className}`}>
     {children}
@@ -103,99 +106,6 @@ const Badge = ({ children, variant = "default", className = "" }) => {
   return <div className={`badge ${variantClass} ${className}`}>{children}</div>
 }
 
-// Toast simulation
-const useToast = () => {
-  return {
-    toast: ({ title, description, variant }) => {
-      alert(`${title}: ${description}`)
-    },
-  }
-}
-
-// ElevenLabs TTS Configuration Component
-const ElevenLabsConfig = ({ isOpen, onClose, config, onConfigChange }) => {
-  if (!isOpen) return null
-
-  return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 50
-    }}>
-      <Card className="config-modal">
-        <CardHeader>
-          <CardTitle>ElevenLabs Settings</CardTitle>
-        </CardHeader>
-        <CardContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div className="field-group">
-            <Label htmlFor="apiKey">API Key</Label>
-            <Input
-              id="apiKey"
-              type="password"
-              value={config.apiKey}
-              onChange={(e) => onConfigChange({ ...config, apiKey: e.target.value })}
-              placeholder="Enter your ElevenLabs API key"
-            />
-          </div>
-          <div className="field-group">
-            <Label htmlFor="voiceId">Voice ID</Label>
-            <Select
-              value={config.voiceId}
-              onValueChange={(value) => onConfigChange({ ...config, voiceId: value })}
-              placeholder="Select a voice"
-            >
-              <SelectItem value="21m00Tcm4TlvDq8ikWAM">Rachel (Calm)</SelectItem>
-              <SelectItem value="AZnzlk1XvdvUeBnXmlld">Domi (Strong)</SelectItem>
-              <SelectItem value="EXAVITQu4vr4xnSDxMaL">Bella (Soft)</SelectItem>
-              <SelectItem value="ErXwobaYiN019PkySvjV">Antoni (Well-rounded)</SelectItem>
-              <SelectItem value="MF3mGyEYCl7XYWbV9V6O">Elli (Emotional)</SelectItem>
-              <SelectItem value="TxGEqnHWrfWFTfGW9XjX">Josh (Deep)</SelectItem>
-              <SelectItem value="VR6AewLTigWG4xSOukaG">Arnold (Crisp)</SelectItem>
-              <SelectItem value="pNInz6obpgDQGcFmaJgB">Adam (Middle-aged)</SelectItem>
-              <SelectItem value="yoZ06aMxZJJ28mfd3POQ">Sam (Raspy)</SelectItem>
-            </Select>
-          </div>
-          <div className="field-group">
-            <Label htmlFor="stability">Stability: {config.stability}</Label>
-            <input
-              id="stability"
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={config.stability}
-              onChange={(e) => onConfigChange({ ...config, stability: parseFloat(e.target.value) })}
-              style={{ width: '100%' }}
-            />
-          </div>
-          <div className="field-group">
-            <Label htmlFor="clarity">Clarity: {config.clarity}</Label>
-            <input
-              id="clarity"
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={config.clarity}
-              onChange={(e) => onConfigChange({ ...config, clarity: parseFloat(e.target.value) })}
-              style={{ width: '100%' }}
-            />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '1rem' }}>
-            <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
 // Main Component with ElevenLabs Integration
 export default function CreateInterview() {
   const [step, setStep] = useState("initial")
@@ -208,13 +118,6 @@ export default function CreateInterview() {
   const [speechSupported, setSpeechSupported] = useState(false)
   const [pendingQuestion, setPendingQuestion] = useState("")
   const [showVoiceConfirmation, setShowVoiceConfirmation] = useState(false)
-  const [showElevenLabsConfig, setShowElevenLabsConfig] = useState(false)
-  const [elevenLabsConfig, setElevenLabsConfig] = useState({
-    apiKey: "",
-    voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel voice by default
-    stability: 0.5,
-    clarity: 0.75
-  })
   const [interviewDetails, setInterviewDetails] = useState({
     title: "",
     category: "",
@@ -222,17 +125,29 @@ export default function CreateInterview() {
     duration: "",
     description: "",
   })
-  
+
   const recognitionRef = useRef(null)
   const audioRef = useRef(null)
   const { toast } = useToast()
 
+  // Replace this with your actual API key
+  const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY // You can set this directly or get it from your config
+
+  // Default ElevenLabs configuration (no longer changeable by user)
+  const elevenLabsConfig = {
+    voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel voice (default)
+    stability: 0.5,
+    clarity: 0.75,
+  }
+
   useEffect(() => {
     if (typeof window === "undefined") return
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (SpeechRecognition) {
       setSpeechSupported(true)
       console.log("✅ Speech Recognition is supported")
+
       recognitionRef.current = new SpeechRecognition()
       recognitionRef.current.continuous = false
       recognitionRef.current.interimResults = false
@@ -286,33 +201,30 @@ export default function CreateInterview() {
 
   // ElevenLabs Text-to-Speech function
   const speakWithElevenLabs = async (text) => {
-    if (!elevenLabsConfig.apiKey) {
-      toast({
-        title: "API Key Required",
-        description: "Please configure your ElevenLabs API key in settings.",
-        variant: "destructive",
-      })
+    if (!ELEVENLABS_API_KEY || ELEVENLABS_API_KEY === "your_elevenlabs_api_key_here") {
+      console.warn("ElevenLabs API key not configured, falling back to browser TTS")
+      speakWithBrowserTTS(text)
       return
     }
 
     try {
       setIsSpeaking(true)
-      
+
       const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenLabsConfig.voiceId}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Accept': 'audio/mpeg',
-          'Content-Type': 'application/json',
-          'xi-api-key': elevenLabsConfig.apiKey
+          Accept: "audio/mpeg",
+          "Content-Type": "application/json",
+          "xi-api-key": ELEVENLABS_API_KEY,
         },
         body: JSON.stringify({
           text: text,
           model_id: "eleven_monolingual_v1",
           voice_settings: {
             stability: elevenLabsConfig.stability,
-            similarity_boost: elevenLabsConfig.clarity
-          }
-        })
+            similarity_boost: elevenLabsConfig.clarity,
+          },
+        }),
       })
 
       if (!response.ok) {
@@ -321,7 +233,7 @@ export default function CreateInterview() {
 
       const audioBlob = await response.blob()
       const audioUrl = URL.createObjectURL(audioBlob)
-      
+
       if (audioRef.current) {
         audioRef.current.src = audioUrl
         audioRef.current.onended = () => {
@@ -333,30 +245,31 @@ export default function CreateInterview() {
     } catch (error) {
       console.error("ElevenLabs TTS Error:", error)
       setIsSpeaking(false)
-      toast({
-        title: "Speech Error",
-        description: "Failed to generate speech. Please check your API key and try again.",
-        variant: "destructive",
-      })
+      // Fallback to browser TTS
+      speakWithBrowserTTS(text)
     }
   }
 
-  // Fallback to browser TTS if ElevenLabs fails
+  // Browser TTS fallback
+  const speakWithBrowserTTS = (text) => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel()
+      const utterance = new SpeechSynthesisUtterance(text)
+      utterance.rate = 0.8
+      utterance.pitch = 1
+      utterance.volume = 1
+      utterance.onstart = () => setIsSpeaking(true)
+      utterance.onend = () => setIsSpeaking(false)
+      window.speechSynthesis.speak(utterance)
+    }
+  }
+
+  // Main speak function
   const speak = async (text) => {
-    if (elevenLabsConfig.apiKey) {
+    if (ELEVENLABS_API_KEY && ELEVENLABS_API_KEY !== "your_elevenlabs_api_key_here") {
       await speakWithElevenLabs(text)
     } else {
-      // Fallback to browser TTS
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel()
-        const utterance = new SpeechSynthesisUtterance(text)
-        utterance.rate = 0.8
-        utterance.pitch = 1
-        utterance.volume = 1
-        utterance.onstart = () => setIsSpeaking(true)
-        utterance.onend = () => setIsSpeaking(false)
-        window.speechSynthesis.speak(utterance)
-      }
+      speakWithBrowserTTS(text)
     }
   }
 
@@ -431,7 +344,6 @@ export default function CreateInterview() {
           }, 500)
         }
         break
-
       case "collecting-questions":
         setPendingQuestion(cleanText)
         setShowVoiceConfirmation(true)
@@ -446,7 +358,6 @@ export default function CreateInterview() {
     }
     setQuestions((prev) => [...prev, newQuestion])
     const nextIndex = currentQuestionIndex + 1
-
     setShowVoiceConfirmation(false)
     setPendingQuestion("")
     setTranscript("")
@@ -483,7 +394,6 @@ export default function CreateInterview() {
         }
         setQuestions((prev) => [...prev, newQuestion])
         const nextIndex = currentQuestionIndex + 1
-
         if (nextIndex < totalQuestions) {
           setCurrentQuestionIndex(nextIndex)
           setTimeout(() => {
@@ -548,58 +458,59 @@ export default function CreateInterview() {
     stopSpeaking()
   }
 
-  // AI Assistant Circle Component for left panel
-  const AIAssistant = () => (
-    <iframe
-      src='https://my.spline.design/voiceinteractionanimation-2TyeWSP24w6QzdGddVpF30we/'
-      frameBorder='0'
-      width='100%'
-      height='100%'
-      title="Askora Voice Interaction Animation"
-    ></iframe>
+  // AI Assistant Circle Component for left panel with waves
+  const AIAssistant = ({ isListening, isSpeaking }) => (
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      {/* Wave animation behind iframe */}
+      <div className="wave-container">
+        <div className="circle"></div>
+        {(isListening || isSpeaking) && (
+          <>
+            <div className="wave wave1"></div>
+            <div className="wave wave2"></div>
+            <div className="wave wave3"></div>
+          </>
+        )}
+      </div>
+      
+      {/* Iframe on top */}
+      <iframe
+        src="https://my.spline.design/voiceinteractionanimation-2TyeWSP24w6QzdGddVpF30we/"
+        frameBorder="0"
+        width="100%"
+        height="100%"
+        title="Askora Voice Interaction Animation"
+      />
+    </div>
   )
 
   return (
-    <div className="app-container">
+    <div className="createapp-container">
       {/* Hidden audio element for ElevenLabs */}
       <audio ref={audioRef} />
-      
-      {/* ElevenLabs Configuration Modal */}
-      <ElevenLabsConfig
-        isOpen={showElevenLabsConfig}
-        onClose={() => setShowElevenLabsConfig(false)}
-        config={elevenLabsConfig}
-        onConfigChange={setElevenLabsConfig}
-      />
 
       <div className="split-layout">
         {/* Left Panel - AI Assistant (Dark) */}
-        <div className="left-panel">
-          <div className="logo-containernew" style={{ position: 'absolute', top: '2rem', left: '2rem', right: '2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span className="logonew">Askora</span>
-              <Button
-                variant="secondary"
-                onClick={() => setShowElevenLabsConfig(true)}
-                style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white' }}
-              >
-                <Settings className="btn-icon" />
-              </Button>
+        <div className="createleft-panel">
+          <div className="logo-container">
+            <div className="logo-header">
+              <span className="logo">Askora</span>
             </div>
           </div>
-          
+
+          {/* Background orbs */}
           <div className="pricing-bg-orbs">
-            <div className="pricing-or1 pricing-orb1"></div>
-            <div className="pricing-orb pricing-orb2"></div>
+            <div className="pricing-orb pricing-orb1"></div>
+           
             <div className="pricing-orb pricing-orb3"></div>
             <div className="pricing-orb pricing-orb4"></div>
             <div className="pricing-orb pricing-orb5"></div>
           </div>
-          
+
           {step === "initial" ? (
-            <div className="welcome-screen">
-              <h1 className="main-heading">Create Interview Pack</h1>
-              <p className="main-subtitle">AI-powered interview question creator</p>
+            <div className="createwelcome-screen">
+              <h1 className="createmain-heading">Create Interview Pack</h1>
+              <p className="createmain-subtitle">AI-powered interview question creator</p>
               <Button onClick={startInterview} size="lg" className="start-btn">
                 <Volume2 className="btn-icon" />
                 Start Creating Interview
@@ -634,7 +545,7 @@ export default function CreateInterview() {
               <h2 className="completion-heading">Interview Pack Created!</h2>
               <p className="completion-subtitle">Your interview is ready to use</p>
               <div className="completion-actions">
-                <Button onClick={resetInterview} variant="outline" size="lg" className="completion-btn">
+                <Button onClick={resetInterview} variant="outline" size="lg" className="completion-btn bg-transparent">
                   Create Another Interview
                 </Button>
                 <Button size="lg" variant="success" className="completion-btn">
@@ -643,7 +554,7 @@ export default function CreateInterview() {
               </div>
             </div>
           ) : (
-            <AIAssistant />
+            <AIAssistant isListening={isListening} isSpeaking={isSpeaking} />
           )}
         </div>
 
@@ -653,7 +564,7 @@ export default function CreateInterview() {
             <div className="right-content-center">
               <Card className="intro-card">
                 <CardHeader className="intro-header">
-                  <CardTitle>Ready to Start?</CardTitle>
+                  <CardTitle className="intro-title">Ready to Start?</CardTitle>
                   <p className="intro-description">Create your interview questions using voice or text input</p>
                 </CardHeader>
                 <CardContent className="intro-content">
@@ -725,11 +636,7 @@ export default function CreateInterview() {
                         )}
                       </Button>
                       {isSpeaking && (
-                        <Button
-                          onClick={stopSpeaking}
-                          variant="outline"
-                          size="lg"
-                        >
+                        <Button onClick={stopSpeaking} variant="outline" size="lg">
                           <VolumeX className="btn-icon" />
                           Stop AI
                         </Button>
@@ -766,7 +673,7 @@ export default function CreateInterview() {
                           }
                         }}
                         variant="outline"
-                        className="buttonsss"
+                        className="submit-text-btn"
                       >
                         Submit
                       </Button>
@@ -845,6 +752,7 @@ export default function CreateInterview() {
                         required
                       />
                     </div>
+
                     <div className="field-row">
                       <div className="field-group">
                         <Label htmlFor="category">Category *</Label>
@@ -853,16 +761,25 @@ export default function CreateInterview() {
                           onValueChange={(value) => setInterviewDetails((prev) => ({ ...prev, category: value }))}
                           placeholder="Select category"
                         >
-                          <SelectItem value="technical">Technical</SelectItem>
-                          <SelectItem value="behavioral">Behavioral</SelectItem>
-                          <SelectItem value="leadership">Leadership</SelectItem>
-                          <SelectItem value="product">Product</SelectItem>
-                          <SelectItem value="design">Design</SelectItem>
-                          <SelectItem value="sales">Sales</SelectItem>
-                          <SelectItem value="marketing">Marketing</SelectItem>
-                          <SelectItem value="general">General</SelectItem>
+                          <SelectItem value="AI Research">AI Research</SelectItem>
+                          <SelectItem value="Application Security Engineer">Application Security Engineer</SelectItem>
+                          <SelectItem value="Back End Developer">Back End Developer</SelectItem>
+                          <SelectItem value="Cloud Engineering">Cloud Engineering</SelectItem>
+                          <SelectItem value="Data Engineering">Data Engineering</SelectItem>
+                          <SelectItem value="Data Scientist">Data Scientist</SelectItem>
+                          <SelectItem value="Desktop Developer">Desktop Developer</SelectItem>
+                          <SelectItem value="DevOps Engineer">DevOps Engineer</SelectItem>
+                          <SelectItem value="Ethical Hacker">Ethical Hacker</SelectItem>
+                          <SelectItem value="Front End Developer">Front End Developer</SelectItem>
+                          <SelectItem value="Full Stack Web Developer">Full Stack Web Developer</SelectItem>
+                          <SelectItem value="ML Engineer">ML Engineer</SelectItem>
+                          <SelectItem value="Mobile Developer">Mobile Developer</SelectItem>
+                          <SelectItem value="Security Engineering">Security Engineering</SelectItem>
+                          <SelectItem value="Site Reliability Engineering">Site Reliability Engineering</SelectItem>
+
                         </Select>
                       </div>
+
                       <div className="field-group">
                         <Label htmlFor="difficulty">Difficulty Level *</Label>
                         <Select
@@ -870,13 +787,14 @@ export default function CreateInterview() {
                           onValueChange={(value) => setInterviewDetails((prev) => ({ ...prev, difficulty: value }))}
                           placeholder="Select difficulty"
                         >
-                          <SelectItem value="entry">Entry Level</SelectItem>
-                          <SelectItem value="intermediate">Intermediate</SelectItem>
-                          <SelectItem value="senior">Senior</SelectItem>
-                          <SelectItem value="expert">Expert</SelectItem>
+                         
+                          <SelectItem value="Easy">Easy</SelectItem>
+                          <SelectItem value="Medium">Medium</SelectItem>
+                          <SelectItem value="Hard">Hard</SelectItem>
                         </Select>
                       </div>
                     </div>
+
                     <div className="field-group">
                       <Label htmlFor="duration">Expected Duration</Label>
                       <Select
@@ -891,6 +809,7 @@ export default function CreateInterview() {
                         <SelectItem value="120">2 hours</SelectItem>
                       </Select>
                     </div>
+
                     <div className="field-group">
                       <Label htmlFor="description">Description</Label>
                       <Textarea
@@ -902,6 +821,7 @@ export default function CreateInterview() {
                       />
                     </div>
                   </div>
+
                   <div className="questions-summary">
                     <h4 className="summary-title">Questions Summary</h4>
                     <p className="summary-count">Total Questions: {questions.length}</p>
@@ -914,6 +834,7 @@ export default function CreateInterview() {
                       ))}
                     </div>
                   </div>
+
                   <div className="form-actions">
                     <Button onClick={handleDetailsSubmit} className="submit-btn" variant="default">
                       Create Interview Pack
@@ -959,8 +880,9 @@ export default function CreateInterview() {
                       </div>
                     )}
                   </div>
+
                   <div className="final-actions">
-                    <Button onClick={resetInterview} variant="outline" className="final-btn">
+                    <Button onClick={resetInterview} variant="outline" className="final-btn bg-transparent">
                       Create Another Interview
                     </Button>
                     <Button className="final-btn" variant="default">
