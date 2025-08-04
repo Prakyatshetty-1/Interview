@@ -1,16 +1,10 @@
-import HeaderCard from "../components/HeaderCard";
-import "./Dashboard.css";
-import Dock from "../react-bits/Dock";
-import TopicFilter from "../components/TopicFilter";
-import Topics from "../components/Topics";
-import SearchBar from "../components/SearchBar";
-import { useNavigate } from "react-router-dom";
+import './Saves.css';
+import Dock from '../react-bits/Dock';
+import { useNavigate } from 'react-router-dom';
 
-
-export default function Dashboard() {
-const navigate=useNavigate();
-
-  const items = [
+export default function Saves() {
+    const navigate=useNavigate();
+    const items = [
     {
       icon: <img src="/homeicon.png" alt="Home" style={{ width: '48px', height: '48px' }} />,
       label: "Home",
@@ -44,25 +38,23 @@ const navigate=useNavigate();
       onClick: () => alert("Settings!"),
     },
   ];
-
-  return (
-    <div className="body-container">
-      <div className="logo-containernew">
-        <span className="logonew">Askora</span>
-      </div>
-      <div className="mainbody">
-        <HeaderCard />
-        <Topics/>
-        <TopicFilter/>
-        <div className="horizontal-divider"></div>
-        <SearchBar/>
-        <Dock
-          items={items}
-          panelHeight={78}
-          baseItemSize={60}
-          magnification={80}
-        />
-      </div>
-    </div>
-  );
+    return (
+        <>
+            <div className="containsaves">
+                <div className="logo-containernew">
+                    <span className="logonew">Askora</span>
+                </div>
+                <div className="nosavesyet">
+                    <img src="./saves.png" alt="" className="nosave" />
+                    <h1>Still waiting for your first save!</h1>
+                </div>
+                <Dock
+                    items={items}
+                    panelHeight={78}
+                    baseItemSize={60}
+                    magnification={80}
+                />
+            </div>
+        </>
+    );
 }

@@ -131,8 +131,8 @@ export default function CreateInterview() {
   const { toast } = useToast()
 
   // Replace this with your actual API key
-  const ELEVENLABS_API_KEY =import.meta.env.VITE_ELEVENLABS_API_KEY // You can set this directly or get it from your config
-
+  //const ELEVENLABS_API_KEY =import.meta.env.VITE_ELEVENLABS_API_KEY // You can set this directly or get it from your config
+  
   // Default ElevenLabs configuration (no longer changeable by user)
   const elevenLabsConfig = {
     voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel voice (default)
