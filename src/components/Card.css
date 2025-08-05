@@ -9,6 +9,15 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     border: none;
     margin-top: 20px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: translateY(0) scale(1);
+}
+
+/* Hover Effects for Card */
+.challenge-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
 }
 
 .gradient-overlay {
@@ -16,9 +25,13 @@
     inset: 0;
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 20%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.9) 80%, rgba(0, 0, 0, 1) 100%);
     backdrop-filter: blur(0px);
+    transition: opacity 0.3s ease;
 }
 
-
+/* Enhance gradient on hover */
+.challenge-card:hover .gradient-overlay {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.15) 20%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0.8) 80%, rgba(0, 0, 0, 0.95) 100%);
+}
 
 .card-content1 {
     position: relative;
@@ -29,12 +42,17 @@
     padding: 24px;
     color: white;
     z-index: 2;
+    transition: transform 0.3s ease;
+}
+
+/* Subtle content animation on hover */
+.challenge-card:hover .card-content1 {
+    transform: translateY(-2px);
 }
 
 .top-section1 {
     display: flex;
     justify-content: end;
-    
 }
 
 .difficulty-badge {
@@ -44,8 +62,15 @@
     font-weight: 400;
     background: rgba(0, 0, 0, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
-
     letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+/* Difficulty badge hover effects */
+.challenge-card:hover .difficulty-badge {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
 }
 
 .difficulty-easy {
@@ -57,7 +82,7 @@
 }
 
 .difficulty-hard {
-color: #ef4444;
+    color: #ef4444;
 }
 
 .bottom-section1 {
@@ -72,12 +97,25 @@ color: #ef4444;
     font-weight: 400;
     margin-bottom: 4px;
     line-height: 1.2;
+    transition: all 0.3s ease;
+}
+
+/* Title animation on hover */
+.challenge-card:hover .title134 {
+    font-size: 18px;
+    font-weight: 500;
 }
 
 .creator {
     font-size: 12px;
     color: rgba(255, 255, 255, 0.8);
     margin-bottom: 2px;
+    transition: color 0.3s ease;
+}
+
+/* Creator text becomes more visible on hover */
+.challenge-card:hover .creator {
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .tags-container {
@@ -94,6 +132,14 @@ color: #ef4444;
     font-size: 11px;
     font-weight: 400;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* Tags hover effects */
+.challenge-card:hover .tag {
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
 }
 
 .start-button {
@@ -125,7 +171,31 @@ color: #ef4444;
     position: absolute;
     inset: 0;
     background-image: 
-    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.2) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.2) 0%, transparent 50%);
     z-index: 1;
+    transition: opacity 0.3s ease;
+}
+
+/* Enhance the decorative gradients on hover */
+.challenge-card:hover::before {
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
+}
+
+/* Optional: Add a subtle glow effect on hover */
+.challenge-card::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, rgba(120, 119, 198, 0.2), rgba(255, 119, 198, 0.2));
+    border-radius: 26px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.challenge-card:hover::after {
+    opacity: 1;
 }
