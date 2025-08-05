@@ -56,24 +56,31 @@
   width: 100%;
   max-width: 350px;
   border-radius: 60px;
-  background:url('../../public/growth.png');
+  background:url('../../public/opendoor.png');
   background-size: cover;
   background-position: center;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  gap:  10px;
+  justify-content: center;
   
 }
+
+
 .firstmay{
   color: white;
-  margin-top: 20%;
-  margin-left: 10%;
+  margin-top: 25%;
+
   font-weight: 600;
-  font-size: 45px;
+  font-size: 38px;
 }
 .secmay{
-  color: white;
-margin-top: -12%;
-  margin-left: 10%;
+  color: blueviolet;
+margin-top:25%;
+
   font-weight: 300;
-  font-size: 45px;
+  font-size: 38px;
 }
 .otherfeatherbox{
   height: 100%;

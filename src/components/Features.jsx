@@ -17,7 +17,8 @@ export default function Features() {
       </div>
       <div className="featurecontainer">
         <div className="featurebox1">
-          <h1 className="firstmay">Grow </h1><br/> <h1 className="secmay">Together</h1>
+          <h1 className="firstmay">Bright</h1> <h1 className="secmay">Future</h1>
+      
         </div>
         <div className="otherfeatherbox">
           <div className="topotherfeaturebox">

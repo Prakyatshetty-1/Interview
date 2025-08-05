@@ -2,6 +2,9 @@ import React from 'react';
 import './AboutAi.css';
 import ScrollFloat from '../react-bits/ScrollFloat';
 import { MdArrowOutward } from "react-icons/md";
+import { BsGraphUpArrow } from "react-icons/bs";
+import { LuCircleUserRound } from "react-icons/lu";
+import { FaArrowRightLong } from "react-icons/fa6";
 
 const AboutAi = () => {
   return (
@@ -11,7 +14,16 @@ const AboutAi = () => {
         <div className="infoboxleft">
           <div className="uppercontentdivs">
             <div className="statbox">
-              
+              <div className="upperstatbox">
+                <BsGraphUpArrow style={{ color: 'white', fontSize: '45px',fontWeight:'300' }} />
+                <h1>320+</h1>
+                <p>interviews<br/>attempted</p>
+                </div>
+              <div className="lowerstatbox">
+                <div className="iconlowerstat"><LuCircleUserRound style={{ color: 'white', fontSize: '45px',fontWeight:'300' }} /></div>
+                <h1>12+</h1>
+                <div className="arrowedcircleforstat"><FaArrowRightLong style={{ color: 'black', fontSize: '35px',fontWeight:'300' }} /></div>
+              </div>
                 
             </div>
             
@@ -60,7 +72,14 @@ const AboutAi = () => {
           </div>
         </div>
         <div className="imgboxright">
-          <img src='/AboutAiBack.png'/>\
+        <div className="pricing-bg-orbs">
+        <div className="pricing-or1 pricing-orb1"></div>
+        <div className="pricing-orb pricing-orb2"></div>
+        <div className="pricing-orb pricing-orb3"></div>
+        <div className="pricing-orb pricing-orb4"></div>
+        <div className="pricing-orb pricing-orb5"></div>
+      </div>
+
           <iframe
             src='https://my.spline.design/voiceinteractionanimation-2TyeWSP24w6QzdGddVpF30we/'
             frameBorder='0'
