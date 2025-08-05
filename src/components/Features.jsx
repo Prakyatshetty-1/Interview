@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import ScrollFloat from "../react-bits/ScrollFloat"
 import "./Features.css"
 
 export default function Features() {
@@ -15,26 +14,18 @@ export default function Features() {
     <div className={`gradient-grid ${isLoaded ? "loaded" : ""}`}>
       <div className="pricing-bg-orbss">
         <div className="pricing-orbb pricing-orbs1"></div>
-
       </div>
-      <ScrollFloat
-        animationDuration={1}
-        ease='back.inOut(2)'
-        scrollStart='center bottom+=10%'
-        scrollEnd='bottom bottom-=60%'
-        stagger={0.03}
-        textClassName="title"
-      >
-        Key Features of Askora
-      </ScrollFloat>
-      <div className="grid-container">
-        {/* Top left block */}
-        <div className="grid-item top-left">
-          <div className="content">
-            <div className="text-container horizontal">
-              <div className="text primary">
-                <h1>Webflow Development</h1>
-                <p>Create stunning, responsive websites that engage your audience and drive results.</p>
+      <div className="featurecontainer">
+        <div className="featurebox1">
+          <h1 className="firstmay">Bright</h1> <h1 className="secmay">Future</h1>
+      
+        </div>
+        <div className="otherfeatherbox">
+          <div className="topotherfeaturebox">
+            <div className="texttopboxouter">
+              <div className="textboxuppertext">
+                <h1>We build</h1>
+                <div className="circleforfeature"></div>
               </div>
               <div className="textboxmiddletext">
                 <h1>digital</h1>
@@ -57,6 +48,9 @@ export default function Features() {
               <div className="bottomboxouter1">
                   <h1>Experience Smooth UI</h1>
                   <div className="glare"></div>
+                  <div className="bottomboxcircle3"></div>
+                  <div className="bottomboxcircle4"></div>
+                
                 <div className="mockup"></div>
               </div>
               <div className="bottomboxouter2">
