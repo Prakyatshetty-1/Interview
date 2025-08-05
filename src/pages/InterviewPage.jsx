@@ -79,5 +79,3 @@ const items = [
   );
 }
 export default InterviewPage;
-
-<div className="flexing"><h1>Askora </h1><h1 className="purple">Interview</h1></div> 
