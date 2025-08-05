@@ -131,8 +131,8 @@ export default function CreateInterview() {
   const { toast } = useToast()
 
   // Replace this with your actual API key
-  //const ELEVENLABS_API_KEY =import.meta.env.VITE_ELEVENLABS_API_KEY // You can set this directly or get it from your config
-  
+  const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY // You can set this directly or get it from your config
+
   // Default ElevenLabs configuration (no longer changeable by user)
   const elevenLabsConfig = {
     voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel voice (default)
@@ -458,25 +458,40 @@ export default function CreateInterview() {
     stopSpeaking()
   }
 
-  // AI Assistant Circle Component for left panel
-  const AIAssistant = () => (
-    <iframe
-      src="https://my.spline.design/voiceinteractionanimation-2TyeWSP24w6QzdGddVpF30we/"
-      frameBorder="0"
-      width="100%"
-      height="100%"
-      title="Askora Voice Interaction Animation"
-    />
+  // AI Assistant Circle Component for left panel with waves
+  const AIAssistant = ({ isListening, isSpeaking }) => (
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      {/* Wave animation behind iframe */}
+      <div className="wave-container">
+        <div className="circle"></div>
+        {(isListening || isSpeaking) && (
+          <>
+            <div className="wave wave1"></div>
+            <div className="wave wave2"></div>
+            <div className="wave wave3"></div>
+          </>
+        )}
+      </div>
+      
+      {/* Iframe on top */}
+      <iframe
+        src="https://my.spline.design/voiceinteractionanimation-2TyeWSP24w6QzdGddVpF30we/"
+        frameBorder="0"
+        width="100%"
+        height="100%"
+        title="Askora Voice Interaction Animation"
+      />
+    </div>
   )
 
   return (
-    <div className="app-container">
+    <div className="createapp-container">
       {/* Hidden audio element for ElevenLabs */}
       <audio ref={audioRef} />
 
       <div className="split-layout">
         {/* Left Panel - AI Assistant (Dark) */}
-        <div className="left-panel">
+        <div className="createleft-panel">
           <div className="logo-container">
             <div className="logo-header">
               <span className="logo">Askora</span>
@@ -486,16 +501,16 @@ export default function CreateInterview() {
           {/* Background orbs */}
           <div className="pricing-bg-orbs">
             <div className="pricing-orb pricing-orb1"></div>
-            <div className="pricing-orb pricing-orb2"></div>
+           
             <div className="pricing-orb pricing-orb3"></div>
             <div className="pricing-orb pricing-orb4"></div>
             <div className="pricing-orb pricing-orb5"></div>
           </div>
 
           {step === "initial" ? (
-            <div className="welcome-screen">
-              <h1 className="main-heading">Create Interview Pack</h1>
-              <p className="main-subtitle">AI-powered interview question creator</p>
+            <div className="createwelcome-screen">
+              <h1 className="createmain-heading">Create Interview Pack</h1>
+              <p className="createmain-subtitle">AI-powered interview question creator</p>
               <Button onClick={startInterview} size="lg" className="start-btn">
                 <Volume2 className="btn-icon" />
                 Start Creating Interview
@@ -539,7 +554,7 @@ export default function CreateInterview() {
               </div>
             </div>
           ) : (
-            <AIAssistant />
+            <AIAssistant isListening={isListening} isSpeaking={isSpeaking} />
           )}
         </div>
 
@@ -549,7 +564,7 @@ export default function CreateInterview() {
             <div className="right-content-center">
               <Card className="intro-card">
                 <CardHeader className="intro-header">
-                  <CardTitle>Ready to Start?</CardTitle>
+                  <CardTitle className="intro-title">Ready to Start?</CardTitle>
                   <p className="intro-description">Create your interview questions using voice or text input</p>
                 </CardHeader>
                 <CardContent className="intro-content">
@@ -746,14 +761,22 @@ export default function CreateInterview() {
                           onValueChange={(value) => setInterviewDetails((prev) => ({ ...prev, category: value }))}
                           placeholder="Select category"
                         >
-                          <SelectItem value="technical">Technical</SelectItem>
-                          <SelectItem value="behavioral">Behavioral</SelectItem>
-                          <SelectItem value="leadership">Leadership</SelectItem>
-                          <SelectItem value="product">Product</SelectItem>
-                          <SelectItem value="design">Design</SelectItem>
-                          <SelectItem value="sales">Sales</SelectItem>
-                          <SelectItem value="marketing">Marketing</SelectItem>
-                          <SelectItem value="general">General</SelectItem>
+                          <SelectItem value="AI Research">AI Research</SelectItem>
+                          <SelectItem value="Application Security Engineer">Application Security Engineer</SelectItem>
+                          <SelectItem value="Back End Developer">Back End Developer</SelectItem>
+                          <SelectItem value="Cloud Engineering">Cloud Engineering</SelectItem>
+                          <SelectItem value="Data Engineering">Data Engineering</SelectItem>
+                          <SelectItem value="Data Scientist">Data Scientist</SelectItem>
+                          <SelectItem value="Desktop Developer">Desktop Developer</SelectItem>
+                          <SelectItem value="DevOps Engineer">DevOps Engineer</SelectItem>
+                          <SelectItem value="Ethical Hacker">Ethical Hacker</SelectItem>
+                          <SelectItem value="Front End Developer">Front End Developer</SelectItem>
+                          <SelectItem value="Full Stack Web Developer">Full Stack Web Developer</SelectItem>
+                          <SelectItem value="ML Engineer">ML Engineer</SelectItem>
+                          <SelectItem value="Mobile Developer">Mobile Developer</SelectItem>
+                          <SelectItem value="Security Engineering">Security Engineering</SelectItem>
+                          <SelectItem value="Site Reliability Engineering">Site Reliability Engineering</SelectItem>
+
                         </Select>
                       </div>
 
@@ -764,10 +787,10 @@ export default function CreateInterview() {
                           onValueChange={(value) => setInterviewDetails((prev) => ({ ...prev, difficulty: value }))}
                           placeholder="Select difficulty"
                         >
-                          <SelectItem value="entry">Entry Level</SelectItem>
-                          <SelectItem value="intermediate">Intermediate</SelectItem>
-                          <SelectItem value="senior">Senior</SelectItem>
-                          <SelectItem value="expert">Expert</SelectItem>
+                         
+                          <SelectItem value="Easy">Easy</SelectItem>
+                          <SelectItem value="Medium">Medium</SelectItem>
+                          <SelectItem value="Hard">Hard</SelectItem>
                         </Select>
                       </div>
                     </div>

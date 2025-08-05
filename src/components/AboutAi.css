@@ -99,135 +99,77 @@
   z-index: 0;
 }
 
-.about-ai-wrapper {
-  max-width: 1200px;
-  width: 100%;
-  position: relative;
+.about-ai-content-box {
+
+    width: 100%;
+    max-width: 1650px; /* Instead of min-width */
+    height: 100vh; /* Full viewport height */
+    display:flex;
+    gap:30px;
+}
+.infoboxleft {
+
+    width: 100%;
+    min-width: min(900px, 100vw); /* Never exceed viewport width */
+    height: 100vh;
+    box-sizing: border-box;
 }
 
-/* Additional gradient spots on wrapper */
-.about-ai-wrapper::before {
-  content: '';
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, 
-    rgba(168, 85, 247, 0.1) 0%, 
-    rgba(168, 85, 247, 0.05) 60%, 
-    transparent 80%
+.imgboxright {
+    width: 100%;
+    min-width: min(720px, 100vw);
+    border-radius: 60px;
+    height: 880px;
+    box-sizing: border-box;
+background-color: rgba(3, 3, 5, 0.6);
+    position: relative; /* Add this */
+    overflow: hidden;
+}
+
+
+
+.contentboximg {
+    height: 230px;
+    width: 100%;
+    border-radius: 60px;
+     /* Advanced glass effect */
+    background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.1) 100%
   );
-  border-radius: 50%;
-  top: -10%;
-  left: -5%;
-  animation: pulse 4s ease-in-out infinite;
-  z-index: 0;
-}
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
 
-.about-ai-wrapper::after {
-  content: '';
-  position: absolute;
-  width: 180px;
-  height: 180px;
-  background: radial-gradient(circle, 
-    rgba(236, 72, 153, 0.08) 0%, 
-    rgba(236, 72, 153, 0.04) 50%, 
-    transparent 70%
-  );
-  border-radius: 50%;
-  bottom: -15%;
-  left: 20%;
-  animation: floatSlow 10s ease-in-out infinite reverse;
-  z-index: 0;
-}
 
-.about-ai-layout {
+
+    position: absolute; /* Add this */
+    bottom: 0; /* Position at bottom */
+    left: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+.sameboxdiv{
+  min-width: 550px;
   display: flex;
   align-items: center;
-  gap: 4rem;
-  position: relative;
 }
 
-/* More gradient orbs on layout */
-.about-ai-layout::before {
-  content: '';
-  position: absolute;
-  width: 220px;
-  height: 220px;
-  background: radial-gradient(circle, 
-    rgba(34, 211, 238, 0.08) 0%, 
-    rgba(34, 211, 238, 0.04) 60%, 
-    transparent 80%
-  );
-  border-radius: 50%;
-  top: 10%;
-  left: -15%;
-  animation: pulseSlow 7s ease-in-out infinite;
-  z-index: 0;
-}
-
-.about-ai-layout::after {
-  content: '';
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle, 
-    rgba(251, 191, 36, 0.1) 0%, 
-    rgba(251, 191, 36, 0.05) 50%, 
-    transparent 70%
-  );
-  border-radius: 50%;
-  top: 60%;
-  left: 10%;
-  animation: float 5s ease-in-out infinite;
-  z-index: 0;
-}
-
-/* Content section gradient accents */
-.about-ai-content-section::before {
-  content: '';
-  position: absolute;
-  width: 160px;
-  height: 160px;
-  background: radial-gradient(circle, 
-    rgba(99, 102, 241, 0.06) 0%, 
-    rgba(99, 102, 241, 0.03) 60%, 
-    transparent 80%
-  );
-  border-radius: 50%;
-  top: -20%;
-  right: -10%;
-  animation: pulse 6s ease-in-out infinite;
-  z-index: 0;
-}
-
-.about-ai-content-section::after {
-  content: '';
-  position: absolute;
-  width: 140px;
-  height: 140px;
-  background: radial-gradient(circle, 
-    rgba(16, 185, 129, 0.08) 0%, 
-    rgba(16, 185, 129, 0.04) 50%, 
-    transparent 70%
-  );
-  border-radius: 50%;
-  bottom: -25%;
-  right: 15%;
-  animation: floatSlow 9s ease-in-out infinite;
-  z-index: 0;
-}
-
-/* Spline iframe styling */
 iframe {
-  width: 180% !important;
-  height: 180% !important;
+  width: 140% !important;
+  height: 140% !important;
   border: none !important;
   outline: none !important;
   display: block !important;
   flex-shrink: 0;
   position: absolute !important;
-  left: -80% !important;
-  top: -30%;
+  top: 40% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
   background: transparent;
   z-index: 1 !important;
   margin: 0 !important;
@@ -237,129 +179,223 @@ iframe {
   overflow: visible !important;
   flex: none !important;
 }
-
-/* Adjust content section to make room for absolute positioned iframe */
-.about-ai-content-section {
-  margin-left: 550px;
-  position: relative;
-  z-index: 2;
+.uppercontentdivs{
+  height: 280px;
+  display: flex;
+  gap: 20px;
+  margin-bottom: 45px;
+  
 }
-
-/* Content section styling */
-.about-ai-content-section {
-  flex: 1;
+.statbox {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  align-items: center;
   justify-content: center;
-}
+  gap: 15px;
+  flex: 1;
+  background-color: rgb(190, 190, 190);
+  margin-left: 10px;
+  border-radius: 50px;
 
-.about-ai-main-title {
-  font-size: 4rem;
-  font-weight:400;
+  
+}
+.upperstatbox{
+  background-color: #000000;
+  border-radius: 30px;
   color: white;
-  margin: 0 0 2rem 0;
+  display: flex;
+  gap: 10px;
+  width: 90%;
+  height: 120px;
+  justify-content: center;
+  align-items: center;
+}
+.upperstatbox h1{
+  font-weight: 500;
+  font-size: 45px;
+}
+.upperstatbox p{
+  font-weight: 500;
+  color: rgb(109, 109, 109);
+  font-size: 15px;
+  margin-top: 20px;
   line-height: 1.1;
-  text-align: left;
-  letter-spacing: 2px;
-  opacity: 0.95;
-  position: relative;
-  z-index: 3;
 }
-
-.about-ai-main-description {
-  color: #b0b0b0;
-  font-size: 1.1rem;
-  line-height: 1.8;
-  margin: 0 0 1rem 0;
-  text-align: left;
-  opacity: 0.9;
-  position: relative;
-  z-index: 3;
+.lowerstatbox{
+  display: flex;
+  gap: 10px;
 }
+.iconlowerstat{
+  width: 100px;
+  height: 80px;
+  background-color:#000000 ;
+  border-radius: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-.about-ai-features-section {
-  padding: 1.5rem 0;
-  background: transparent;
-  z-index: 3;
-  position: relative;
 }
-
-.about-ai-features-text {
-  color: #d0d0d0;
-  font-size: 1rem;
-  line-height: 1.6;
-  text-align: left;
-  position: relative;
-  z-index: 3;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .about-ai-layout {
-    flex-direction: column;
-    gap: 3rem;
-    text-align: center;
-  }
-  
-  iframe {
-    width: 100%;
-    max-width: 400px;
-    height: 400px;
-    position: relative !important;
-    left: 0 !important;
-  }
-  
-  .about-ai-content-section {
-    margin-left: 0;
-  }
-  
-  .about-ai-main-title {
-    font-size: 2.5rem;
-    text-align: center;
-  }
-  
-  .about-ai-main-description {
-    text-align: center;
-  }
-  
-  .about-ai-features-text {
-    text-align: center;
-  }
-  
-  /* Adjust gradient spots for mobile */
-  .about-ai-container::before {
-    width: 200px;
-    height: 200px;
-    top: 10%;
-    right: 5%;
-  }
-  
-  .about-ai-container::after {
-    width: 150px;
-    height: 150px;
-    bottom: 15%;
-    right: 10%;
-  }
-  
-  .about-ai-layout::before {
-    width: 180px;
-    height: 180px;
-    top: 5%;
-    left: -10%;
-  }
-  
-  .about-ai-layout::after {
-    width: 80px;
+.arrowedcircleforstat {
     height: 80px;
-    top: 15%;
-    left: 5%;
-  }
-  
-  .about-ai-wrapper::before,
-  .about-ai-wrapper::after,
-  .about-ai-content-section::before,
-  .about-ai-content-section::after {
-    display: none;
-  }
+    width: 80px;
+    color: rgb(0, 0, 0);
+    background-color: rgb(170, 170, 170); /* Add this to see the circle */
+    border-radius: 50%;
+    display: flex; /* Ensure it's displayed as a block element */
+    justify-content: center;
+    align-items: center;
+}
+.lowerstatbox h1{
+  font-size: 40px;
+  font-weight: 500;
+}
+.watchvideo {
+  flex: 1;
+  position: relative;
+ 
+  border-radius: 50px;
+  padding: 20px;
+  min-height: 200px;
+  overflow: hidden;
+  border: 2px solid  rgba(170, 170, 170, 0.8);
+}
+
+.titlecontentdiv{
+  height: 400px;
+
+  color: white;
+}
+.uppertitlecon{
+  font-size:100px;
+  font-weight: 300;
+}
+.middletitlecon{
+ 
+display: flex;
+}
+.middletitlecon h1{
+  font-size:100px;
+  font-weight: 300;
+  margin-top: -40px;
+}
+.bottomtitlecon{
+   display: flex;
+}
+.bottomtitlecon h1{
+    font-size:100px;
+  font-weight: 300;
+  margin-top: -40px;}
+/* From Uiverse.io by McHaXYT */ 
+.buttonforaboutai {
+  border-radius: 50px;
+  padding: 15px 45px;
+  border: none;
+  outline: none;
+  background-color: #eee;
+  color: #151515;
+height: 70px;
+font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease-out;
+  margin-left: 35px;
+  z-index: 1;
+}
+
+.buttonforaboutai:hover {
+  transform: translateY(-3px);
+}
+.buttonforaboutai1 {
+  border-radius: 50px;
+ 
+  border: none;
+  outline: none;
+  background-color: #eee;
+  color: #151515;
+  height: 70px;
+  width: 70px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease-out;
+
+}
+.card-avatars {
+            display: flex;
+            align-items: center;
+            margin-left: 35px;
+        }
+
+        .cardavatar-container {
+            position: relative;
+            margin-left: -12px;
+            z-index: 2;
+        }
+        .cardavatar {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            border: 3px solid #151515 ;
+            object-fit: cover;
+            background-color: #ddd;
+            display: block;
+        }
+    .lowercontentdiv p{
+      font-size: 20px;
+      color: rgba(202, 202, 202, 0.8);
+    }
+    .joinourplat{
+      font-size: 38px;
+      color: white;
+      font-weight: 400;
+    }
+    .sameboxdiv p{
+      margin-left: 20px;
+      color: white;
+      font-weight: 200;
+    }
+    .buttonsforai {
+  position: relative;
+  width: 70px;
+  height: 70px;
+}
+
+.buttonforaboutai2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50px;
+  border: none;
+  outline: none;
+  background-color:rgb(202, 202, 202, 0.8);
+  color: #eee;
+  height: 65px;
+  width: 65px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease-out;
+  z-index: 1;
+  margin-left: 190px;
+}
+
+.buttonforaboutai3 {
+  position: absolute;
+  top: 0;
+  left: 40px;
+  height: 70px;
+  width: 70px;
+ background-color: #151515;
+  border: none;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 190px;
+  border-radius: 50px;
+}
+.vertical-line {
+    width: 1px;
+    height: 70px;
+    background-color: white;
+    margin: 0 10px;
+     margin-left: 20px;
 }
