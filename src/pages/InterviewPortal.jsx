@@ -28,6 +28,7 @@ export default function InterviewPortal() {
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
 
+  
   // Effect to initialize Speech Recognition and Speech Synthesis
   useEffect(() => {
     // Initialize SpeechRecognition
@@ -307,6 +308,50 @@ export default function InterviewPortal() {
             <div className="pricing-orb pricing-orb5"></div>
           </div>
 
+          {/* Enhanced Particle Wave Orb */}
+          <div className={`particle-orb-container ${isSpeaking ? 'active' : ''}`}>
+            {/* Central energy core */}
+            <div className="energy-core"></div>
+            
+            {/* Multi-layered particle system */}
+            <div className="particle-layer layer-1">
+              {Array.from({length: 8}).map((_, i) => (
+                <div key={`layer1-${i}`} className={`particle particle-layer-1 particle-${i + 1}`}></div>
+              ))}
+            </div>
+            
+            <div className="particle-layer layer-2">
+              {Array.from({length: 12}).map((_, i) => (
+                <div key={`layer2-${i}`} className={`particle particle-layer-2 particle-${i + 9}`}></div>
+              ))}
+            </div>
+            
+            <div className="particle-layer layer-3">
+              {Array.from({length: 16}).map((_, i) => (
+                <div key={`layer3-${i}`} className={`particle particle-layer-3 particle-${i + 21}`}></div>
+              ))}
+            </div>
+            
+            {/* Floating energy particles */}
+            <div className="floating-particles">
+              {Array.from({length: 20}).map((_, i) => (
+                <div key={`float-${i}`} className={`floating-particle float-${i + 1}`}></div>
+              ))}
+            </div>
+            
+            {/* Dynamic pulse waves */}
+            <div className="pulse-wave wave-1"></div>
+            <div className="pulse-wave wave-2"></div>
+            <div className="pulse-wave wave-3"></div>
+            <div className="pulse-wave wave-4"></div>
+            
+            {/* Energy beams */}
+            <div className="energy-beam beam-1"></div>
+            <div className="energy-beam beam-2"></div>
+            <div className="energy-beam beam-3"></div>
+            <div className="energy-beam beam-4"></div>
+          </div>
+
           <iframe
             src="https://my.spline.design/voiceinteractionanimation-2TyeWSP24w6QzdGddVpF30we/"
             frameBorder="0"
@@ -323,9 +368,9 @@ export default function InterviewPortal() {
 
           {!interviewStarted ? (
             <div className="askora-start-section">
-              <h1 className="askora-title">AI Interview Portal</h1>
+              <h1 className="askora-title">Askora Interview Portal</h1>
               <p className="askora-instructions">
-                Click "Start Interview" to begin. The AI will ask you 5
+                Click "Start Interview" to begin. Askora will ask you 5
                 questions, provide feedback, and then move to the next
                 question.
               </p>
@@ -467,7 +512,7 @@ export default function InterviewPortal() {
           left: 50% !important;
           transform: translate(-50%, -50%) !important;
           background: transparent;
-          z-index: 10 !important;
+          z-index:999 !important;
           margin: 0 !important;
           padding: 0 !important;
           border-radius: 0 !important;
@@ -502,6 +547,337 @@ export default function InterviewPortal() {
           gap: 1.5rem;
         }
 
+        /* Enhanced Particle Orb System */
+        .particle-orb-container {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 25;
+          opacity: 0;
+          transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+          pointer-events: none;
+          width: 500px;
+          height: 500px;
+        }
+
+        .particle-orb-container.active {
+          opacity: 1;
+        }
+
+        /* Central Energy Core */
+        .energy-core {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 20px;
+          height: 20px;
+          background: radial-gradient(circle, #ffffff, #4f46e5, #7c3aed);
+          border-radius: 50%;
+          box-shadow: 
+            0 0 20px rgba(255, 255, 255, 0.8),
+            0 0 40px rgba(79, 70, 229, 0.6),
+            0 0 60px rgba(124, 58, 237, 0.4);
+          animation: coreEnergy 2s ease-in-out infinite;
+        }
+
+        @keyframes coreEnergy {
+          0%, 100% {
+            transform: translate(-50%, -50%) scale(1);
+            box-shadow: 
+              0 0 20px rgba(255, 255, 255, 0.8),
+              0 0 40px rgba(79, 70, 229, 0.6),
+              0 0 60px rgba(124, 58, 237, 0.4);
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.3);
+            box-shadow: 
+              0 0 30px rgba(255, 255, 255, 1),
+              0 0 60px rgba(79, 70, 229, 0.8),
+              0 0 90px rgba(124, 58, 237, 0.6);
+          }
+        }
+
+        /* Particle Layers */
+        .particle-layer {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100%;
+          height: 100%;
+        }
+
+        .particle {
+          position: absolute;
+          border-radius: 50%;
+          animation: orbitalDance 4s ease-in-out infinite;
+        }
+
+        /* Layer 1 - Inner orbit particles */
+        .particle-layer-1 {
+          width: 6px;
+          height: 6px;
+          background: radial-gradient(circle, #ffffff, #4f46e5);
+          box-shadow: 0 0 12px rgba(79, 70, 229, 0.9);
+        }
+
+        .layer-1 .particle-1 { top: 50%; left: 60%; animation-delay: 0s; transform-origin: -60px center; }
+        .layer-1 .particle-2 { top: 35%; left: 57%; animation-delay: 0.5s; transform-origin: -57px center; }
+        .layer-1 .particle-3 { top: 25%; left: 50%; animation-delay: 1s; transform-origin: -50px center; }
+        .layer-1 .particle-4 { top: 35%; left: 43%; animation-delay: 1.5s; transform-origin: -43px center; }
+        .layer-1 .particle-5 { top: 50%; left: 40%; animation-delay: 2s; transform-origin: -40px center; }
+        .layer-1 .particle-6 { top: 65%; left: 43%; animation-delay: 2.5s; transform-origin: -43px center; }
+        .layer-1 .particle-7 { top: 75%; left: 50%; animation-delay: 3s; transform-origin: -50px center; }
+        .layer-1 .particle-8 { top: 65%; left: 57%; animation-delay: 3.5s; transform-origin: -57px center; }
+
+        /* Layer 2 - Middle orbit particles */
+        .particle-layer-2 {
+          width: 5px;
+          height: 5px;
+          background: radial-gradient(circle, #7c3aed, #ec4899);
+          box-shadow: 0 0 10px rgba(124, 58, 237, 0.8);
+        }
+
+        .layer-2 .particle-9 { top: 50%; left: 75%; animation-delay: 0.2s; transform-origin: -125px center; }
+        .layer-2 .particle-10 { top: 25%; left: 68%; animation-delay: 0.7s; transform-origin: -118px center; }
+        .layer-2 .particle-11 { top: 15%; left: 50%; animation-delay: 1.2s; transform-origin: -100px center; }
+        .layer-2 .particle-12 { top: 25%; left: 32%; animation-delay: 1.7s; transform-origin: -82px center; }
+        .layer-2 .particle-13 { top: 50%; left: 25%; animation-delay: 2.2s; transform-origin: -75px center; }
+        .layer-2 .particle-14 { top: 75%; left: 32%; animation-delay: 2.7s; transform-origin: -82px center; }
+        .layer-2 .particle-15 { top: 85%; left: 50%; animation-delay: 3.2s; transform-origin: -100px center; }
+        .layer-2 .particle-16 { top: 75%; left: 68%; animation-delay: 3.7s; transform-origin: -118px center; }
+        .layer-2 .particle-17 { top: 40%; left: 80%; animation-delay: 0.4s; transform-origin: -130px center; }
+        .layer-2 .particle-18 { top: 35%; left: 20%; animation-delay: 0.9s; transform-origin: -70px center; }
+        .layer-2 .particle-19 { top: 65%; left: 20%; animation-delay: 1.4s; transform-origin: -70px center; }
+        .layer-2 .particle-20 { top: 60%; left: 80%; animation-delay: 1.9s; transform-origin: -130px center; }
+
+        /* Layer 3 - Outer orbit particles */
+        .particle-layer-3 {
+          width: 4px;
+          height: 4px;
+          background: radial-gradient(circle, #ec4899, #f59e0b);
+          box-shadow: 0 0 8px rgba(236, 72, 153, 0.7);
+        }
+
+        .layer-3 .particle-21 { top: 50%; left: 90%; animation-delay: 0.1s; transform-origin: -190px center; }
+        .layer-3 .particle-22 { top: 20%; left: 80%; animation-delay: 0.3s; transform-origin: -180px center; }
+        .layer-3 .particle-23 { top: 10%; left: 65%; animation-delay: 0.6s; transform-origin: -165px center; }
+        .layer-3 .particle-24 { top: 5%; left: 50%; animation-delay: 0.9s; transform-origin: -150px center; }
+        .layer-3 .particle-25 { top: 10%; left: 35%; animation-delay: 1.2s; transform-origin: -135px center; }
+        .layer-3 .particle-26 { top: 20%; left: 20%; animation-delay: 1.5s; transform-origin: -120px center; }
+        .layer-3 .particle-27 { top: 35%; left: 8%; animation-delay: 1.8s; transform-origin: -108px center; }
+        .layer-3 .particle-28 { top: 50%; left: 5%; animation-delay: 2.1s; transform-origin: -105px center; }
+        .layer-3 .particle-29 { top: 65%; left: 8%; animation-delay: 2.4s; transform-origin: -108px center; }
+        .layer-3 .particle-30 { top: 80%; left: 20%; animation-delay: 2.7s; transform-origin: -120px center; }
+        .layer-3 .particle-31 { top: 90%; left: 35%; animation-delay: 3s; transform-origin: -135px center; }
+        .layer-3 .particle-32 { top: 95%; left: 50%; animation-delay: 3.3s; transform-origin: -150px center; }
+        .layer-3 .particle-33 { top: 90%; left: 65%; animation-delay: 3.6s; transform-origin: -165px center; }
+        .layer-3 .particle-34 { top: 80%; left: 80%; animation-delay: 3.9s; transform-origin: -180px center; }
+        .layer-3 .particle-35 { top: 65%; left: 92%; animation-delay: 0.15s; transform-origin: -192px center; }
+        .layer-3 .particle-36 { top: 35%; left: 92%; animation-delay: 0.45s; transform-origin: -192px center; }
+
+        @keyframes orbitalDance {
+          0% {
+            transform: rotate(0deg) translateX(0px) scale(0.8);
+            opacity: 0.6;
+          }
+          25% {
+            transform: rotate(90deg) translateX(12px) scale(1.4);
+            opacity: 1;
+          }
+          50% {
+            transform: rotate(180deg) translateX(0px) scale(1.1);
+            opacity: 0.8;
+          }
+          75% {
+            transform: rotate(270deg) translateX(-12px) scale(1.4);
+            opacity: 1;
+          }
+          100% {
+            transform: rotate(360deg) translateX(0px) scale(0.8);
+            opacity: 0.6;
+          }
+        }
+
+        /* Floating Energy Particles */
+        .floating-particles {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+
+        .floating-particle {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: radial-gradient(circle, #ffffff, transparent);
+          border-radius: 50%;
+          animation: floatAround 6s linear infinite;
+        }
+
+        .floating-particle:nth-child(odd) {
+          background: radial-gradient(circle, #4f46e5, transparent);
+        }
+
+        .floating-particle:nth-child(3n) {
+          background: radial-gradient(circle, #ec4899, transparent);
+        }
+
+        /* Randomized floating positions */
+        .float-1 { top: 20%; left: 30%; animation-delay: 0s; }
+        .float-2 { top: 80%; left: 70%; animation-delay: 0.3s; }
+        .float-3 { top: 40%; left: 10%; animation-delay: 0.6s; }
+        .float-4 { top: 60%; left: 90%; animation-delay: 0.9s; }
+        .float-5 { top: 15%; left: 75%; animation-delay: 1.2s; }
+        .float-6 { top: 85%; left: 25%; animation-delay: 1.5s; }
+        .float-7 { top: 50%; left: 5%; animation-delay: 1.8s; }
+        .float-8 { top: 30%; left: 95%; animation-delay: 2.1s; }
+        .float-9 { top: 70%; left: 15%; animation-delay: 2.4s; }
+        .float-10 { top: 25%; left: 55%; animation-delay: 2.7s; }
+        .float-11 { top: 75%; left: 45%; animation-delay: 3s; }
+        .float-12 { top: 10%; left: 40%; animation-delay: 3.3s; }
+        .float-13 { top: 90%; left: 60%; animation-delay: 3.6s; }
+        .float-14 { top: 45%; left: 85%; animation-delay: 3.9s; }
+        .float-15 { top: 55%; left: 35%; animation-delay: 4.2s; }
+        .float-16 { top: 35%; left: 65%; animation-delay: 4.5s; }
+        .float-17 { top: 65%; left: 50%; animation-delay: 4.8s; }
+        .float-18 { top: 18%; left: 18%; animation-delay: 5.1s; }
+        .float-19 { top: 82%; left: 82%; animation-delay: 5.4s; }
+        .float-20 { top: 50%; left: 50%; animation-delay: 5.7s; }
+
+        @keyframes floatAround {
+          0%, 100% {
+            transform: translate(0, 0) scale(0.5);
+            opacity: 0;
+          }
+          20% {
+            transform: translate(20px, -30px) scale(1);
+            opacity: 1;
+          }
+          40% {
+            transform: translate(-15px, -60px) scale(0.8);
+            opacity: 0.7;
+          }
+          60% {
+            transform: translate(-40px, -20px) scale(1.2);
+            opacity: 1;
+          }
+          80% {
+            transform: translate(10px, 15px) scale(0.6);
+            opacity: 0.5;
+          }
+        }
+
+        /* Dynamic Pulse Waves */
+        .pulse-wave {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          border-radius: 50%;
+          border: 1px solid transparent;
+          animation: pulseWave 3s ease-out infinite;
+        }
+
+        .wave-1 {
+          width: 100px;
+          height: 100px;
+          animation-delay: 0s;
+          border-color: rgba(79, 70, 229, 0.6);
+        }
+
+        .wave-2 {
+          width: 180px;
+          height: 180px;
+          animation-delay: 0.8s;
+          border-color: rgba(124, 58, 237, 0.5);
+        }
+
+        .wave-3 {
+          width: 260px;
+          height: 260px;
+          animation-delay: 1.6s;
+          border-color: rgba(236, 72, 153, 0.4);
+        }
+
+        .wave-4 {
+          width: 340px;
+          height: 340px;
+          animation-delay: 2.4s;
+          border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        @keyframes pulseWave {
+          0% {
+            transform: translate(-50%, -50%) scale(0.5);
+            opacity: 0;
+            border-width: 3px;
+          }
+          30% {
+            opacity: 1;
+            border-width: 2px;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0;
+            border-width: 1px;
+          }
+        }
+
+        /* Energy Beams */
+        .energy-beam {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform-origin: center;
+          width: 2px;
+          height: 150px;
+          background: linear-gradient(to top, transparent, rgba(79, 70, 229, 0.8), transparent);
+          animation: energyBeam 4s linear infinite;
+        }
+
+        .beam-1 {
+          transform: translate(-50%, -50%) rotate(0deg);
+          animation-delay: 0s;
+        }
+
+        .beam-2 {
+          transform: translate(-50%, -50%) rotate(90deg);
+          animation-delay: 1s;
+          background: linear-gradient(to top, transparent, rgba(124, 58, 237, 0.8), transparent);
+        }
+
+        .beam-3 {
+          transform: translate(-50%, -50%) rotate(45deg);
+          animation-delay: 2s;
+          background: linear-gradient(to top, transparent, rgba(236, 72, 153, 0.8), transparent);
+        }
+
+        .beam-4 {
+          transform: translate(-50%, -50%) rotate(135deg);
+          animation-delay: 3s;
+          background: linear-gradient(to top, transparent, rgba(245, 158, 11, 0.8), transparent);
+        }
+
+        @keyframes energyBeam {
+          0%, 90%, 100% {
+            opacity: 0;
+            transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) scaleY(0.5);
+          }
+          10%, 80% {
+            opacity: 1;
+            transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) scaleY(1);
+          }
+          50% {
+            opacity: 0.7;
+            transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) scaleY(1.2);
+          }
+        }
+
         .askora-error-message {
           background: #fee2e2;
           border: 1px solid #fecaca;
@@ -521,13 +897,13 @@ export default function InterviewPortal() {
 
         .askora-title {
           font-size: 2rem;
-          font-weight: 700;
+          font-weight: 500;
           color: white;
           margin-bottom: 1rem;
         }
 
         .askora-instructions {
-          font-size: 1.1rem;
+          font-size: 0.8rem;
           color: #64748b;
           margin-bottom: 2rem;
           line-height: 1.6;
@@ -542,8 +918,8 @@ export default function InterviewPortal() {
         }
 
         .askora-question-panel {
-          background: white;
-          border: 1px solid #e2e8f0;
+          background:rgba(15, 16, 31, 0.6) ;
+          border: 1px solid rgba(15, 16, 31, 0.6);
           border-radius: 15px;
           padding: 1.5rem;
           flex: 0 0 auto;
@@ -553,7 +929,7 @@ export default function InterviewPortal() {
         .askora-question-title {
           font-size: 1.3rem;
           font-weight: 600;
-          color: #1e293b;
+          color: #5c6e86ff;
           margin: 0 0 15px 0;
         }
 
@@ -568,12 +944,12 @@ export default function InterviewPortal() {
         .askora-answer-section {
           margin-top: 20px;
           padding-top: 20px;
-          border-top: 1px solid #e2e8f0;
+          border-top: 1px solid #475569;
         }
 
         .askora-label {
           font-weight: 600;
-          color: #374151;
+          color: #475569;
         }
 
         .askora-feedback-text {
@@ -601,7 +977,7 @@ export default function InterviewPortal() {
           position: absolute;
           top: 2rem;
           left: 2rem;
-          z-index: 10;
+          z-index: 30;
         }
 
         .askora-logo {
@@ -730,14 +1106,14 @@ export default function InterviewPortal() {
 
         .askora-transcript-title {
           font-size: 1.2rem;
-          font-weight: 600;
-          color: #1e293b;
+          font-weight: 500;
+          color: #5c6e88ff;
           margin: 0 0 15px 0;
         }
 
         .askora-transcript-container {
-          background: white;
-          border: 1px solid #e2e8f0;
+          background: rgba(15, 16, 31, 0.73);
+          border: 1px solid rgba(8, 9, 17, 1);
           border-radius: 10px;
           padding: 20px;
           flex: 1;
@@ -759,9 +1135,9 @@ export default function InterviewPortal() {
         }
 
         .askora-transcript-question {
-          background: #dbeafe;
-          color: #1e40af;
-          border-left: 4px solid #3b82f6;
+          background:rgba(33, 36, 68, 0.6) ;
+          color: #8b5cf6;
+          border-left: 4px solid #8b5cf6;
         }
 
         .askora-transcript-answer {
@@ -771,7 +1147,7 @@ export default function InterviewPortal() {
         }
 
         .askora-transcript-feedback {
-          background: #f3e8ff;
+          background: #f3e8ffff;
           color: #6b21a8;
           border-left: 4px solid #8b5cf6;
         }
@@ -814,6 +1190,46 @@ export default function InterviewPortal() {
             max-width: 250px;
             justify-content: center;
           }
+
+          .particle-orb-container {
+            width: 350px;
+            height: 350px;
+          }
+
+          .energy-core {
+            width: 15px;
+            height: 15px;
+          }
+
+          .particle-layer-1 {
+            width: 4px;
+            height: 4px;
+          }
+
+          .particle-layer-2 {
+            width: 3px;
+            height: 3px;
+          }
+
+          .particle-layer-3 {
+            width: 2px;
+            height: 2px;
+          }
+
+          .floating-particle {
+            width: 1.5px;
+            height: 1.5px;
+          }
+
+          .energy-beam {
+            width: 1px;
+            height: 100px;
+          }
+
+          .wave-1 { width: 80px; height: 80px; }
+          .wave-2 { width: 140px; height: 140px; }
+          .wave-3 { width: 200px; height: 200px; }
+          .wave-4 { width: 260px; height: 260px; }
         }
       `}</style>
     </div>
