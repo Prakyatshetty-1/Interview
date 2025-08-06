@@ -1,6 +1,9 @@
 import './Saves.css';
 import Dock from '../react-bits/Dock';
 import { useNavigate } from 'react-router-dom';
+import CardFolder from '../components/CardFolder'
+import SlidingCard from '../components/SlidingCard';
+
 
 export default function Saves() {
     const navigate=useNavigate();
@@ -44,10 +47,7 @@ export default function Saves() {
                 <div className="logo-containernew">
                     <span className="logonew">Askora</span>
                 </div>
-                <div className="nosavesyet">
-                    <img src="./saves.png" alt="" className="nosave" />
-                    <h1>Still waiting for your first save!</h1>
-                </div>
+
                 <Dock
                     items={items}
                     panelHeight={78}

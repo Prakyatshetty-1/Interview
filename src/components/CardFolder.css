@@ -91,4 +91,27 @@
 .avatar-container:nth-child(5) .avatar {
     border-color: #4facfe;
 }
+.save-button-wrapper {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  z-index: 10; /* Ensure it's on top */
+  pointer-events: auto;
+}
+
+.save-button-wrapper button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.save-button-wrapper button:hover {
+  background-color: #0056b3;
+}
+
        
