@@ -17,7 +17,12 @@ export default function Features() {
       </div>
       <div className="featurecontainer">
         <div className="featurebox1">
-          <h1 className="firstmay">Bright</h1> <h1 className="secmay">Future</h1>
+          <div className="titels">
+            <h1 className="firstmay">Bright</h1> <h1 className="secmay">Future</h1>
+          </div>
+      
+          <p>With the right guidance, tools, and mindset, your future isn’t just something to wait for — it's something you create. </p>
+      <div className="letsworktogether"><h1>Let's work together</h1></div>
       
         </div>
         <div className="otherfeatherbox">

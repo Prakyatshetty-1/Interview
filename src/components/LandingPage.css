@@ -198,18 +198,13 @@ spline-viewer {
     width: 120% !important;
     height: 120% !important;
     display: block !important;
-    position: absolute !important;
-    top: 60% !important;
-    left: 55% !important;
-    transform: translate(-50%, -50%) !important;
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
     outline: none !important;
     z-index: -1;
+    margin-left:-200px;
 }
-
-
 /* Responsive adjustments for mobile */
 @media (max-width: 768px) {
     .content-wrapper {
