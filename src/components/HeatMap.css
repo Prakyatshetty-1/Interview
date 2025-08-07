@@ -1,0 +1,194 @@
+/* GitHub-style Activity Heatmap CSS */
+.heatmap-container {
+    margin: 1rem;
+    background: #0d1117;
+    border-radius: 6px;
+    padding: 16px;
+    margin-top: 30px;
+    color: #e6edf3;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+}
+
+.heatmap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.heatmap-title {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.heatmap-title span {
+    font-weight: 600;
+}
+
+.heatmap-info-icon {
+    color: #7d8590;
+    cursor: pointer;
+}
+
+.heatmap-stats {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #7d8590;
+}
+
+.heatmap-stats strong {
+    color: #e6edf3;
+}
+
+.heatmap-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: #21262d;
+    border: 1px solid #30363d;
+}
+
+.heatmap-dropdown:hover {
+    background: #30363d;
+}
+
+.heatmap-dropdown-arrow {
+    font-size: 10px;
+}
+
+.heatmap-grid {
+    display: flex;
+}
+
+.heatmap-weekdays {
+    display: flex;
+    flex-direction: column;
+    width: 25px;
+    font-size: 9px;
+    color: #7d8590;
+    padding-right: 2px;
+}
+
+.heatmap-weekday-spacer {
+    height: 15px;
+    margin-bottom: 8px;
+}
+
+.heatmap-weekday-label {
+    height: 10px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.heatmap-months {
+    display: flex;
+    gap: 12px;
+}
+
+.heatmap-month-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.heatmap-month-label {
+    height: 15px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 11px;
+    color: #7d8590;
+}
+
+.heatmap-month-blocks {
+    display: flex;
+    gap: 2px;
+}
+
+.heatmap-week {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.heatmap-day {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+.heatmap-day:hover {
+    outline: 1px solid #7d8590;
+}
+
+/* Activity levels */
+.heatmap-day.level-0 {
+    background-color: #161b22;
+}
+
+.heatmap-day.level-1 {
+    background-color: #0e4429;
+}
+
+.heatmap-day.level-2 {
+    background-color: #006d32;
+}
+
+.heatmap-day.level-3 {
+    background-color: #26a641;
+}
+
+.heatmap-day.level-4 {
+    background-color: #39d353;
+}
+
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #7d8590;
+}
+
+.heatmap-legend-squares {
+    display: flex;
+    gap: 2px;
+    margin: 0 4px;
+}
+
+.heatmap-legend-square {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.heatmap-legend-square.level-0 {
+    background-color: #161b22;
+}
+
+.heatmap-legend-square.level-1 {
+    background-color: #0e4429;
+}
+
+.heatmap-legend-square.level-2 {
+    background-color: #006d32;
+}
+
+.heatmap-legend-square.level-3 {
+    background-color: #26a641;
+}
+
+.heatmap-legend-square.level-4 {
+    background-color: #39d353;
+}

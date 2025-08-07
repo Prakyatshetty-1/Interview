@@ -1,0 +1,226 @@
+.topics-filter1 {
+
+  padding: 12px 16px;
+  border-radius: 8px;
+margin-top: 1%;
+  width: 1400px;
+  box-sizing: border-box;
+}
+
+.topics-container1 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.topic-button1 {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  border: none;
+background-color: transparent;
+  padding: 6px 12px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.topic-button1:hover {
+  color: #7c3aed; /* Darker purple */
+  transform: translateY(-1px);
+}
+
+
+.topic-name1 {
+  color: inherit;
+  font-size: 13px;
+}
+
+.topic-count1 {
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 10px;
+  background-color: #7c3aed;
+  padding: 1px 6px;
+  display: inline-block;
+  margin-left: 5px;
+  line-height: 1.4;
+}
+
+.topic-button1.highlighted .topic-count {
+  color: #cce7ff;
+}
+
+.expand-button1 {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: transparent;
+  border: 1px solid #555555;
+  border-radius: 18px;
+  padding: 6px 12px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.expand-button1:hover {
+  background-color: #404040;
+  border-color: #666666;
+}
+
+.expand-icon1 {
+  font-size: 11px;
+  transition: transform 0.2s ease;
+}
+
+/* Responsive design for 67% browser width */
+@media (max-width: 1200px) {
+  .topics-filter {
+    padding: 10px 14px;
+  }
+
+  .topics-container {
+    gap: 5px;
+  }
+
+  .topic-button {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 16px;
+  }
+
+  .topic-name {
+    font-size: 12px;
+  }
+
+  .topic-count {
+    font-size: 11px;
+  }
+
+  .expand-button {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  .topics-filter {
+    padding: 8px 12px;
+  }
+
+  .topics-container {
+    gap: 4px;
+  }
+
+  .topic-button {
+    padding: 4px 8px;
+    font-size: 11px;
+    border-radius: 14px;
+  }
+
+  .topic-name {
+    font-size: 11px;
+  }
+
+  .topic-count {
+    font-size: 10px;
+  }
+
+  .expand-button {
+    padding: 4px 8px;
+    font-size: 11px;
+    border-radius: 14px;
+  }
+
+  .expand-icon {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .topics-filter {
+    padding: 6px 10px;
+  }
+
+  .topics-container {
+    gap: 3px;
+  }
+
+  .topic-button {
+    padding: 3px 6px;
+    font-size: 10px;
+    border-radius: 12px;
+    gap: 3px;
+  }
+
+  .topic-name {
+    font-size: 10px;
+  }
+
+  .topic-count {
+    font-size: 9px;
+  }
+
+  .expand-button {
+    padding: 3px 6px;
+    font-size: 10px;
+    border-radius: 12px;
+    gap: 3px;
+  }
+
+  .expand-icon {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 400px) {
+  .topics-container {
+    gap: 2px;
+  }
+
+  .topic-button {
+    padding: 2px 5px;
+    font-size: 9px;
+    border-radius: 10px;
+  }
+
+  .topic-name {
+    font-size: 9px;
+  }
+
+  .topic-count {
+    font-size: 8px;
+  }
+
+  .expand-button {
+    padding: 2px 5px;
+    font-size: 9px;
+    border-radius: 10px;
+  }
+}
+
+/* Animation for smooth expansion */
+.topics-container {
+  transition: all 0.3s ease;
+}
+
+/* Ensure proper wrapping in constrained width */
+.topics-container {
+  max-width: 100%;
+  overflow: hidden;
+}
