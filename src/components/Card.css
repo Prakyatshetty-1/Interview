@@ -129,3 +129,36 @@ color: #ef4444;
     radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.2) 0%, transparent 50%);
     z-index: 1;
 }
+.save-button {
+  background-color: #ff5722;
+  color: white;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.save-button:hover {
+  background-color: #e64a19;
+}
+.popup-message {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #323232;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+  animation: fadeInOut 2s ease forwards;
+  z-index: 9999;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(10px); }
+}

@@ -5,15 +5,15 @@ const LeetcodeMeter = () => {
   const [animatedAttempting, setAnimatedAttempting] = useState(0);
   
   const stats = {
-    solved: 145,
     total: 3632,
     attempting: 6,
     easy: { solved: 67, total: 886 },
-    medium: { solved: 68, total: 1889 },
-    hard: { solved: 10, total: 857 }
-  };
-
-  const solvedPercentage = (stats.solved / stats.total) * 100;
+    medium: { solved: 0, total: 1889 },
+    hard: { solved: 10, total: 857 },
+    
+  };// ider bhi same ye format me data store kar tere database me aur har ek user ke liye data alag rahega then baki sub working hai 
+  const solved = stats.easy.solved + stats.medium.solved + stats.hard.solved;
+  const solvedPercentage = (solved / stats.total) * 100;
   const radius = 85;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (solvedPercentage / 100) * circumference;
@@ -22,9 +22,9 @@ const LeetcodeMeter = () => {
     const timer1 = setTimeout(() => {
       const interval1 = setInterval(() => {
         setAnimatedSolved(prev => {
-          if (prev < stats.solved) return prev + 2;
+          if (prev < solved) return prev + 2;
           clearInterval(interval1);
-          return stats.solved;
+          return solved;
         });
       }, 10);
     }, 200);

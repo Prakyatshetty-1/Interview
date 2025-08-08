@@ -1,33 +1,57 @@
-import "./CardFolder.css"
+import { useState } from "react";
+import { LuSave, LuSaveOff } from "react-icons/lu";
+import "./CardFolder.css";
 
 export default function CardFolder(props) {
+  const [isSaved, setIsSaved] = useState(props.isSaved || false);
+  const [popupMessage, setPopupMessage] = useState("");
 
-  const handleClick = async () => {
+  const showPopup = (message) => {
+    setPopupMessage(message);
+    setTimeout(() => setPopupMessage(""), 2000);
+  };
+
+  const handleSave = async () => {
     const title = props.title;
     const imageUrl = props.path;
-    console.log("Saving:", title, imageUrl);
 
     try {
       const response = await fetch("http://localhost:5000/api/save", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, imageUrl }),
       });
 
-      const data = await response.json();
+      if (response.ok) {
+        setIsSaved(true);
+        showPopup("✅ Saved successfully!");
+      } else {
+        showPopup("❌ Failed to save card.");
+      }
+    } catch {
+      showPopup("⚠️ Error saving card.");
+    }
+  };
+
+  const handleUnsave = async () => {
+    const title = props.title;
+    const imageUrl = props.path;
+
+    try {
+      const response = await fetch("http://localhost:5000/api/unsave", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, imageUrl }),
+      });
 
       if (response.ok) {
-        console.log("Saved successfully:", data);
-        alert("Card saved!");
+        setIsSaved(false);
+        showPopup("🗑️ Unsaved successfully!");
       } else {
-        console.error("Save failed:", data);
-        alert("Failed to save card.");
+        showPopup("❌ Failed to unsave card.");
       }
-    } catch (error) {
-      console.error("Network error:", error);
-      alert("Error saving card.");
+    } catch {
+      showPopup("⚠️ Error unsaving card.");
     }
   };
 
@@ -40,36 +64,39 @@ export default function CardFolder(props) {
         }}
       >
         <div className="card-content-section">
-          {/* Bottom section */}
           <div className="card-bottom-section">
             <div className="bott">
               <h2 className="cardfoldertitle">{props.title}</h2>
               <p className="numberofquestion1">145 Packs</p>
               <div className="profile-avatars">
-                <div className="avatar-container">
-                  <img src="/placeholder.svg?height=27&width=27" alt="Profile 1" className="avatar" />
-                </div>
-                <div className="avatar-container">
-                  <img src="/placeholder.svg?height=27&width=27" alt="Profile 2" className="avatar" />
-                </div>
-                <div className="avatar-container">
-                  <img src="/placeholder.svg?height=27&width=27" alt="Profile 3" className="avatar" />
-                </div>
-                <div className="avatar-container">
-                  <img src="/placeholder.svg?height=27&width=27" alt="Profile 4" className="avatar" />
-                </div>
-                <div className="avatar-container">
-                  <img src="/placeholder.svg?height=27&width=27" alt="Profile 5" className="avatar" />
-                </div>
+                {[...Array(5)].map((_, i) => (
+                  <div className="avatar-container" key={i}>
+                    <img
+                      src="/placeholder.svg?height=27&width=27"
+                      alt={`Profile ${i + 1}`}
+                      className="avatar"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
-        {/* Add the save button wrapper here */}
+
         <div className="save-button-wrapper">
-          <button onClick={handleClick}> save</button>
+          {isSaved ? (
+            <button onClick={handleUnsave} className="save-btn">
+              <LuSaveOff size={20} />
+            </button>
+          ) : (
+            <button onClick={handleSave} className="save-btn">
+              <LuSave size={20} />
+            </button>
+          )}
         </div>
       </div>
+
+      {popupMessage && <div className="popup-message">{popupMessage}</div>}
     </>
-  )
+  );
 }

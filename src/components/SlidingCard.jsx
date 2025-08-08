@@ -5,6 +5,7 @@ import "./SlidingCard.css"
 import CardFolder from './CardFolder'
 import Card from './Card'
 import cardDataJson from "../data/CardData.json"
+import SaveCard from "./SaveCard"
 
 // Character limits configuration
 const TITLE_CHAR_LIMIT = 20

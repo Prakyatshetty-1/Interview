@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import InterviewPortal from './pages/InterviewPortal';
 import ProfileCard from './components/ProfileCard';
 import ViewProfile from './pages/ViewProfiles';
+import QuestionFloder from './pages/QuestionFloder';
 import './App.css';
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Route path='/Profile' element={<Profile/>}/>
         <Route path='/InterviewPortal' element={<InterviewPortal/>}/>
         <Route path='/ProfileCard' element={<ViewProfile/>}/>
+        <Route path='/QuestionFloder' element={<QuestionFloder/>}/>
       </Routes>
     </Router>
   );
