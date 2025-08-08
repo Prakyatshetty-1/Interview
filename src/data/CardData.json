@@ -1539,5 +1539,134 @@
     "popularity": 52,
     "company": "TestEquip",
     "paid": false
-  }
+  },
+    {
+      "difficulty": "Med.",
+      "title": "Autonomous Navigation System",
+      "creator": "Arjun Patel",
+      "tags": ["Robotics Engineer", "Autonomous Systems"],
+      "path": "/Robotics.png",
+      "popularity": 75,
+      "company": "RoboNav Technologies",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Servo Motor Controller",
+      "creator": "Priya Sharma",
+      "tags": ["Robotics Engineer", "Motor Control"],
+      "path": "/Robotics.png",
+      "popularity": 61,
+      "company": "ServoTech",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Machine Learning Vision",
+      "creator": "Vikash Singh",
+      "tags": ["Robotics Engineer", "Computer Vision"],
+      "path": "/Robotics.png",
+      "popularity": 89,
+      "company": "VisionBot Systems",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Robotic Arm Kinematics",
+      "creator": "Sneha Gupta",
+      "tags": ["Robotics Engineer", "Kinematics"],
+      "path": "/Robotics.png",
+      "popularity": 72,
+      "company": "ArmTech Robotics",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Sensor Fusion Module",
+      "creator": "Rahul Mehta",
+      "tags": ["Robotics Engineer", "Sensors"],
+      "path": "/Robotics.png",
+      "popularity": 58,
+      "company": "SensorBot",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Swarm Robotics Controller",
+      "creator": "Anita Desai",
+      "tags": ["Robotics Engineer", "Swarm Intelligence"],
+      "path": "/Robotics.png",
+      "popularity": 91,
+      "company": "SwarmTech Industries",
+      "paid": true
+    },{
+      "difficulty": "Med.",
+      "title": "Flight Control System",
+      "creator": "Kiran Reddy",
+      "tags": ["Aerospace Engineer", "Flight Control"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 78,
+      "company": "AeroControl Systems",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Propulsion Calculator",
+      "creator": "Meera Iyer",
+      "tags": ["Aerospace Engineer", "Propulsion"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 64,
+      "company": "PropCalc Solutions",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Satellite Orbit Predictor",
+      "creator": "Rajesh Kumar",
+      "tags": ["Aerospace Engineer", "Orbital Mechanics"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 87,
+      "company": "OrbitTech Aerospace",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Aerodynamics Simulator",
+      "creator": "Kavya Nair",
+      "tags": ["Aerospace Engineer", "Aerodynamics"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 73,
+      "company": "AeroSim Technologies",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Weight and Balance Tool",
+      "creator": "Suresh Pillai",
+      "tags": ["Aerospace Engineer", "Aircraft Design"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 55,
+      "company": "DesignAero",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Spacecraft Thermal Analysis",
+      "creator": "Deepika Rao",
+      "tags": ["Aerospace Engineer", "Thermal Systems"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 82,
+      "company": "ThermalSpace Systems",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Avionics Interface Designer",
+      "creator": "Anil Joshi",
+      "tags": ["Aerospace Engineer", "Avionics"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 69,
+      "company": "AvionicsDesign Pro",
+      "paid": false
+    }
 ]
