@@ -1,7 +1,9 @@
 import LeetcodeMeter from '../components/LeetcodeMeter'
 import './QuestionFloder.css'
+import { useLocation } from "react-router-dom";
 
 export default function QuestionFolder() {
+    const location = useLocation();
     const questions = [
         { number: 17, title: "Letter Combinations of a Phone Number", acceptance: 64.2, difficulty: "Med.", solved: true },
         { number: 22, title: "Generate Parentheses", acceptance: 77.4, difficulty: "Med.", solved: true },
@@ -33,7 +35,7 @@ export default function QuestionFolder() {
                 <header className="header">
                     <div className="topicIcon" aria-hidden="true">🎓</div>
                     <div>
-                        <h1 className="title">Backtracking</h1>
+                        <h1 className="title">{location.state.topic}</h1>
                         <p className="subtitle">LeetCode · 108 questions · 2367 Saved</p>
                     </div>
                 </header>
@@ -43,7 +45,7 @@ export default function QuestionFolder() {
                             {/* <img src="/Adobe.png?height=60&width=60" alt="Icon" /> */}
                             <div className="topicIcon1" >🎓</div>
                             <div className="header-content1">
-                                <h2 className="topic-title1">Backtracking</h2>
+                                <h2 className="topic-title1">{location.state.topic}</h2>
                                 <p className="topic-subtitle1">LeetCode · 108 questions · 2367 Saved</p>
                             </div>
                         <LeetcodeMeter />
