@@ -199,3 +199,145 @@
 .challenge-card:hover::after {
     opacity: 1;
 }
+/* Premium enhancements for your existing card styles */
+          .premium-card.locked-card {
+            filter: blur(2px);
+          }
+
+          .premium-card.locked-card:hover {
+            filter: blur(1px);
+          }
+
+          .premium-glow {
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ff6b35, #f7931e, #ffd700);
+            background-size: 400% 400%;
+            border-radius: 27px;
+            z-index: -2;
+            animation: premiumGlow 3s ease-in-out infinite;
+          }
+
+          @keyframes premiumGlow {
+            0%, 100% {
+              background-position: 0% 50%;
+            }
+            50% {
+              background-position: 100% 50%;
+            }
+          }
+
+          .locked-overlay {
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%);
+          }
+
+          .lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            border-radius: 24px;
+          }
+
+          .lock-content {
+            text-align: center;
+            color: white;
+          }
+
+          .lock-icon {
+            margin-bottom: 12px;
+            opacity: 0.9;
+          }
+
+          .lock-text h3 {
+            margin: 0 0 4px 0;
+            font-size: 18px;
+            font-weight: 500;
+          }
+
+          .lock-text p {
+            margin: 0;
+            opacity: 0.8;
+            font-size: 13px;
+          }
+
+          .premium-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+            transition: all 0.3s ease;
+          }
+
+          .challenge-card:hover .premium-badge {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(255, 215, 0, 0.5);
+          }
+
+          .premium-difficulty {
+            background: linear-gradient(135deg, #667eea, #764ba2) !important;
+            border: 1px solid rgba(255, 215, 0, 0.3) !important;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+          }
+
+          .star-icon {
+            color: #ffd700;
+          }
+
+          .blurred-content {
+            filter: blur(3px);
+            pointer-events: none;
+          }
+
+          .premium-tag {
+            background: rgba(255, 215, 0, 0.25) !important;
+            border: 1px solid rgba(255, 215, 0, 0.4) !important;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.15);
+          }
+
+          .challenge-card:hover .premium-tag {
+            background: rgba(255, 215, 0, 0.35) !important;
+            border: 1px solid rgba(255, 215, 0, 0.6) !important;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.25);
+          }
+
+          /* Enhanced premium card hover effects */
+          .premium-card:hover {
+            box-shadow: 0 30px 60px rgba(255, 215, 0, 0.15), 0 30px 60px rgba(0, 0, 0, 0.4) !important;
+          }
+
+          /* Premium card gets a subtle golden tint */
+          .premium-card .gradient-overlay {
+            background: linear-gradient(to bottom, 
+              rgba(255, 215, 0, 0.02) 0%, 
+              rgba(0, 0, 0, 0.2) 20%, 
+              rgba(0, 0, 0, 0.6) 50%, 
+              rgba(0, 0, 0, 0.9) 80%, 
+              rgba(0, 0, 0, 1) 100%) !important;
+          }
+
+          .premium-card:hover .gradient-overlay {
+            background: linear-gradient(to bottom, 
+              rgba(255, 215, 0, 0.05) 0%, 
+              rgba(0, 0, 0, 0.15) 20%, 
+              rgba(0, 0, 0, 0.5) 50%, 
+              rgba(0, 0, 0, 0.8) 80%, 
+              rgba(0, 0, 0, 0.95) 100%) !important;
+          }

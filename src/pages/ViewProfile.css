@@ -1,46 +1,39 @@
-.search-page {
-  height: 200vh;
+/* ViewProfile.css - All styles scoped under wrapper class */
+
+.view-profile-page-wrapper .search-page {
+
   background-color: rgba(15, 16, 31, 0.6);
   display: flex;
   justify-content: center;
 }
 
-.page-header {
+.view-profile-page-wrapper .page-header {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 20px 40px;
+
   max-width: 1400px;
-  margin: 0 auto;
 }
 
-
-
-.page-content {
-  padding: 0 40px 40px 40px;
-  position: absolute;
+.view-profile-page-wrapper .page-content {
+  position: relative;
   margin-top: 110px;
- left: 0;
-
 }
 
-.search-container {
-  max-width: 1200px;
-  margin: 0 auto 40px auto;
+.view-profile-page-wrapper .search-container {
+  max-width: 1600px;
+  margin-bottom: 40px;
   display: flex;
-  margin-left:20px;
-
- 
 }
 
 /* Search Bar Styles - Matching the Reference Image */
-.search-wrapper {
+.view-profile-page-wrapper .search-wrapper {
   position: relative;
   width: 100%;
   max-width: 500px;
 }
 
-.search-input {
+.view-profile-page-wrapper .search-input {
   width: 100%;
   padding: 16px 20px 16px 55px;
   border: 2px solid #8b5cf6;
@@ -53,18 +46,18 @@
   transition: all 0.3s ease;
 }
 
-.search-input:focus {
+.view-profile-page-wrapper .search-input:focus {
   border-color: #a855f7;
   box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
   background: #2a1f3d;
 }
 
-.search-input::placeholder {
+.view-profile-page-wrapper .search-input::placeholder {
   color: #9ca3af;
   font-weight: 400;
 }
 
-.search-icon {
+.view-profile-page-wrapper .search-icon {
   position: absolute;
   left: 20px;
   top: 50%;
@@ -74,16 +67,16 @@
   pointer-events: none;
 }
 
-.profiles-grid {
-  max-width: 1400px;
+.view-profile-page-wrapper .profiles-grid {
+  max-width: 1600px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 40px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
   justify-items: center;
 }
 
-.no-results {
+.view-profile-page-wrapper .no-results {
   text-align: center;
   color: #888;
   font-size: 18px;
@@ -91,65 +84,3 @@
   grid-column: 1 / -1;
 }
 
-/* Better responsive breakpoints */
-@media (max-width: 1600px) {
-  .profiles-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 30px;
-  }
-}
-
-@media (max-width: 1300px) {
-  .profiles-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 25px;
-  }
-}
-
-@media (max-width: 1000px) {
-  .profiles-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-}
-
-@media (max-width: 768px) {
-  .page-header {
-    padding: 15px 20px;
-  }
-  
-  .page-content {
-    padding: 0 15px 20px 15px;
-  }
-  
-  .profiles-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  
-  .logo {
-    font-size: 20px;
-  }
-  
-  .logo-icon {
-    width: 28px;
-    height: 28px;
-  }
-
-  .search-input {
-    padding: 14px 18px 14px 50px;
-    font-size: 15px;
-  }
-
-  .search-icon {
-    left: 18px;
-  }
-}
-
-/* For very large screens */
-@media (min-width: 1800px) {
-  .profiles-grid {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 40px;
-  }
-}

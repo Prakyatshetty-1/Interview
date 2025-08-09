@@ -11,6 +11,7 @@ import Saves from './pages/Saves';
 import Profile from './pages/Profile';
 import InterviewPortal from './pages/InterviewPortal';
 import ViewProfile from './pages/ViewProfile';
+import Questionfolder from  './pages/Questionfolder';
 import './App.css';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         <Route path='/Profile' element={<Profile/>}/>
         <Route path='/InterviewPortal' element={<InterviewPortal/>}/>
         <Route path='/ViewProfile' element={<ViewProfile/>}/>
+        <Route path='/Questionfolder' element={<Questionfolder/>}/>
       </Routes>
     </Router>
   );

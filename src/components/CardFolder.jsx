@@ -39,6 +39,7 @@ export default function CardFolder(props) {
           backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(${props.path})`,
         }}
       >
+        
         <div className="card-content-section">
           {/* Bottom section */}
           <div className="card-bottom-section">

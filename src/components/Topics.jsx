@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import "./Topics.css"
 
 const allTopics = [
@@ -78,6 +79,7 @@ const allTopics = [
 ]
 
 const Topics = () => {
+  const navigate=useNavigate()
   const [isExpanded, setIsExpanded] = useState(false)
 
   // Show first 6 topics when collapsed
@@ -86,13 +88,25 @@ const Topics = () => {
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded)
   }
+   const handleTopicClick = (topicName) => {
+    navigate("/questionfolder", { state: { topic: topicName } });
+  };
 
   return (
     <div className="topics-filter1">
       <div className="topics-container1">
         {visibleTopics.map((topic, index) => (
-          <button key={index} className={`topic-button1 highlighted1`}>
-            <span className="topic-name1">{topic.name}</span>
+          <button
+            key={index}
+            className={`topic-button1 highlighted1`}
+          >
+            <span
+              className="topic-name1"
+              onClick={() => handleTopicClick(topic.name)}
+              style={{ cursor: "pointer" }}
+            >
+              {topic.name}
+            </span>
             <span className="topic-count1">{topic.count}</span>
           </button>
         ))}

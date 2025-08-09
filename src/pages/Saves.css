@@ -1,23 +1,109 @@
-.containsaves {
-    width: 100%;
-    height: 100vh;
-    background-color: rgba(15, 16, 31, 0.6);
-    display: flex;
-    flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-}
-.nosave{
-width: 320px;
-height: 320px;
-}
-.nosavesyet h1{
-font-size: 28px;
-color: gray;
-font-weight: 400;
+/* ---------- Page Container ---------- */  
+/* .logo-containernew1 .logonew1 {   
+  display: inline-block;   
+  padding: 14px 20px;   
+  font-size: 20px;   
+  font-weight: 700;   
+  letter-spacing: 0.2px;   
+  background: linear-gradient(90deg, #7c3aed, #d946ef);   
+  -webkit-background-clip: text;   
+  background-clip: text;   
+  color: transparent; 
+} */ 
 
-}
-.nosavesyet{
-    position: fixed;
+/* Optional subtle noise overlay for texture */  
+
+/* ---------- Grid Container for Saved Cards ---------- */ 
+.saved-cards-container {   
+  width: min(1100px, 92%);   
+  margin: 18px auto 0 auto;   
+  display: grid;   
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));   
+  gap: 16px;   
+  position: relative;   
+  z-index: 1; /* above background overlay */   
+  padding: 8px 2px 2px;   
+  animation: fadeIn 400ms ease-out; 
+}   
+
+/* ---------- Dock breathing room if your Dock is fixed ---------- */ 
+@media (max-width: 520px) {   
+  .containsaves {     
+    padding-bottom: 120px;   
+  } 
+}  
+
+/* ---------- Animations ---------- */ 
+@keyframes fadeIn {   
+  from { opacity: 0; transform: translateY(6px); }   
+  to   { opacity: 1; transform: translateY(0); } 
+}  
+
+@keyframes pop {   
+  0%   { transform: scale(0.98); opacity: 0; }   
+  100% { transform: scale(1);     opacity: 1; } 
+}  
+
+/* ---------- Nice Scrollbar (WebKit) ---------- */ 
+.saved-cards-container::-webkit-scrollbar {   
+  height: 10px;   
+  width: 10px; 
+} 
+
+.saved-cards-container::-webkit-scrollbar-thumb {   
+  background: rgba(0,0,0,0.14);   
+  border-radius: 999px; 
+} 
+
+.saved-cards-container::-webkit-scrollbar-track {   
+  background: transparent; 
+}  
+
+/* ---------- Responsive Tweaks ---------- */ 
+@media (min-width: 1440px) {   
+  .saved-cards-container {     
+    width: min(1200px, 88%);     
+    gap: 18px;   
+  } 
+}  
+
+@media (max-width: 640px) {   
+  .logo-containernew .logonew {     
+    font-size: 18px;     
+    padding: 12px 16px;   
+  }   
+  .saved-cards-container {     
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));     
+    gap: 14px;   
+  } 
+} 
+
+.containsaves {     
+  width: 100%;     
+  height: 100vh;     
+  background-color: rgba(15, 16, 31, 0.6);     
+  display: flex;     
+  flex-direction: column;             
+  align-items: center;             
+  justify-content: center;             
+  text-align: center; 
+} 
+
+.nosave{ 
+  width: 320px; 
+  height: 320px; 
+} 
+
+.nosavesyet h1{ 
+  font-size: 28px; 
+  color: gray; 
+  font-weight: 400;  
+} 
+
+.nosavesyet{     
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
 }

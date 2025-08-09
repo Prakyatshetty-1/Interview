@@ -1668,5 +1668,300 @@
       "popularity": 69,
       "company": "AvionicsDesign Pro",
       "paid": false
+    },{
+      "difficulty": "Hard",
+      "title": "Engine Performance Optimizer",
+      "creator": "Vikram Singh",
+      "tags": ["Automotive Engineer", "Engine Design"],
+      "path": "/AutomotiveEngineer.png",
+      "popularity": 91,
+      "company": "AutoTech Dynamics",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Suspension Dynamics Analyzer",
+      "creator": "Priya Sharma",
+      "tags": ["Automotive Engineer", "Vehicle Dynamics"],
+      "path": "/AutomotiveEngineer.png",
+      "popularity": 76,
+      "company": "DriveForce Engineering",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Fuel Efficiency Calculator",
+      "creator": "Ramesh Gupta",
+      "tags": ["Automotive Engineer", "Efficiency Analysis"],
+      "path": "/AutomotiveEngineer.png",
+      "popularity": 58,
+      "company": "EcoMotors Solutions",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Electric Powertrain Designer",
+      "creator": "Sneha Patel",
+      "tags": ["Automotive Engineer", "Electric Vehicles"],
+      "path": "/AutomotiveEngineer.png",
+      "popularity": 88,
+      "company": "ElectricDrive Systems",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Crash Test Simulator",
+      "creator": "Arjun Reddy",
+      "tags": ["Automotive Engineer", "Safety Systems"],
+      "path": "/AutomotiveEngineer.png",
+      "popularity": 72,
+      "company": "SafetyFirst Automotive",
+      "paid": false
+    },{
+      "difficulty": "Hard",
+      "title": "Ship Hull Optimizer",
+      "creator": "Captain Rohit Menon",
+      "tags": ["Marine Engineer", "Naval Architecture"],
+      "path": "/MarineEngineer.png",
+      "popularity": 79,
+      "company": "OceanTech Marine",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Propulsion System Analyzer",
+      "creator": "Lakshmi Nambiar",
+      "tags": ["Marine Engineer", "Propulsion"],
+      "path": "/MarineEngineer.png",
+      "popularity": 67,
+      "company": "PropelMarine Systems",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Ballast Water Calculator",
+      "creator": "Kiran Yadav",
+      "tags": ["Marine Engineer", "Stability"],
+      "path": "/MarineEngineer.png",
+      "popularity": 52,
+      "company": "StabilityMarine Pro",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Offshore Platform Designer",
+      "creator": "Sanjay Iyer",
+      "tags": ["Marine Engineer", "Offshore Structures"],
+      "path": "/MarineEngineer.png",
+      "popularity": 85,
+      "company": "DeepSea Engineering",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Marine Engine Diagnostics",
+      "creator": "Anita Kulkarni",
+      "tags": ["Marine Engineer", "Engine Systems"],
+      "path": "/MarineEngineer.png",
+      "popularity": 63,
+      "company": "MarineService Tech",
+      "paid": false
+    },{
+      "difficulty": "Hard",
+      "title": "Reactor Core Simulator",
+      "creator": "Dr. Ashwin Bhat",
+      "tags": ["Nuclear Engineer", "Reactor Physics"],
+      "path": "/NuclearEngineer.png",
+      "popularity": 93,
+      "company": "Nuclear Dynamics Corp",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Radiation Dose Calculator",
+      "creator": "Meera Agarwal",
+      "tags": ["Nuclear Engineer", "Radiation Safety"],
+      "path": "/NuclearEngineer.png",
+      "popularity": 71,
+      "company": "RadSafe Solutions",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Decay Chain Visualizer",
+      "creator": "Naveen Kumar",
+      "tags": ["Nuclear Engineer", "Nuclear Physics"],
+      "path": "/NuclearEngineer.png",
+      "popularity": 49,
+      "company": "AtomViz Technologies",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Fuel Cycle Optimizer",
+      "creator": "Dr. Ravi Krishnan",
+      "tags": ["Nuclear Engineer", "Fuel Management"],
+      "path": "/NuclearEngineer.png",
+      "popularity": 89,
+      "company": "FuelCycle Systems",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Containment Stress Analyzer",
+      "creator": "Pooja Desai",
+      "tags": ["Nuclear Engineer", "Structural Analysis"],
+      "path": "/NuclearEngineer.png",
+      "popularity": 74,
+      "company": "StructuralNuc Engineering",
+      "paid": false
+    },{
+      "difficulty": "Hard",
+      "title": "Bioprocess Optimization Suite",
+      "creator": "Dr. Manish Thakur",
+      "tags": ["Biotechnology Engineer", "Bioprocessing"],
+      "path": "/BiotechnologyEngineer.png",
+      "popularity": 86,
+      "company": "BioOptimize Systems",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Fermentation Monitor",
+      "creator": "Rashmi Jain",
+      "tags": ["Biotechnology Engineer", "Fermentation"],
+      "path": "/BiotechnologyEngineer.png",
+      "popularity": 68,
+      "company": "FermentTech Solutions",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Protein Purification Planner",
+      "creator": "Sunil Mishra",
+      "tags": ["Biotechnology Engineer", "Protein Engineering"],
+      "path": "/BiotechnologyEngineer.png",
+      "popularity": 56,
+      "company": "ProteinPure Pro",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Bioreactor Design Tool",
+      "creator": "Dr. Kavitha Srinivasan",
+      "tags": ["Biotechnology Engineer", "Equipment Design"],
+      "path": "/BiotechnologyEngineer.png",
+      "popularity": 84,
+      "company": "BioreactorTech Industries",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Cell Culture Optimizer",
+      "creator": "Abhishek Chandra",
+      "tags": ["Biotechnology Engineer", "Cell Culture"],
+      "path": "/BiotechnologyEngineer.png",
+      "popularity": 70,
+      "company": "CellGrow Technologies",
+      "paid": false
+    },{
+      "difficulty": "Hard",
+      "title": "Medical Device Simulator",
+      "creator": "Dr. Nisha Arun",
+      "tags": ["Biomedical Engineer", "Device Design"],
+      "path": "/BiomedicalEngineer.png",
+      "popularity": 92,
+      "company": "MedDevice Innovations",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Prosthetic Limb Designer",
+      "creator": "Rakesh Verma",
+      "tags": ["Biomedical Engineer", "Prosthetics"],
+      "path": "/BiomedicalEngineer.png",
+      "popularity": 77,
+      "company": "ProstheTech Systems",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Heart Rate Analyzer",
+      "creator": "Shilpa Mehta",
+      "tags": ["Biomedical Engineer", "Signal Processing"],
+      "path": "/BiomedicalEngineer.png",
+      "popularity": 61,
+      "company": "BioSignal Analytics",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Tissue Engineering Toolkit",
+      "creator": "Dr. Varun Kapoor",
+      "tags": ["Biomedical Engineer", "Tissue Engineering"],
+      "path": "/BiomedicalEngineer.png",
+      "popularity": 90,
+      "company": "RegeneraTech Labs",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Imaging System Calibrator",
+      "creator": "Aditi Saxena",
+      "tags": ["Biomedical Engineer", "Medical Imaging"],
+      "path": "/BiomedicalEngineer.png",
+      "popularity": 75,
+      "company": "ImageMed Technologies",
+      "paid": false
+    },{
+      "difficulty": "Hard",
+      "title": "Experimental Design Optimizer",
+      "creator": "Dr. Siddharth Bansal",
+      "tags": ["Research Engineer", "Statistical Analysis"],
+      "path": "/ResearchEngineer.png",
+      "popularity": 87,
+      "company": "ResearchOpt Solutions",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Data Analysis Pipeline",
+      "creator": "Neha Tiwari",
+      "tags": ["Research Engineer", "Data Science"],
+      "path": "/ResearchEngineer.png",
+      "popularity": 73,
+      "company": "DataFlow Research",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Literature Review Manager",
+      "creator": "Gaurav Pandey",
+      "tags": ["Research Engineer", "Knowledge Management"],
+      "path": "/ResearchEngineer.png",
+      "popularity": 59,
+      "company": "LitReview Pro",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Simulation Framework Builder",
+      "creator": "Dr. Priyanka Malhotra",
+      "tags": ["Research Engineer", "Computational Modeling"],
+      "path": "/ResearchEngineer.png",
+      "popularity": 91,
+      "company": "SimulatePro Technologies",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Research Collaboration Portal",
+      "creator": "Vivek Rajan",
+      "tags": ["Research Engineer", "Collaboration Tools"],
+      "path": "/ResearchEngineer.png",
+      "popularity": 66,
+      "company": "CollabResearch Systems",
+      "paid": false
     }
+  
 ]
