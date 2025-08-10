@@ -10,9 +10,8 @@ import CreateInterview from './pages/CreateInterview';
 import Saves from './pages/Saves';
 import Profile from './pages/Profile';
 import InterviewPortal from './pages/InterviewPortal';
-import ProfileCard from './components/ProfileCard';
-import ViewProfile from './pages/ViewProfiles';
-import QuestionFloder from './pages/QuestionFloder';
+import ViewProfile from './pages/ViewProfile';
+import Questionfolder from  './pages/Questionfolder';
 import './App.css';
 
 function App() {
@@ -29,8 +28,8 @@ function App() {
         <Route path='/Saves' element={<Saves/>}/>
         <Route path='/Profile' element={<Profile/>}/>
         <Route path='/InterviewPortal' element={<InterviewPortal/>}/>
-        <Route path='/ProfileCard' element={<ViewProfile/>}/>
-        <Route path='/QuestionFloder' element={<QuestionFloder/>}/>
+        <Route path='/ViewProfile' element={<ViewProfile/>}/>
+        <Route path='/Questionfolder' element={<Questionfolder/>}/>
       </Routes>
     </Router>
   );

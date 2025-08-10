@@ -64,6 +64,7 @@ export default function CardFolder(props) {
         }}
         onClick={props.onClick}
       >
+        
         <div className="card-content-section">
           <div className="card-bottom-section">
             <div className="bott">
