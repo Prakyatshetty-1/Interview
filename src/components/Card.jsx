@@ -7,7 +7,8 @@ const Card = ({
   title = "Full Stack Challenge",
   creator = "bhavith",
   tags = ["Web Dev", "Full Stack"],
-  path = "/FullStackWebDev.png"
+  path = "/FullStackWebDev.png",
+  onClick=onClick
 }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
@@ -104,6 +105,7 @@ const Card = ({
       <div
         className="challenge-card"
         style={{ backgroundImage: `url(${path})` }}
+        onClick={onClick}
       >
         <div className="gradient-overlay"></div>
         <div className="bottom-blur"></div>

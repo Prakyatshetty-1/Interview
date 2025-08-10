@@ -287,6 +287,7 @@ const navigate=useNavigate();
                           difficulty={course.difficulty}
                           paid={course.paid}
                           creator={course.creator}
+                          onClick={() => navigate('/InterviewPortal')}
                         />
                       )}
                     </div>
