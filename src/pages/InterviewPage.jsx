@@ -49,20 +49,20 @@ const items = [
       <div className="containersall">
         <div className="headsecc">
           <p>Welcome to</p>
-          <div class="cardint">
-            <div class="loaderint">
+          <div className="cardint">
+            <div className="loaderint">
               <p>Askora</p>
-              <div class="wordsint">
-                <span class="wordint">Share</span>
-                <span class="wordint">Interview</span>
-                <span class="wordint">Create</span>
-                <span class="wordint">Learn</span>
-                <span class="wordint">Practise</span>
+              <div className="wordsint">
+                <span className="wordint">Share</span>
+                <span className="wordint">Interview</span>
+                <span className="wordint">Create</span>
+                <span className="wordint">Learn</span>
+                <span className="wordint">Practise</span>
               </div>
             </div>
           </div>
         </div>
-        <SlidingCard tag="Recently Viewed" />
+        <SlidingCard tag="Recently Viewed"  />
         <SlidingCard tag="Recommended" />
         <SlidingCard tag="Featured" />
         <SlidingCard tag="Top Companies" />

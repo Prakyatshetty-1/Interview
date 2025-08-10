@@ -5,7 +5,7 @@ import "./SlidingCard.css"
 import CardFolder from './CardFolder'
 import Card from './Card'
 import cardDataJson from "../data/CardData.json"
-import SaveCard from "./SaveCard"
+import { useNavigate } from "react-router-dom"
 
 // Character limits configuration
 const TITLE_CHAR_LIMIT = 20
@@ -29,7 +29,10 @@ const ArrowRight = () => (
   </svg>
 )
 
+
 const SliderCard = (props) => {
+const navigate=useNavigate();
+
   const [currentIndex, setCurrentIndex] = useState(0)
   const [courseData, setCourseData] = useState([])
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -41,6 +44,10 @@ const SliderCard = (props) => {
     if (text.length <= limit) return text
     return text.substring(0, limit) + "..."
   }
+  const handleCardFolderClick = (course) => {
+    console.log("hello");
+    navigate("/QuestionFloder", { state: { topic: course.title } });
+  };
 
   // Intersection Observer for scroll animations
   useEffect(() => {
@@ -269,6 +276,7 @@ const SliderCard = (props) => {
                         <CardFolder
                           title={truncateText(course.title, TITLE_CHAR_LIMIT)}
                           path={course.path}
+                          onClick={() => handleCardFolderClick(course)}
                         />
                       ) : (
                         <Card

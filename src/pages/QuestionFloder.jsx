@@ -1,24 +1,29 @@
 import LeetcodeMeter from '../components/LeetcodeMeter'
 import './QuestionFloder.css'
+import cardDataJson from "../data/CardData.json"
 import { useLocation } from "react-router-dom";
+import { useState, useEffect } from 'react';
 
 export default function QuestionFolder() {
     const location = useLocation();
-    const questions = [
-        { number: 17, title: "Letter Combinations of a Phone Number", acceptance: 64.2, difficulty: "Med.", solved: true },
-        { number: 22, title: "Generate Parentheses", acceptance: 77.4, difficulty: "Med.", solved: true },
-        { number: 37, title: "Sudoku Solver", acceptance: 64.1, difficulty: "Hard", solved: true },
-        { number: 39, title: "Combination Sum", acceptance: 75.1, difficulty: "Med.", solved: true },
-        { number: 40, title: "Combination Sum II", acceptance: 58.0, difficulty: "Med.", solved: true },
-        { number: 46, title: "Permutations", acceptance: 80.9, difficulty: "Med.", solved: true },
-        { number: 47, title: "Permutations II", acceptance: 61.9, difficulty: "Med.", solved: true },
-        { number: 51, title: "N-Queens", acceptance: 73.5, difficulty: "Hard", solved: true },
-        { number: 52, title: "N-Queens II", acceptance: 77.1, difficulty: "Hard", solved: true },
-        { number: 77, title: "Combinations", acceptance: 73.2, difficulty: "Med.", solved: true },
-        { number: 78, title: "Subsets", acceptance: 81.2, difficulty: "Med.", solved: true },
-        { number: 79, title: "Word Search", acceptance: 45.7, difficulty: "Med.", solved: true },
-        { number: 89, title: "Gray Code", acceptance: 62.3, difficulty: "Med.", solved: true },
-    ];
+    const [filterData, setFilterData] = useState([]);
+
+    useEffect(() => {
+        if (location.state?.topic) {
+            const topicLower = location.state.topic.toLowerCase();
+
+            const filtered = cardDataJson.filter(card =>
+                card.tags.some(tag => tag.toLowerCase() === topicLower) ||
+                card.company?.toLowerCase() === topicLower
+            );
+
+            setFilterData(filtered);
+        } else {
+            setFilterData(cardDataJson); // If no topic, show all
+        }
+    }, [location.state?.topic]);
+    console.log(filterData);
+    const questions = filterData
 
     const getDifficultyColor = (difficulty) => {
         switch (difficulty) {
@@ -42,12 +47,12 @@ export default function QuestionFolder() {
 
                 <section className="grid">
                     <div className="card">
-                            {/* <img src="/Adobe.png?height=60&width=60" alt="Icon" /> */}
-                            <div className="topicIcon1" >🎓</div>
-                            <div className="header-content1">
-                                <h2 className="topic-title1">{location.state.topic}</h2>
-                                <p className="topic-subtitle1">LeetCode · 108 questions · 2367 Saved</p>
-                            </div>
+                        {/* <img src="/Adobe.png?height=60&width=60" alt="Icon" /> */}
+                        <div className="topicIcon1" >🎓</div>
+                        <div className="header-content1">
+                            <h2 className="topic-title1">{location.state.topic}</h2>
+                            <p className="topic-subtitle1">LeetCode · 108 questions · 2367 Saved</p>
+                        </div>
                         <LeetcodeMeter />
                     </div>
 
@@ -60,8 +65,8 @@ export default function QuestionFolder() {
                         </div>
 
                         <div className="questions-list">
-                            {questions.map((q) => (
-                                <div className="question-item" key={q.number}>
+                            {questions.map((q,index) => (
+                                <div className="question-item" key={index}>
                                     <div className="question-left">
                                         <span className="question-number">{q.number}</span>
                                         <span className="question-title">{q.title}</span>
