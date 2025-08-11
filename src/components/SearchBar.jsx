@@ -8,6 +8,7 @@ import { BiSort } from "react-icons/bi"
 import { FaFilter } from "react-icons/fa"
 import ShinyText from "../react-bits/ShinyText"
 import cardDataJson from "../data/CardData.json"
+import { useNavigate } from "react-router-dom"
 
 export default function SearchBar() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -25,6 +26,7 @@ export default function SearchBar() {
   const [matchType, setMatchType] = useState("All") // "All" or "Any"
   const [isTopicsExpanded, setIsTopicsExpanded] = useState(false)
   const [isTopicsModalOpen, setIsTopicsModalOpen] = useState(false)
+  const navigate =useNavigate();
 
   // Advanced filter form state with support for "is not" conditions
   const [advancedFilters, setAdvancedFilters] = useState({
@@ -754,7 +756,7 @@ export default function SearchBar() {
       {/* Card grid */}
       <div className="topicholder5">
         {currentCards.length > 0 ? (
-          currentCards.map((card, index) => <Card key={startIndex + index} {...card} />)
+          currentCards.map((card, index) => <Card key={startIndex + index} {...card} onClick={()=>navigate('/InterviewPortal')} />)
         ) : (
           <p className="no-results5">No matching cards found.</p>
         )}

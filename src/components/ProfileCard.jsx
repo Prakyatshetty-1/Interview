@@ -1,12 +1,13 @@
 // ProfileCard.jsx
 import styles from './ProfileCard.module.css';
 import { useNavigate } from 'react-router-dom';
+import Profile from '../pages/Profile';
 
 function ProfileCard(props) {
     const navigate = useNavigate();
 
     function handleClick() {
-        navigate('/Profile');
+         navigate("/profile", { state: { name: props.profile.name } });
     }
 
     // Helper function to truncate text with ellipsis

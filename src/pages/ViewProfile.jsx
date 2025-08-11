@@ -1239,16 +1239,20 @@ const ViewProfile = () => {
 
   // Filter profiles based on search term
   const filteredProfiles = useMemo(() => {
-    if (!searchTerm.trim()) {
-      return profiles;
-    }
-    
-    const searchLower = searchTerm.toLowerCase();
-    return profiles.filter(profile => 
-      profile.name.toLowerCase().includes(searchLower) ||
-      profile.title.toLowerCase().includes(searchLower)
-    );
-  }, [searchTerm, profiles]);
+  if (!searchTerm?.trim()) {
+    return profiles || [];
+  }
+
+  const searchLower = searchTerm.toLowerCase();
+
+  return (profiles || []).filter(profile => {
+    const name = profile?.name?.toLowerCase() || "";
+    const title = profile?.title?.toLowerCase() || "";
+
+    return name.includes(searchLower) || title.includes(searchLower);
+  });
+}, [searchTerm, profiles]);
+
  const navigate = useNavigate();
    const items = [
     { icon: <img src="/homeicon.png" alt="Home" style={{ width: '48px', height: '48px' }} />, label: "Home", onClick: () => navigate('/Dashboard') },

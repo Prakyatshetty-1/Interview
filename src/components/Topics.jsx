@@ -89,7 +89,7 @@ const Topics = () => {
     setIsExpanded(!isExpanded)
   }
    const handleTopicClick = (topicName) => {
-    navigate("/questionfloder", { state: { topic: topicName } });
+    navigate("/questionfolder", { state: { topic: topicName } });
   };
 
   return (

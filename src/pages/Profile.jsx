@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import Dock from "../react-bits/Dock";
 import LeetcodeMeter from "../components/LeetcodeMeter";
 import CountUp from "../react-bits/CountUp";
+import { useLocation } from "react-router-dom";
 import "./Profile.css";
 
 const Card = ({
@@ -40,13 +41,14 @@ const Card = ({
   </div>
 );
 
-export default function Profile() {
+export default function Profile(props) {
   const [aboutText, setAboutText] = useState(
     "I'm Bhavith Shetty, a creative developer and designer passionate about building digital experiences that are both functional and emotionally engaging. My work spans across web development, game design, and AI-powered applications — with a strong focus on clean design, user-first thinking, and innovation."
   );
   const [isEditingAbout, setIsEditingAbout] = useState(false);
   const [tempAboutText, setTempAboutText] = useState(aboutText);
   const navigate = useNavigate();
+  const location=useLocation()
 
   const items = [
     {
@@ -316,7 +318,7 @@ export default function Profile() {
                     margin: "0 0 10px 0",
                   }}
                 >
-                  {profileData.username}
+                    {location.state?.name || "Bhavith22"}
                 </h1>
                 <div
                   style={{

@@ -45,8 +45,7 @@ const navigate=useNavigate();
     return text.substring(0, limit) + "..."
   }
   const handleCardFolderClick = (course) => {
-    console.log("hello");
-    navigate("/QuestionFloder", { state: { topic: course.title } });
+    navigate("/QuestionFolder", { state: { topic: course.title } });
   };
 
   // Intersection Observer for scroll animations
