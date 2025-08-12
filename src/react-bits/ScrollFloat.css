@@ -1,0 +1,57 @@
+.scroll-float {
+  overflow: hidden;
+}
+
+.scroll-float-text {
+  display: inline-block;
+  position: relative;
+  font-size: clamp(1.6rem, 8vw, 10rem);
+  font-weight: 900;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.char {
+  display: inline-block;
+}
+
+
+.about-ai-main-title {
+  font-size: 4rem;
+  font-weight:400;
+  text-align: left;
+  color: #ffffff;
+}
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 350;
+  color: #ffffff;
+  line-height: 1.1;
+  margin-bottom: 32px;
+  text-align: left;
+  width: 100%;
+}
+
+.subtitle1 {
+  font-size: 16px;
+  color: #8892b0;
+  margin: 0;
+  font-weight: 300;
+}
+.title11 {
+  font-size: 48px;
+  font-weight: 400;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+.about-ai-main-description {
+  color: #b0b0b0;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin: 0 0 1rem 0;
+  text-align: left;
+  opacity: 0.9;
+  position: relative;
+  z-index: 3;
+}
