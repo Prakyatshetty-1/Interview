@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LuSave, LuSaveOff } from "react-icons/lu";
+import { LuHeart, LuSave } from "react-icons/lu";
 import "./Card.css";
 
 const Card = ({
@@ -8,10 +8,11 @@ const Card = ({
   creator = "bhavith",
   tags = ["Web Dev", "Full Stack"],
   path = "/FullStackWebDev.png",
-  onClick=onClick
+  onClick = () => {}
 }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
+  const [isClicked, setIsClicked] = useState(false);
 
   // Check difficulty styling
   const getDifficultyClass = (difficulty) => {
@@ -54,8 +55,14 @@ const Card = ({
     checkIfSaved();
   }, [title, path]);
 
-  // Save handler
-  const handleSave = async () => {
+  // Save handler with animation
+  const handleSave = async (e) => {
+    e.stopPropagation(); // Prevent card click when saving
+    
+    // Trigger click animation
+    setIsClicked(true);
+    setTimeout(() => setIsClicked(false), 600);
+
     try {
       const response = await fetch("http://localhost:5000/api/save", {
         method: "POST",
@@ -77,8 +84,14 @@ const Card = ({
     }
   };
 
-  // Unsave handler
-  const handleUnsave = async () => {
+  // Unsave handler with animation
+  const handleUnsave = async (e) => {
+    e.stopPropagation(); // Prevent card click when unsaving
+    
+    // Trigger click animation
+    setIsClicked(true);
+    setTimeout(() => setIsClicked(false), 600);
+
     try {
       const response = await fetch("http://localhost:5000/api/unsave", {
         method: "DELETE",
@@ -110,6 +123,19 @@ const Card = ({
         <div className="gradient-overlay"></div>
         <div className="bottom-blur"></div>
 
+        {/* Hover Save Button */}
+        <div className="hover-save-container">
+          <button
+            className={`hover-save-button ${isSaved ? 'saved' : ''} ${isClicked ? 'clicked' : ''}`}
+            onClick={isSaved ? handleUnsave : handleSave}
+            title={isSaved ? "Remove from saved" : "Save card"}
+          >
+            <div className="save-icon">
+              {isSaved ? <LuHeart size={20} fill="currentColor" /> : <LuHeart size={20} />}
+            </div>
+          </button>
+        </div>
+
         <div className="card-content1">
           {/* Top section with difficulty */}
           <div className="top-section1">
@@ -135,17 +161,6 @@ const Card = ({
                 </span>
               ))}
             </div>
-
-            {/* Save / Unsave button */}
-            {isSaved ? (
-              <button className="save-button" onClick={handleUnsave}>
-                <LuSaveOff size={20} />
-              </button>
-            ) : (
-              <button className="save-button" onClick={handleSave}>
-                <LuSave size={20} />
-              </button>
-            )}
           </div>
         </div>
       </div>

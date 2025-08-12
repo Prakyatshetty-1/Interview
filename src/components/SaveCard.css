@@ -1,4 +1,5 @@
-.cardfol-background{
+/* Base card styling that works for both card and folder types */
+.saved-card-background {
     width: 260px;
     height: 260px;
     position: relative;
@@ -9,146 +10,304 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     border: none;
     margin-top: 20px;
+    cursor: pointer;
+    transition: 
+        transform 0.4s cubic-bezier(0.25, 1, 0.3, 1),
+        box-shadow 0.4s ease,
+        filter 0.4s ease;
 }
-.card-content-section{
-     display: flex;
+
+/* Hover Animation */
+.saved-card-background:hover {
+    transform: scale(1.05) rotateX(4deg) rotateY(2deg);
+    box-shadow: 0 28px 60px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.05) saturate(1.1);
+}
+
+/* Gradient overlays for different card types */
+.saved-card-background.card-type {
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 20%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.9) 80%, rgba(0, 0, 0, 1) 100%);
+}
+
+.saved-card-background.folder-type::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom, 
+        rgba(0, 0, 0, 0.02) 0%, 
+        rgba(0, 0, 0, 0.15) 20%, 
+        rgba(0, 0, 0, 0.5) 50%, 
+        rgba(0, 0, 0, 0.8) 80%, 
+        rgba(0, 0, 0, 0.95) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.saved-card-background.folder-type:hover::before {
+    opacity: 1;
+}
+
+/* Card content sections */
+.saved-card-content {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+    color: white;
+    z-index: 2;
+}
+
+.saved-top-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.saved-bottom-section {
+    display: flex;
     flex-direction: column;
     gap: 16px;
     text-align: left;
 }
-.bott{
+
+/* Card type specific content */
+.card-type .saved-bottom-section {
+    gap: 16px;
+}
+
+.folder-type .saved-bottom-section {
     position: absolute;
     bottom: 20px;
-    margin-left: 20px;
+    left: 20px;
+    right: 20px;
 }
-.cardfoldertitle{
-    color: white;
+
+/* Typography */
+.saved-card-title {
+    font-size: 17px;
     font-weight: 400;
-    font-size: 20px;
+    margin-bottom: 4px;
     line-height: 1.2;
+    color: white;
 }
-.numberofquestion1{
+
+.folder-type .saved-card-title {
+    font-size: 20px;
+}
+
+.saved-card-creator {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 2px;
+}
+
+.saved-card-meta {
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.8);
     font-weight: 400;
-    font-size: 14px;
     margin-bottom: 20px;
 }
-.profile-avatars {
-            display: flex;
-            align-items: center;
-        }
 
-        .avatar-container {
-            position: relative;
-            margin-left: -12px;
-            z-index: 2;
-        }
-
-        .avatar-container:first-child {
-            margin-left: 0;
-            z-index: 1;
-        }
-
-        .avatar-container:nth-child(2) {
-            z-index: 2;
-        }
-
-        .avatar-container:nth-child(3) {
-            z-index: 3;
-        }
-        .avatar-container:nth-child(4) {
-            z-index: 4;
-        }
-        .avatar-container:nth-child(5) {
-            z-index: 5;
-        }
-
-        .avatar {
-            width: 27px;
-            height: 27px;
-            border-radius: 50%;
-            border: 2px solid ;
-            object-fit: cover;
-            background-color: #ddd;
-            display: block;
-        }
-.avatar-container:nth-child(1) .avatar {
-    border-color: #667eea;
+/* Difficulty badge for card type */
+.saved-difficulty-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 400;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    letter-spacing: 0.5px;
 }
 
-.avatar-container:nth-child(2) .avatar {
-    border-color: #764ba2;
+.difficulty-easy {
+    color: #22c55e;
 }
 
-.avatar-container:nth-child(3) .avatar {
-    border-color: #f093fb;
+.difficulty-med {
+    color: #f59e0b;
 }
 
-.avatar-container:nth-child(4) .avatar {
-    border-color: #f5576c;
+.difficulty-hard {
+    color: #ef4444;
 }
 
-.avatar-container:nth-child(5) .avatar {
-    border-color: #4facfe;
-}
-.save-button-wrapper {
-  position: absolute;
-  bottom: 15px;
-  right: 15px;
-  z-index: 10; /* Ensure it's on top */
-  pointer-events: auto;
+/* Tags for card type */
+.saved-tags-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
 }
 
-.save-button-wrapper button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  background-color: #007bff;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+.saved-tag {
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 400;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.save-button-wrapper button:hover {
-  background-color: #0056b3;
-}
-.save-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background-color: #ff5722;
-  color: white;
-  padding: 6px 14px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+/* Profile avatars for folder type */
+.saved-profile-avatars {
+    display: flex;
+    align-items: center;
 }
 
-.save-btn:hover {
-  background-color: #e64a19;
+.saved-avatar-container {
+    position: relative;
+    margin-left: -12px;
+    z-index: 2;
 }
+
+.saved-avatar-container:first-child {
+    margin-left: 0;
+    z-index: 1;
+}
+
+.saved-avatar-container:nth-child(2) { z-index: 2; }
+.saved-avatar-container:nth-child(3) { z-index: 3; }
+.saved-avatar-container:nth-child(4) { z-index: 4; }
+.saved-avatar-container:nth-child(5) { z-index: 5; }
+
+.saved-avatar {
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    border: 2px solid;
+    object-fit: cover;
+    background-color: #ddd;
+    display: block;
+}
+
+.saved-avatar-container:nth-child(1) .saved-avatar { border-color: #667eea; }
+.saved-avatar-container:nth-child(2) .saved-avatar { border-color: #764ba2; }
+.saved-avatar-container:nth-child(3) .saved-avatar { border-color: #f093fb; }
+.saved-avatar-container:nth-child(4) .saved-avatar { border-color: #f5576c; }
+.saved-avatar-container:nth-child(5) .saved-avatar { border-color: #4facfe; }
+
+/* Hover Save Button Styles for SaveCard */
+.saved-hover-save-container {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+}
+
+.saved-hover-save-button {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(220, 38, 127, 0.9); /* Different color for unsave - pink/red */
+    backdrop-filter: blur(10px);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 25px rgba(220, 38, 127, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.saved-card-background:hover .saved-hover-save-button {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+.saved-hover-save-button:hover {
+    background: rgba(220, 38, 127, 1);
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 12px 30px rgba(220, 38, 127, 0.4);
+}
+
+.saved-hover-save-button:active {
+    transform: scale(0.95) translateY(0);
+}
+
+/* Cool click animation for saved cards */
+.saved-hover-save-button.clicked {
+    animation: savedUnsaveClickAnimation 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes savedUnsaveClickAnimation {
+    0% {
+        transform: scale(1);
+    }
+    15% {
+        transform: scale(0.9);
+    }
+    30% {
+        transform: scale(1.2);
+        box-shadow: 0 0 0 8px rgba(220, 38, 127, 0.3);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 12px rgba(220, 38, 127, 0.2);
+    }
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 16px rgba(220, 38, 127, 0.1);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 8px 25px rgba(220, 38, 127, 0.3);
+    }
+}
+
+/* Heart animation when unsaving */
+.saved-hover-save-button .saved-icon {
+    transition: all 0.3s ease;
+}
+
+.saved-hover-save-button.clicked .saved-icon {
+    animation: savedHeartBeat 0.6s ease;
+}
+
+@keyframes savedHeartBeat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.3); }
+    50% { transform: scale(1.1); }
+    75% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Special glow effect for saved cards */
+.saved-card-background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(220, 38, 127, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(147, 51, 234, 0.2) 0%, transparent 50%);
+    z-index: 1;
+    opacity: 0.7;
+}
+
 .popup-message {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #323232;
-  color: white;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
-  animation: fadeInOut 2s ease forwards;
-  z-index: 9999;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #323232;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    animation: fadeInOut 2s ease forwards;
+    z-index: 9999;
 }
 
 @keyframes fadeInOut {
-  0% { opacity: 0; transform: translateY(10px); }
-  10% { opacity: 1; transform: translateY(0); }
-  90% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(10px); }
+    0% { opacity: 0; transform: translateY(10px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(10px); }
 }
-
-
-       
