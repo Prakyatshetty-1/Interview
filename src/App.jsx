@@ -30,7 +30,7 @@ function App() {
       <Route path="/create" element={<CreateInterview />} />
       <Route path="/saves" element={<Saves />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/interviewportal" element={<InterviewPortal />} />
+      <Route path="/interview/:id" element={<InterviewPortal />} />
       <Route path='/Interview' element={<InterviewPage/>}/>
       {/* Interviews + tag results */}
       <Route path="/interviews/tag/:tag" element={<InterviewsByTag />} />

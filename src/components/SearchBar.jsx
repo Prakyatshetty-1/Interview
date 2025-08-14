@@ -9,7 +9,7 @@ import { BiSort } from "react-icons/bi"
 import { FaFilter } from "react-icons/fa"
 import ShinyText from "../react-bits/ShinyText"
 
-export default function SearchBar() {
+export default function SearchBar({ onCardClick }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortOrder, setSortOrder] = useState("desc")
   const [cardData, setCardData] = useState([])
@@ -676,9 +676,19 @@ export default function SearchBar() {
         </div>
       )}
 
-      <div className="topicholder5">
-        {currentCards.length > 0 ? currentCards.map((card, index) => <Card key={card.id || startIndex + index} {...card} />) : <p className="no-results5">No matching cards found.</p>}
-      </div>
+    <div className="topicholder5">
+      {currentCards.length > 0 ? (
+        currentCards.map((card, index) => (
+          <Card
+            key={card.id || startIndex + index}
+            {...card}
+            onClick={() => onCardClick(card.id)}
+          />
+        ))
+      ) : (
+        <p className="no-results5">No matching cards found.</p>
+      )}
+    </div>
 
       {(filteredCards || []).length > cardsPerPage && (
         <div className="pagination-container5">

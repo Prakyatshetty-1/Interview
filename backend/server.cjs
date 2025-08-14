@@ -11,6 +11,9 @@ const SECRET_KEY = 'askorishere';
 const interviewRoutes = require("./interview.cjs"); // or your route file
 const { connectToDb } = require('./db.cjs');
 
+const aiRoutes = require("./ai.cjs");
+app.use("/api/ai", aiRoutes);
+
 console.log("Starting server...");
 
 app.use(cors());
@@ -147,4 +150,40 @@ app.get("/api/interviews/by-tag/:tag", (req, res) => {
     iv.tags?.some(t => t.trim().toLowerCase() === tagParam)
   );
   res.json(results);
+});
+
+
+app.post("/api/ai/feedback", async (req, res) => {
+  const { question, answer } = req.body;
+  if (!question || !answer) {
+    return res.status(400).json({ error: "Missing question or answer" });
+  }
+
+  try {
+    const response = await fetch(GEMINI_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: `You are a professional job interviewer. The candidate was asked: "${question}". Their answer was: "${answer}". Provide constructive feedback.`,
+              },
+            ],
+          },
+        ],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 200 },
+      }),
+    });
+
+    const data = await response.json();
+    const feedbackText =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "No feedback returned";
+    res.json({ feedback: feedbackText });
+  } catch (error) {
+    console.error("AI proxy error:", error);
+    res.status(500).json({ error: "AI service error" });
+  }
 });
