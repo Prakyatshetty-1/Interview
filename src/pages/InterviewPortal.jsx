@@ -25,6 +25,7 @@ export default function InterviewPortal() {
   const currentQuestionIndexRef = useRef(0);
   const inFlightRef = useRef(false);
   const interviewQuestionsRef = useRef([]); // <-- latest questions for callbacks
+  const isSpeakingRef = useRef(false); // More reliable speech tracking
 
   const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
@@ -189,35 +190,93 @@ export default function InterviewPortal() {
     }
 
     return () => {
-      try { recognitionRef.current && recognitionRef.current.stop(); } catch (e) {}
-      recognitionRef.current = null;
-      try { synthRef.current && synthRef.current.cancel(); } catch (e) {}
+      // More thorough cleanup
+      if (recognitionRef.current) {
+        try { 
+          recognitionRef.current.stop(); 
+          recognitionRef.current.abort?.();
+        } catch (e) {}
+        recognitionRef.current = null;
+      }
+      
+      if (synthRef.current) {
+        try { 
+          synthRef.current.cancel(); 
+        } catch (e) {}
+      }
+      
+      // Reset refs
+      isSpeakingRef.current = false;
+      inFlightRef.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // speak text & return when finished
+  // speak text & return when finished - IMPROVED VERSION
   const speakText = (text) => {
     return new Promise((resolve) => {
       if (!synthRef.current) {
         resolve();
         return;
       }
-      setIsSpeaking(true);
-      try { synthRef.current.cancel(); } catch (e) { /* ignore */ }
-      const utter = new window.SpeechSynthesisUtterance(String(text));
-      utter.lang = "en-US";
-      utter.rate = 0.95;
-      utter.onend = () => {
-        setIsSpeaking(false);
-        resolve();
+
+      // Wait for any existing speech to finish before starting new one
+      const startSpeech = () => {
+        if (isSpeakingRef.current) {
+          // If already speaking, wait a bit and try again
+          setTimeout(startSpeech, 100);
+          return;
+        }
+
+        setIsSpeaking(true);
+        isSpeakingRef.current = true;
+
+        // Cancel any pending speeches more safely
+        try {
+          synthRef.current.cancel();
+          // Wait a moment for cancel to take effect
+          setTimeout(() => {
+            const utter = new window.SpeechSynthesisUtterance(String(text));
+            utter.lang = "en-US";
+            utter.rate = 0.95;
+            
+            utter.onstart = () => {
+              console.log("Speech started:", text.substring(0, 50));
+            };
+            
+            utter.onend = () => {
+              console.log("Speech ended");
+              setIsSpeaking(false);
+              isSpeakingRef.current = false;
+              resolve();
+            };
+            
+            utter.onerror = (err) => {
+              console.error("SpeechSynthesis error", err);
+              setIsSpeaking(false);
+              isSpeakingRef.current = false;
+              // Don't reject, just resolve to continue the flow
+              resolve();
+            };
+            
+            try {
+              synthRef.current.speak(utter);
+            } catch (e) {
+              console.error("Error calling speak:", e);
+              setIsSpeaking(false);
+              isSpeakingRef.current = false;
+              resolve();
+            }
+          }, 50);
+        } catch (e) {
+          console.error("Error canceling speech:", e);
+          setIsSpeaking(false);
+          isSpeakingRef.current = false;
+          resolve();
+        }
       };
-      utter.onerror = (err) => {
-        console.error("SpeechSynthesis error", err);
-        setIsSpeaking(false);
-        resolve();
-      };
-      synthRef.current.speak(utter);
+
+      startSpeech();
     });
   };
 
@@ -291,7 +350,7 @@ export default function InterviewPortal() {
     }
   };
 
-  // ask question: put in transcript, speak it, then start listening
+  // ask question: put in transcript, speak it, then start listening - IMPROVED
   const askQuestion = async (index) => {
     if (!interviewQuestionsRef.current || index >= interviewQuestionsRef.current.length) {
       const completionMessage = "Interview completed! Thank you for your time.";
@@ -307,15 +366,22 @@ export default function InterviewPortal() {
     const question = interviewQuestionsRef.current[index];
     setTranscript((prev) => [...prev, { type: "question", text: question }]);
 
+    // Stop any ongoing recognition before speaking
+    if (isListening) {
+      stopListening();
+      // Wait for recognition to fully stop
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
     await speakText(question);
 
-    // ensure recognizer present
+    // Ensure recognizer is ready
     if (!recognitionRef.current) {
       initRecognition();
     }
 
-    // slight delay to let speechSynthesis finish internal steps
-    setTimeout(() => startListening(), 120);
+    // Longer delay to ensure speech synthesis is completely finished
+    setTimeout(() => startListening(), 300);
   };
 
   const startInterview = () => {
@@ -333,7 +399,53 @@ export default function InterviewPortal() {
     askQuestion(0);
   };
 
-  // resilient startListening that handles InvalidStateError by reinit/retry
+  // Helper function for actually starting recognition
+  const actuallyStartListening = async () => {
+    const tryStart = async (attempt = 0) => {
+      try {
+        // More aggressive TTS cancellation
+        if (synthRef.current) {
+          try { 
+            synthRef.current.cancel(); 
+            // Wait for cancel to take effect
+            await new Promise(resolve => setTimeout(resolve, 100));
+          } catch (e) {
+            console.warn("Error canceling TTS:", e);
+          }
+        }
+
+        recognitionRef.current.start();
+        setUserAnswerText("Listening...");
+        setError("");
+        console.log("Started recognition for question index:", currentQuestionIndexRef.current);
+      } catch (e) {
+        console.warn("Error starting recognition:", e);
+        const msg = (e && e.name) ? e.name : (e && e.message) ? e.message : String(e);
+        
+        if (attempt < 3 && /invalidstateerror|started|already started/i.test(msg)) {
+          // Clean up recognition state more thoroughly
+          try { 
+            recognitionRef.current.stop(); 
+            recognitionRef.current.abort?.();
+          } catch (s) {}
+          
+          // Reinitialize recognition if needed
+          setTimeout(() => {
+            initRecognition();
+            tryStart(attempt + 1);
+          }, 300 + attempt * 200);
+        } else {
+          setIsListening(false);
+          setError("Failed to start microphone. Check permissions and try again.");
+          setTimeout(initRecognition, 400);
+        }
+      }
+    };
+
+    tryStart();
+  };
+
+  // resilient startListening that handles InvalidStateError by reinit/retry - IMPROVED
   const startListening = async () => {
     if (!recognitionRef.current) {
       setError("Speech Recognition is not available in your browser.");
@@ -341,36 +453,22 @@ export default function InterviewPortal() {
     }
     if (isListening) return;
 
-    const tryStart = async (attempt = 0) => {
-      try {
-        // cancel any TTS to avoid capturing it
-        if (synthRef.current) try { synthRef.current.cancel(); } catch (e) {}
-        recognitionRef.current.start();
-        // note: onstart handler sets isListening = true
-        setUserAnswerText("Listening...");
-        setError("");
-        console.log("Started recognition for question index:", currentQuestionIndexRef.current);
-      } catch (e) {
-        console.warn("Error starting recognition:", e);
-        // often InvalidStateError occurs when engine is already starting; retry a couple times
-        const msg = (e && e.name) ? e.name : (e && e.message) ? e.message : String(e);
-        if (attempt < 3 && /invalidstateerror|started|already started/i.test(msg)) {
-          // try stopping or aborting, re-init recognition and retry after short delay
-          try { recognitionRef.current.stop(); } catch (s) {}
-          try { recognitionRef.current.abort?.(); } catch (s) {}
-          setTimeout(() => {
-            tryStart(attempt + 1);
-          }, 200 + attempt * 150);
+    // Wait for speech synthesis to complete before starting recognition
+    if (isSpeakingRef.current) {
+      console.log("Waiting for speech to finish before starting recognition...");
+      const waitForSpeech = () => {
+        if (isSpeakingRef.current) {
+          setTimeout(waitForSpeech, 100);
         } else {
-          setIsListening(false);
-          setError("Failed to start microphone. Check permissions and try again.");
-          // final fallback: re-init recognition completely
-          setTimeout(initRecognition, 400);
+          // Add extra delay to ensure TTS is fully finished
+          setTimeout(() => actuallyStartListening(), 200);
         }
-      }
-    };
+      };
+      waitForSpeech();
+      return;
+    }
 
-    tryStart();
+    actuallyStartListening();
   };
 
   const stopListening = () => {
@@ -405,12 +503,11 @@ export default function InterviewPortal() {
         setFeedback(errMsg);
         setTranscript((prev) => [...prev, { type: "feedback", text: errMsg }]);
         await speakText(errMsg);
-        setCurrentQuestionIndex((prev) => {
-          const next = prev + 1;
-          currentQuestionIndexRef.current = next;
-          askQuestion(next);
-          return next;
-        });
+        
+        const next = currentQuestionIndexRef.current + 1;
+        currentQuestionIndexRef.current = next;
+        setCurrentQuestionIndex(next);
+        askQuestion(next);
         return;
       }
 
@@ -420,12 +517,11 @@ export default function InterviewPortal() {
         setFeedback(errMsg);
         setTranscript((prev) => [...prev, { type: "feedback", text: errMsg }]);
         await speakText(errMsg);
-        setCurrentQuestionIndex((prev) => {
-          const next = prev + 1;
-          currentQuestionIndexRef.current = next;
-          askQuestion(next);
-          return next;
-        });
+        
+        const next = currentQuestionIndexRef.current + 1;
+        currentQuestionIndexRef.current = next;
+        setCurrentQuestionIndex(next);
+        askQuestion(next);
         return;
       }
 
@@ -443,12 +539,10 @@ export default function InterviewPortal() {
 
       await speakText(safeFeedback);
 
-      setCurrentQuestionIndex((prev) => {
-        const next = prev + 1;
-        currentQuestionIndexRef.current = next;
-        askQuestion(next);
-        return next;
-      });
+      const next = currentQuestionIndexRef.current + 1;
+      currentQuestionIndexRef.current = next;
+      setCurrentQuestionIndex(next);
+      askQuestion(next);
     } catch (err) {
       console.error("Error processing answer:", err);
       const errMsg = "There was an error processing your answer. Moving to next question.";
@@ -456,12 +550,10 @@ export default function InterviewPortal() {
       setTranscript((prev) => [...prev, { type: "feedback", text: errMsg }]);
       await speakText(errMsg);
 
-      setCurrentQuestionIndex((prev) => {
-        const next = prev + 1;
-        currentQuestionIndexRef.current = next;
-        askQuestion(next);
-        return next;
-      });
+      const next = currentQuestionIndexRef.current + 1;
+      currentQuestionIndexRef.current = next;
+      setCurrentQuestionIndex(next);
+      askQuestion(next);
     } finally {
       setIsLoadingLLM(false);
       inFlightRef.current = false;
