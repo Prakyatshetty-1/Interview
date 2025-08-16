@@ -2,35 +2,67 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const User = require('./User.cjs');
-const bcrypt = require('bcrypt'); // if not already at top
+const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 5000;
 const MONGO_URI = 'mongodb://localhost:27017/interview-app';
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'askorishere'; 
-const interviewRoutes = require("./interview.cjs"); // or your route file
+const interviewRoutes = require("./interview.cjs");
 const { connectToDb } = require('./db.cjs');
 
 const aiRoutes = require("./ai.cjs");
-app.use("/api/ai", aiRoutes);
 
 console.log("Starting server...");
 
+// ✅ CORS configuration - THIS MUST BE BEFORE OTHER MIDDLEWARE
 app.use(cors({
   origin: [
     'http://localhost:5173',  // Vite dev server
+    'http://127.0.0.1:5173',  // Alternative localhost
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200 // For legacy browser support
 }));
 
+// ✅ Handle preflight requests explicitly
+app.options('*', cors());
 
+// ✅ Body parser middleware
 app.use(express.json());
 
-// Use interview routes
+// ✅ Add AI routes AFTER CORS and body parser
+app.use("/api/ai", aiRoutes);
+
+// ✅ Add other routes
 app.use('/api/interviews', interviewRoutes);
 
+// ✅ Root route
+app.get('/', (req, res) => {
+  res.send('API is working');
+});
+
+// ✅ Auth middleware
+const authMiddleware = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) return res.status(401).json({ message: 'Authorization header missing' });
+
+  const token = authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Token missing' });
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    res.status(403).json({ message: 'Invalid or expired token' });
+  }
+};
+
+// ✅ Database connection and server startup (removed duplicate)
 connectToDb().then(() => {
   mongoose.connect(MONGO_URI)
     .then(() => {
@@ -38,47 +70,17 @@ connectToDb().then(() => {
 
       app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
+        console.log(`CORS enabled for: http://localhost:5173`);
       });
     })
     .catch(err => {
       console.error('Error connecting to MongoDB (Mongoose):', err.message);
     });
+}).catch(err => {
+  console.error('Database connection failed:', err);
 });
 
-// ✅ Add a GET / route to respond to browser visits
-app.get('/', (req, res) => {
-  res.send('API is working');
-});
-
-mongoose.connect(MONGO_URI)
-  .then(() => {
-    console.log('MongoDB connected');
-
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error('Error connecting to MongoDB:', err.message);
-  });
-
-const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) return res.status(401).json({ message: 'Authorization header missing' });
-
-  const token = authHeader.split(' ')[1]; // Expecting: Bearer <token>
-  if (!token) return res.status(401).json({ message: 'Token missing' });
-
-  try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    req.user = decoded; // Attach user data to request
-    next(); // ✅ Proceed to actual route
-  } catch (err) {
-    res.status(403).json({ message: 'Invalid or expired token' });
-  }
-};
-
+// ✅ Auth routes
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -89,7 +91,6 @@ app.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
 
-    // ✅ Generate JWT
     const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
       expiresIn: '1h'
     });
@@ -99,7 +100,6 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
-
 
 app.post('/signup', async (req, res) => {
   try {
@@ -117,11 +117,11 @@ app.post('/signup', async (req, res) => {
   }
 });
 
+// ✅ Preference routes
 const Preference = require('./Preference.cjs');
 
-// POST /api/preference - save form data (secured)
 app.post('/api/preference', authMiddleware, async (req, res) => {
-  const userId = req.user.id; // extracted from token
+  const userId = req.user.id;
   const { answers } = req.body;
 
   try {
@@ -134,7 +134,6 @@ app.post('/api/preference', authMiddleware, async (req, res) => {
   }
 });
 
-// GET /api/preference/check - see if user has already submitted preferences
 app.get('/api/preference/check', authMiddleware, async (req, res) => {
   const userId = req.user.id;
 
@@ -152,47 +151,11 @@ app.get('/api/preference/check', authMiddleware, async (req, res) => {
   }
 });
 
-
+// ✅ Interview routes
 app.get("/api/interviews/by-tag/:tag", (req, res) => {
   const tagParam = decodeURIComponent(req.params.tag).trim().toLowerCase();
   const results = interviews.filter(iv => 
     iv.tags?.some(t => t.trim().toLowerCase() === tagParam)
   );
   res.json(results);
-});
-
-
-app.post("/api/ai/feedback", async (req, res) => {
-  const { question, answer } = req.body;
-  if (!question || !answer) {
-    return res.status(400).json({ error: "Missing question or answer" });
-  }
-
-  try {
-    const response = await fetch(GEMINI_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: `You are a professional job interviewer. The candidate was asked: "${question}". Their answer was: "${answer}". Provide constructive feedback.`,
-              },
-            ],
-          },
-        ],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 200 },
-      }),
-    });
-
-    const data = await response.json();
-    const feedbackText =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No feedback returned";
-    res.json({ feedback: feedbackText });
-  } catch (error) {
-    console.error("AI proxy error:", error);
-    res.status(500).json({ error: "AI service error" });
-  }
 });

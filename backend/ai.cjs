@@ -6,7 +6,7 @@ const router = express.Router();
 require('dotenv').config();
 
 // ✅ Fixed: Use process.env instead of import.meta.env
-const GEMINI_KEY = "AIzaSyDmDSjazjqBBFlyO__yWyjedh0Zn7AIrS4";
+const GEMINI_KEY = process.env.VITE_GEMINI_API_KEY;
 const GEMINI_URL = GEMINI_KEY
   ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`
   : null;
