@@ -1,193 +1,124 @@
-/* src/pages/Dashboard.css - add/replace styles as needed */
 .body-container {
-  min-height: 100vh;
-  background: #0b1220;
-  color: #e6eef8;
   width: 100%;
+  
+  background-color: rgba(15, 16, 31, 0.6);
 }
 
 .mainbody {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 36px 20px 120px;
   display: flex;
+  justify-content: center;
   flex-direction: column;
   align-items: center;
+  text-align: center;
+ 
 }
-
+.horizontal-divider {
+  width: 1400px;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin-bottom: 2rem;
+}
+.topicholder{
+display: flex;
+gap: 20px;
+}
 .logo-containernew {
   position: absolute;
-  top: 18px;
-  left: 18px;
-  z-index: 40;
-}
-.logonew { font-size: 28px; font-weight: 600; color: #fff; }
-
-/* Divider */
-.horizontal-divider {
-  width: 100%;
-  height: 1px;
-  background-color: rgba(255,255,255,0.03);
-  margin: 18px 0;
+  top: 2rem;
+  left: 2rem;
+  z-index: 10;
 }
 
-/* PACKS GRID */
-.packs-grid {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 28px;
-  padding: 12px 12px 40px;
-}
-
-/* Pack card */
-.pack-card {
-  background: linear-gradient(180deg, rgba(10,10,20,0.55), rgba(8,8,14,0.6));
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(2,6,23,0.7), inset 0 1px 0 rgba(255,255,255,0.02);
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 220ms ease, box-shadow 220ms ease;
-  outline: none;
-  display: flex;
-  flex-direction: column;
-  min-height: 320px;
-}
-
-.pack-card:focus,
-.pack-card:hover {
-  transform: translateY(-6px) scale(1.01);
-  box-shadow: 0 20px 40px rgba(2,6,23,0.75);
-}
-
-/* Image area */
-.pack-image {
-  height: 160px;
-  background-size: cover;
-  background-position: center;
-  position: relative;
-}
-
-/* Difficulty badge in top-right of image */
-.difficulty-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 12px;
+.logonew {
+  font-size: 28px;
+  font-weight: 500;
   color: white;
-  backdrop-filter: blur(6px);
+  flex: 1; /* Takes up equal space */
 }
 
-/* color hints for levels (customize) */
-.difficulty-easy { background: #10b981; }      /* green */
-.difficulty-medium, .difficulty-med { background: #f59e0b; }  /* amber */
-.difficulty-hard { background: #ef4444; }      /* red */
-.difficulty-unknown { background: #6b7280; }
 
-/* body */
-.pack-body {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-/* Title */
-.pack-title {
-  margin: 0;
-  font-size: 18px;
-  color: #fff;
-  line-height: 1.1;
-  font-weight: 700;
-}
-
-/* creator */
-.pack-creator {
-  margin: 0;
-  color: rgba(255,255,255,0.7);
-  font-size: 13px;
-}
-
-/* meta row */
-.pack-meta {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-top: auto;
+.dashboard-bg-orbs {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  justify-content: space-between;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* category and tags */
-.category-pill {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.04);
-  color: #e6eef8;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
+.dashboard-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: pricingFloat 25s infinite ease-in-out;
+  opacity: 0.4;
+}
+.dashboard-or1 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  
+  opacity: 0.4;
 }
 
-.tags-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.tag-pill {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.03);
-  color: rgba(255,255,255,0.85);
-  padding: 4px 8px;
-  border-radius: 14px;
-  font-size: 12px;
+.dashboard-orb1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.6), rgba(139, 92, 246, 0.4));
+  top: -12%;
+  left: -15%;
+  
+  z-index: -1;
 }
 
-/* no packs message */
-.no-packs {
-  color: rgba(255,255,255,0.7);
-  padding: 40px;
-  font-size: 18px;
+.dashboard-orb2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.5), rgba(245, 158, 11, 0.3));
+  top: 60%;
+  right: -15%;
+  animation-delay: -8s;
 }
 
-/* responsive tweaks */
-@media (max-width: 900px) {
-  .packs-grid { gap: 18px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
-  .pack-image { height: 140px; }
+.dashboard-orb3 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.4), rgba(59, 130, 246, 0.3));
+  top: 30%;
+  left: 75%;
+  animation-delay: -15s;
 }
 
-@media (max-width: 480px) {
-  .mainbody { padding: 18px 12px 120px; }
-  .pack-image { height: 120px; }
-  .pack-title { font-size: 16px; }
+.dashboard-orb4 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.4), rgba(239, 68, 68, 0.3));
+  top: 10%;
+  right: 15%;
+  animation-delay: -4s;
 }
 
-/* packs grid - responsive 4 columns */
-.packs-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 28px;
-  margin-top: 32px;
-  align-items: stretch;
+.dashboard-orb5 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.5), rgba(236, 72, 153, 0.4));
+  top: 68%;
+  left: 20%;
+  animation-delay: -12s;
 }
 
-/* responsive */
-@media (max-width: 1200px) {
-  .packs-grid { grid-template-columns: repeat(3, 1fr); }
+@keyframes pricingFloat {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-40px) translateX(20px) rotate(90deg);
+  }
+  50% {
+    transform: translateY(20px) translateX(-15px) rotate(180deg);
+  }
+  75% {
+    transform: translateY(-20px) translateX(25px) rotate(270deg);
+  }
 }
-@media (max-width: 900px) {
-  .packs-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 600px) {
-  .packs-grid { grid-template-columns: 1fr; }
-}
-
-/* pagination little styles */
-.pagination { display:flex; gap:10px; justify-content:center; align-items:center; }
-.page-number, .page-btn { background:#0b0f16; border:1px solid rgba(255,255,255,0.06); padding:8px 12px; border-radius:8px; color:#fff; cursor:pointer; }
-.page-number.active { background: linear-gradient(90deg,#6b21a8,#7c3aed); box-shadow:0 6px 18px rgba(124,58,237,0.25); }
-.page-ellipsis { color: rgba(255,255,255,0.35); padding: 0 8px; }

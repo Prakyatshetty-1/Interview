@@ -1,13 +1,10 @@
-// src/pages/Dashboard.jsx
-import React from "react";
-import { useNavigate } from "react-router-dom";
 import HeaderCard from "../components/HeaderCard";
 import "./Dashboard.css";
 import Dock from "../react-bits/Dock";
 import TopicFilter from "../components/TopicFilter";
 import Topics from "../components/Topics";
 import SearchBar from "../components/SearchBar";
-
+import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
   const navigate = useNavigate();
 
@@ -26,20 +23,21 @@ export default function Dashboard() {
 
   return (
     <div className="body-container">
-      <div className="logo-containernew"><span className="logonew">Askora</span></div>
+      <div className="logo-containernew">
+        <span className="logonew">Askora</span>
+      </div>
       <div className="mainbody">
-        <div className="dashboard-bg-orbs">
-          <div className="dashboard-orb dashboard-orb1"></div>
-          <div className="dashboard-orb dashboard-orb2"></div>
-          <div className="dashboard-orb dashboard-orb3"></div>
-          <div className="dashboard-orb dashboard-orb4"></div>
-          <div className="dashboard-orb dashboard-orb5"></div>
-        </div>
-
+       <div className="dashboard-bg-orbs">
+  <div className="dashboard-orb dashboard-orb1"></div>
+  <div className="dashboard-orb dashboard-orb2"></div>
+  <div className="dashboard-orb dashboard-orb3"></div>
+  <div className="dashboard-orb dashboard-orb4"></div>
+  <div className="dashboard-orb dashboard-orb5"></div>
+</div>
         <HeaderCard />
-        <Topics />
-        <TopicFilter />
-        <div className="horizontal-divider" />
+        <Topics/>
+        <TopicFilter/>
+        <div className="horizontal-divider"></div>
 
         {/* SearchBar now owns fetching and rendering the cards. supply a click handler */}
         <SearchBar onCardClick={handleCardClick} />
