@@ -6,6 +6,7 @@ import Features from './components/Features';
 
 import CommunityPage from './components/CommunityPage';
 import HeroSection from './components/HeroSection';
+import CreatedBy  from './components/CreatedBy';
 
 function MainLanding(){
     return (
@@ -15,6 +16,7 @@ function MainLanding(){
              <div id="about-ai"><AboutAi/></div> 
             <div id="Features"><Features/></div>
             <div id="pricing"><PricingPage/></div>
+            <div id="createdby"><CreatedBy/></div>
             {/* <div id=""><Reviews/></div> */}
             <div id="community"><CommunityPage/></div>
             <HeroSection/>

@@ -14,10 +14,18 @@ export default function Features() {
     <div className={`gradient-grid ${isLoaded ? "loaded" : ""}`}>
       <div className="pricing-bg-orbss">
         <div className="pricing-orbb pricing-orbs1"></div>
+    
+  
       </div>
       <div className="featurecontainer">
         <div className="featurebox1">
-          <h1 className="firstmay">Grow </h1><br/> <h1 className="secmay">Together</h1>
+          <div className="titels">
+            <h1 className="firstmay">Bright</h1> <h1 className="secmay">Future</h1>
+          </div>
+      
+          <p>With the right guidance, tools, and mindset, your future isn’t just something to wait for — it's something you create. </p>
+      <div className="letsworktogether"><h1>Let's work together</h1></div>
+      
         </div>
         <div className="otherfeatherbox">
           <div className="topotherfeaturebox">
@@ -59,6 +67,9 @@ export default function Features() {
                 <p>500 clients accross <br/> 15 countries</p>
                 <div className="bottomboxcircle1"></div>
                 <div className="bottomboxcircle2"></div>
+                <div className="bottom">
+                  
+                </div>
               </div>
             </div>
           </div>
