@@ -79,6 +79,7 @@ export default function SearchBar({ onCardClick }) {
 
   const TITLE_CHAR_LIMIT = 20
   const TAG_CHAR_LIMIT = 10
+  const MAX_TAGS_DISPLAY = 2 // New constant for maximum tags to display
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -98,7 +99,15 @@ export default function SearchBar({ onCardClick }) {
     return text.length <= limit ? text : text.substring(0, limit) + "..."
   }
 
-  const truncateTags = (tags = []) => (Array.isArray(tags) ? tags.map((t) => truncateText(t, TAG_CHAR_LIMIT)) : [])
+  // Updated function to limit tags to maximum 3 and truncate text
+  const truncateTags = (tags = []) => {
+    if (!Array.isArray(tags)) return []
+    
+    // First limit to MAX_TAGS_DISPLAY, then truncate text of each tag
+    return tags
+      .slice(0, MAX_TAGS_DISPLAY)
+      .map((t) => truncateText(t, TAG_CHAR_LIMIT))
+  }
 
   // fetch backend packs and map them to card shape
   useEffect(() => {
