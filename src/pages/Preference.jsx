@@ -1,6 +1,8 @@
-"use client"
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+
+"use client";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ IMPORTANT
+
 import "./Preference.css";
 
 const questions = [
@@ -103,9 +105,63 @@ const questions = [
 ]
 
 export default function Preference() {
+
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState({})
   const [isAnimating, setIsAnimating] = useState(false)
+  const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+    const checkPreferences = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/preference/check", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.alreadySubmitted) {
+          navigate("/dashboard"); // ✅ Already submitted — go to dashboard
+        } else {
+          setLoading(false); // ✅ Show form
+        }
+      } catch (error) {
+        console.error("Error checking preferences:", error);
+        setLoading(false); // still show form even if error
+      }
+    };
+
+    checkPreferences();
+  }, [navigate]);
+
+  // ✅ Show loading screen while checking
+  if (loading) {
+    return (
+      <div
+        className="loading-screen"
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#f9f9f9",
+        }}
+      >
+        <h2 style={{ fontSize: "1.5rem", color: "#333" }}>Checking your preferences...</h2>
+      </div>
+    );
+  }
+
 
   const handleNext = async () => {
     if (currentStep < questions.length - 1) {
@@ -116,10 +172,44 @@ export default function Preference() {
       setIsAnimating(false)
     }
   }
-  const navigate=useNavigate();
-  const handleSubmit = () => {
-   navigate('/Dashboard')
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const token = localStorage.getItem("token"); // ✅ retrieve token
+
+    if (!token) {
+      alert("You are not logged in.");
+      return;
+    }
+
+    const response = await fetch("http://localhost:5000/api/preference", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // ✅ correct token usage
+      },
+      body: JSON.stringify({ answers }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("Preferences submitted successfully!");
+      console.log("Saved preferences:", data);
+      navigate("/dashboard"); // redirect to Dashboard
+    } else {
+      console.error("Preference error:", data);
+      alert(data.message || "Failed to submit preferences");
+    }
+  } catch (error) {
+    console.error("Submit error:", error);
+    alert("Something went wrong while submitting preferences.");
   }
+};
+
 
   const handleAnswerChange = (value, subQuestionId = null) => {
     if (subQuestionId) {

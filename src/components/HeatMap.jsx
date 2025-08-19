@@ -2,6 +2,7 @@ import React from 'react';
 import './HeatMap.css';
 function HeatMap() {
     const generateHeatmapData = () => {
+
         const today = new Date();
         const lastYear = new Date();
         lastYear.setFullYear(today.getFullYear() - 1);
@@ -60,6 +61,8 @@ function HeatMap() {
         }
         console.log(data);
 
+
+        
         return data;
     };
 
@@ -81,19 +84,23 @@ function HeatMap() {
             }
         });
 
+        
         return maxStreak;
     };
+    
 
     const maxStreak = calculateMaxStreak();
 
     // Group data by months with proper handling
     const groupByMonths = () => {
         const monthGroups = [];
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
         // Group by month-year combination to handle year transitions
         const monthMap = new Map();
+        
 
         heatmapData.forEach((day) => {
             const key = `${day.fullDate.getFullYear()}-${day.month}`;
@@ -121,11 +128,13 @@ function HeatMap() {
         let currentWeek = Array(7).fill(null);
         let weekStarted = false;
 
+        
         // Sort days within month by date
         const sortedData = monthData.sort((a, b) => a.fullDate - b.fullDate);
-
+        
         sortedData.forEach((day, index) => {
             const dayOfWeek = day.dayOfWeek;
+            
 
             // If it's Sunday and we've started a week, finish the current week
             if (dayOfWeek === 0 && weekStarted) {
@@ -133,8 +142,10 @@ function HeatMap() {
                 currentWeek = Array(7).fill(null);
             }
 
+            
             currentWeek[dayOfWeek] = day;
             weekStarted = true;
+            
 
             // If it's the last day, make sure to add the final week
             if (index === sortedData.length - 1) {
@@ -148,23 +159,25 @@ function HeatMap() {
     const monthGroups = groupByMonths();
 
     const getColor = (level) => {
-        switch (level) {
-            case 0: return '#262e3aff';     // Dark purple base (similar to button background)
-            case 1: return '#4c1d95';     // Medium dark purple
-            case 2: return '#6b21a8';     // Purple (matches button background)
-            case 3: return '#9333ea';     // Bright purple (matches button border)
-            case 4: return '#c084fc';     // Light purple (matches button text)
-            default: return '#1e1b3a';    // Very dark purple default
-        }
-    };
+
+    switch (level) {
+        case 0: return '#262e3aff';     // Dark purple base (similar to button background)
+        case 1: return '#4c1d95';     // Medium dark purple
+        case 2: return '#6b21a8';     // Purple (matches button background)
+        case 3: return '#9333ea';     // Bright purple (matches button border)
+        case 4: return '#c084fc';     // Light purple (matches button text)
+        default: return '#1e1b3a';    // Very dark purple default
+    }
+};
 
     const formatDate = (dateStr) => {
         const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
+        return date.toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+
         });
     };
 
@@ -189,7 +202,9 @@ function HeatMap() {
                 gap: '8px'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ fontSize: '20px', fontWeight: '500', color: '#7d8590' }}>
+
+                    <span style={{fontSize:'20px', fontWeight: '500',color:'#7d8590' }}>
+
                         {totalSubmissions} contributions in the past year
                     </span>
                 </div>
@@ -200,26 +215,32 @@ function HeatMap() {
                     color: '#7d8590',
                     flexWrap: 'wrap'
                 }}>
-                    <span>Total active days: <strong style={{ color: '#e6edf3' }}>{activeDays}</strong></span>
-                    <span>Max streak: <strong style={{ color: '#e6edf3' }}>{maxStreak}</strong></span>
+
+                    <span>Total active days: <strong style={{color: '#e6edf3'}}>{activeDays}</strong></span>
+                    <span>Max streak: <strong style={{color: '#e6edf3'}}>{maxStreak}</strong></span>
+
                 </div>
             </div>
 
             {/* Contribution graph */}
             <div>
                 {/* Grid */}
-                <div style={{ display: 'flex', justifyContent: 'center', overflowX: 'auto' }}>
+
+                <div style={{ display: 'flex', justifyContent:'center', overflowX: 'auto' }}>
+
                     {/* Month sections with labels above blocks */}
                     <div style={{ display: 'flex', gap: '10px' }}>
                         {monthGroups.map((monthGroup, monthIndex) => {
                             const weeks = convertToWeeks(monthGroup.data);
 
+                            
                             if (weeks.length === 0) return null;
-
+                            
                             return (
-                                <div key={`${monthGroup.year}-${monthGroup.month}`} style={{
-                                    display: 'flex',
-                                    flexDirection: 'column'
+                                <div key={`${monthGroup.year}-${monthGroup.month}`} style={{ 
+                                    display: 'flex', 
+                                    flexDirection: 'column' 
+
                                 }}>
                                     {/* Month label above this section */}
                                     <div style={{
@@ -234,6 +255,8 @@ function HeatMap() {
                                     }}>
                                         {monthGroup.label}
                                     </div>
+
+                                    
 
                                     {/* Blocks for this month */}
                                     <div style={{ display: 'flex', gap: '2px' }}>

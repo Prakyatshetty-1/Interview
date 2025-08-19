@@ -1539,6 +1539,7 @@
     "popularity": 52,
     "company": "TestEquip",
     "paid": false
+
   },
     {
       "difficulty": "Med.",
@@ -1963,5 +1964,5 @@
       "company": "CollabResearch Systems",
       "paid": false
     }
-  
+
 ]

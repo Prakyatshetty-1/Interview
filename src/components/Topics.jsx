@@ -1,8 +1,9 @@
+
 "use client"
 
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import "./Topics.css"
+import "./Topics.css";
 
 const allTopics = [
   { name: "Full Stack", count: 1944 },
@@ -79,45 +80,53 @@ const allTopics = [
 ]
 
 const Topics = () => {
-  const navigate=useNavigate()
-  const [isExpanded, setIsExpanded] = useState(false)
 
-  // Show first 6 topics when collapsed
-  const visibleTopics = isExpanded ? allTopics : allTopics.slice(0, 9)
+  const [isExpanded, setIsExpanded] = useState(false);
+  const navigate = useNavigate();
 
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded)
-  }
-   const handleTopicClick = (topicName) => {
-    navigate("/questionfolder", { state: { topic: topicName } });
+  const visibleTopics = isExpanded ? allTopics : allTopics.slice(0, 9);
+
+  const toggleExpanded = () => setIsExpanded(!isExpanded);
+
+  const handleTopicClick = (topicName) => {
+    // Normalize topic name for URL
+    const urlSafeTag = encodeURIComponent(topicName.trim().toLowerCase());
+    navigate(`/interviews/tag/${urlSafeTag}`);
+
   };
 
   return (
     <div className="topics-filter1">
       <div className="topics-container1">
-        {visibleTopics.map((topic, index) => (
+
+        {visibleTopics.map((topic) => (
           <button
-            key={index}
-            className={`topic-button1 highlighted1`}
+            key={topic.name}
+            className="topic-button1 highlighted1"
+            onClick={() => handleTopicClick(topic.name)}
+            aria-label={`View ${topic.name} interviews`}
           >
-            <span
-              className="topic-name1"
-              onClick={() => handleTopicClick(topic.name)}
-              style={{ cursor: "pointer" }}
-            >
-              {topic.name}
-            </span>
+            <span className="topic-name1">{topic.name}</span>
+
             <span className="topic-count1">{topic.count}</span>
           </button>
         ))}
 
-        <button className="expand-button1" onClick={toggleExpanded}>
+
+        <button 
+          className="expand-button1" 
+          onClick={toggleExpanded}
+          aria-expanded={isExpanded}
+        >
+
           {isExpanded ? "Collapse" : "Expand"}
           <span className="expand-icon1">{isExpanded ? "↑" : "↓"}</span>
         </button>
       </div>
     </div>
-  )
-}
 
-export default Topics
+  );
+};
+
+export default Topics;
+

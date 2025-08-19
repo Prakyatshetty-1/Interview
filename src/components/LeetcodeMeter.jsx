@@ -5,6 +5,7 @@ const LeetcodeMeter = () => {
   const [animatedAttempting, setAnimatedAttempting] = useState(0);
   
   const stats = {
+
     total: 3632,
     attempting: 6,
     easy: { solved: 67, total: 886 },
@@ -14,6 +15,7 @@ const LeetcodeMeter = () => {
   };// ider bhi same ye format me data store kar tere database me aur har ek user ke liye data alag rahega then baki sub working hai 
   const solved = stats.easy.solved + stats.medium.solved + stats.hard.solved;
   const solvedPercentage = (solved / stats.total) * 100;
+
   const radius = 85;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (solvedPercentage / 100) * circumference;
@@ -22,9 +24,12 @@ const LeetcodeMeter = () => {
     const timer1 = setTimeout(() => {
       const interval1 = setInterval(() => {
         setAnimatedSolved(prev => {
+
           if (prev < solved) return prev + 2;
           clearInterval(interval1);
           return solved;
+
+          
         });
       }, 10);
     }, 200);
@@ -50,7 +55,10 @@ const LeetcodeMeter = () => {
         padding: '1rem',
         width:'380px',
         marginLeft:'10px',
+
        backgroundColor:'rgba(36, 36, 56, 0.8)',
+
+
         marginTop:'20px'
       }}>
         <div style={{
@@ -271,3 +279,173 @@ const LeetcodeMeter = () => {
 };
 
 export default LeetcodeMeter;
+
+
+/* 
+ * CSS FILE: AlgorithmWidget.css
+ * Save this in a separate file named AlgorithmWidget.css
+ */
+
+/*
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+}
+
+.widget {
+  background-color: rgba(26, 26, 46, 0.8);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  backdrop-filter: blur(20px);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+}
+
+.progress-section {
+  position: relative;
+}
+
+.progress-svg {
+  transform: rotate(-90deg);
+}
+
+.progress-circle {
+  transition: stroke-dashoffset 2s ease-out;
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.4));
+}
+
+.center-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.solved-number {
+  font-size: 3rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 0.25rem;
+}
+
+.solved-label {
+  color: #d1d5db;
+  font-size: 1.125rem;
+}
+
+.total-number {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.attempting-badge {
+  position: absolute;
+  bottom: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(26, 26, 46, 0.9);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+}
+
+.attempting-text {
+  color: #c4b5fd;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.stats-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stat-card {
+  background-color: rgba(26, 26, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  padding: 1rem 1.5rem;
+  border: 1px solid;
+  min-width: 10rem;
+  transition: all 0.3s ease;
+}
+
+.stat-card.easy {
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.stat-card.easy:hover {
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.stat-card.medium {
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.stat-card.medium:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.stat-card.hard {
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.stat-card.hard:hover {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.stat-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.difficulty-label {
+  font-weight: 600;
+}
+
+.easy .difficulty-label {
+  color: #4ade80;
+}
+
+.medium .difficulty-label {
+  color: #fbbf24;
+}
+
+.hard .difficulty-label {
+  color: #f87171;
+}
+
+.numbers {
+  text-align: right;
+}
+
+.solved-count {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.total-count {
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+*/
+

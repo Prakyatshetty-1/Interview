@@ -67,7 +67,9 @@ export default function Features() {
                 <p>500 clients accross <br/> 15 countries</p>
                 <div className="bottomboxcircle1"></div>
                 <div className="bottomboxcircle2"></div>
-                <div className="bottom">h1hejdfadada
+
+                <div className="bottom">
+
                   
                 </div>
               </div>

@@ -775,22 +775,84 @@ export default function CreateInterview() {
     }, 500);
   };
 
-  const handleDetailsSubmit = () => {
-    if (
-      !interviewDetails.title ||
-      !interviewDetails.category ||
-      !interviewDetails.difficulty
-    ) {
+
+// CreateInterview.jsx --- replace existing handleDetailsSubmit with this
+const handleDetailsSubmit = async () => {
+  // Require title, category, difficulty and at least one tag
+  if (
+    !interviewDetails.title ||
+    !interviewDetails.category ||
+    !interviewDetails.difficulty ||
+    !Array.isArray(interviewDetails.tags) ||
+    interviewDetails.tags.length === 0
+  ) {
+    toast({
+      title: "Missing Information",
+      description: "Please fill in title, category, difficulty and select at least one tag.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("token");
+
+    // IMPORTANT: post to backend server (port 5000) route registered in server.cjs:
+    // app.use('/api/interviews', interviewRoutes)
+    const res = await fetch("http://localhost:5000/api/interviews/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({
+        title: interviewDetails.title,
+        category: interviewDetails.category,
+        difficulty: interviewDetails.difficulty,
+        duration: interviewDetails.duration,
+        // send the tags array
+        tags: interviewDetails.tags,
+        // questions must be an array of objects { question: ..., ... }
+        questions: questions.map((q) => ({
+          question: q.text,
+          category: interviewDetails.category,
+          difficulty: interviewDetails.difficulty,
+          expectedDuration: interviewDetails.duration || 5,
+          // don't set per-question tag unless you want to:
+          // tag: interviewDetails.tags[0] || undefined
+        })),
+      }),
+    });
+
+    // handle possible empty response body safely
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (err) {
+      // empty JSON body or non-JSON response
+    }
+
+    if (res.ok) {
+      setStep("completed");
+      speak("Your interview pack has been created successfully!");
+    } else {
+      console.error("Save error:", data || { status: res.status });
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
+        title: "Save failed",
+        description: data.error || "Server error while saving",
         variant: "destructive",
       });
-      return;
     }
-    setStep("completed");
-    speak("Your interview pack has been created successfully!");
-  };
+  } catch (err) {
+    console.error("Error saving interview:", err);
+    toast({
+      title: "Network error",
+      description: "Could not save interview. Is your backend running on port 5000?",
+      variant: "destructive",
+    });
+  }
+};
+
 
   const resetInterview = () => {
     setStep("initial");
@@ -1172,7 +1234,9 @@ export default function CreateInterview() {
                         >
                           <SelectItem value="All">All</SelectItem>
                           <SelectItem value="Accounting">Accounting</SelectItem>
-                          <SelectItem value="AI Researcher">
+
+                          <SelectItem value="AI Research">
+
                             AI Researcher
                           </SelectItem>
                           <SelectItem value="Aerospace Engineer">

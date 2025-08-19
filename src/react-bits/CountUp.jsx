@@ -103,4 +103,6 @@ export default function CountUp({
   }, [springValue, separator, maxDecimals]);
 
   return <span className={className} ref={ref} />;
+
 }
+

@@ -3,6 +3,9 @@ import './Login.css';
 import LoginImage from "../assets/Image3.png"; // Replace with your login image
 import { Link } from 'react-router-dom';
 
+import { useNavigate } from 'react-router-dom';
+
+
 const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
@@ -10,6 +13,9 @@ const Login = () => {
   });
 
   const [focusedField, setFocusedField] = useState(null);
+
+  const navigate = useNavigate();
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -19,14 +25,63 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
-  };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch('http://localhost:5000/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+    console.log('Login successful');
+    localStorage.setItem("token", data.token); // ✅ Save the token
+    alert('Login successful');
+    
+    // Check if user has filled preferences
+    try {
+      const prefResponse = await fetch("http://localhost:5000/api/preference/check", {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+      });
+
+      const prefData = await prefResponse.json();
+
+      if (prefResponse.ok && prefData.alreadySubmitted) {
+        // User already filled preferences, go to dashboard
+        navigate('/dashboard');
+      } else {
+        // User needs to fill preferences
+        navigate('/Preference');
+      }
+    } catch (err) {
+      console.error("Error checking preferences", err);
+      // Default to preference page if check fails
+      navigate('/Preference');
+    }
+
+    } else {
+      alert(data.message);
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    alert('Something went wrong during login');
+  }
+};
+
+
 
   const handleGoogleSignIn = () => {
     console.log("Google sign in clicked");
   };
+
 
   const handleGitHubSignIn = () => {
     console.log("GitHub sign in clicked");
@@ -35,6 +90,7 @@ const Login = () => {
   const handleLinkedInSignIn = () => {
     console.log("LinkedIn sign in clicked");
   };
+
 
   return (
     <div className="login-container">
@@ -139,6 +195,7 @@ const Login = () => {
             Sign in with Google
           </button>
 
+
           {/* GitHub Sign In */}
           <button onClick={handleGitHubSignIn} className="google-button" style={{ marginTop: '0.75rem' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" className="google-icon" fill="currentColor">
@@ -154,6 +211,7 @@ const Login = () => {
             </svg>
             Sign in with LinkedIn
           </button>
+
 
           {/* Sign Up Link */}
           <div className="sign-up-link">
