@@ -337,3 +337,233 @@ html {
   }
 
 }
+
+/* Toast Notification Styles */
+
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 50%;
+  transform: translateX(50%);
+  z-index: 9999;
+  animation: slideInFromTop 0.3s ease-out;
+}
+
+.toast-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 20rem;
+  font-size: 0.75rem;
+  z-index: 50;
+}
+
+.toast-alert {
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 3.5rem;
+  border-radius: 0.75rem;
+  background-color: #232531;
+  padding: 0 0.75rem;
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.3), 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toast-content {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.toast-icon-container {
+  background-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.toast-icon-success {
+  color: #2b9875;
+}
+
+.toast-icon-error {
+  color: #ef4444;
+}
+
+.toast-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.toast-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.toast-title {
+  color: #ffffff;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.toast-description {
+  color: #9ca3af;
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  opacity: 0.9;
+}
+
+.toast-close-button {
+  color: #6b7280;
+  background-color: transparent;
+  border: none;
+  padding: 0.375rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toast-close-button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #d1d5db;
+  transform: scale(1.05);
+}
+
+.toast-close-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Animation */
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-100%) translateX(50%);
+    opacity: 0;
+    scale: 0.95;
+  }
+  to {
+    transform: translateY(0) translateX(50%);
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* Success variant with subtle glow */
+.toast-success {
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.3), 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(43, 152, 117, 0.2),
+    0 0 20px rgba(43, 152, 117, 0.1);
+}
+
+/* Error variant with subtle red glow */
+.toast-error {
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.3), 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(239, 68, 68, 0.2),
+    0 0 20px rgba(239, 68, 68, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .toast-container {
+    right: 50%;
+    top: 0.5rem;
+    transform: translateX(50%);
+  }
+  
+  .toast-wrapper {
+    width: 13rem;
+  }
+  
+  .toast-alert {
+    height: 3rem;
+    padding: 0 0.5rem;
+  }
+  
+  .toast-title {
+    font-size: 0.8rem;
+  }
+  
+  .toast-description {
+    font-size: 0.7rem;
+  }
+}
+/* Add these CSS rules to fix the input background issue */
+
+.input {
+  width: 100%;
+  padding: 1rem;
+  background-color: rgba(39, 39, 42, 0.8) !important;
+  border: 1px solid rgba(63, 63, 70, 0.8);
+  border-radius: 12px;
+  color: #ffffff !important;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.input:focus {
+  background-color: rgba(39, 39, 42, 0.95) !important;
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1), 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  color: #ffffff !important;
+}
+
+.input-focused {
+  border-color: #8b5cf6 !important;
+  background-color: rgba(39, 39, 42, 0.95) !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1), 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  color: #ffffff !important;
+}
+
+.input-active {
+  border-color: #8b5cf6 !important;
+  background-color: rgba(39, 39, 42, 0.95) !important;
+  color: #ffffff !important;
+}
+
+.input::placeholder {
+  color: #71717a !important;
+  opacity: 1;
+}
+
+/* Make sure autofill doesn't override styles */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px rgba(39, 39, 42, 0.95) inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Firefox autofill fix */
+.input:-moz-autofill {
+  background-color: rgba(39, 39, 42, 0.95) !important;
+  color: #ffffff !important;
+}

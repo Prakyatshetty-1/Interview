@@ -874,31 +874,7 @@ const handleDetailsSubmit = async () => {
     stopSpeaking();
   };
 
-  // AI Assistant Circle Component for left panel with waves
-  const AIAssistant = ({ isListening, isSpeaking }) => (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      {/* Wave animation behind iframe */}
-      <div className="wave-container">
-        <div className="circle"></div>
-        {(isListening || isSpeaking) && (
-          <>
-            <div className="wave wave1"></div>
-            <div className="wave wave2"></div>
-            <div className="wave wave3"></div>
-          </>
-        )}
-      </div>
 
-      {/* Iframe on top */}
-      <iframe
-        src="https://my.spline.design/voiceinteractionanimation-2TyeWSP24w6QzdGddVpF30we/"
-        frameBorder="0"
-        width="100%"
-        height="100%"
-        title="Askora Voice Interaction Animation"
-      />
-    </div>
-  );
 
   return (
     <div className="createapp-container">
@@ -924,34 +900,37 @@ const handleDetailsSubmit = async () => {
           </div>
 
           {step === "initial" ? (
-            <div className="createwelcome-screen">
-              <h1 className="createmain-heading">Create Interview Pack</h1>
-              <p className="createmain-subtitle">
-                AI-powered interview question creator
-              </p>
-              <Button onClick={startInterview} size="lg" className="start-btn">
-                <Volume2 className="btn-icon" />
-                Start Creating Interview
-              </Button>
-              {!speechSupported && (
-                <div className="warning-alert">
-                  <AlertCircle className="warning-icon" />
-                  <p className="warning-text">
-                    Speech recognition not supported. Please use Chrome or Edge
-                    browser.
-                  </p>
-                </div>
-              )}
+            <div className="createwelcome-screen initial-background">
+              <div className="initial-content-overlay">
+                <h1 className="createmain-heading">Create Askora Interview</h1>
+                <p className="createmain-subtitle">
+                  AI-powered interview question creator
+                </p>
+                <Button onClick={startInterview} size="lg" className="start-btn">
+                  <Volume2 className="btn-icon" />
+                  Start Creating Interview
+                </Button>
+                {!speechSupported && (
+                  <div className="warning-alert">
+                    <AlertCircle className="warning-icon" />
+                    <p className="warning-text">
+                      Speech recognition not supported. Please use Chrome or Edge
+                      browser.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
+         
           ) : step === "greeting" ? (
             <div className="welcome-screen">
-              <h2 className="greeting-heading">Welcome! 👋</h2>
-              <p className="greeting-subtitle">
-                I'm your AI interview assistant
-              </p>
+              <h2 className="greeting-heading">
+  Welcome! <span className="wave-emoji-continuous">👋</span>
+</h2>
+             
               <div className="greeting-message">
                 <p className="greeting-text">
-                  Hello! Welcome to the AI-powered interview creator. I'm here
+                  Hello! Welcome to the Askora-powered interview creator. I'm here
                   to help you create amazing interview questions using voice or
                   text input.
                 </p>
@@ -969,36 +948,97 @@ const handleDetailsSubmit = async () => {
               </Button>
             </div>
           ) : step === "completed" ? (
-            <div className="completion-screen">
-              <div className="celebration-icon">🎉</div>
-              <h2 className="completion-heading">Interview Pack Created!</h2>
-              <p className="completion-subtitle">
-                Your interview is ready to use
-              </p>
-              <div className="completion-actions">
-                <Button
-                  onClick={resetInterview}
-                  variant="outline"
-                  size="lg"
-                  className="completion-btn bg-transparent"
-                >
-                  Create Another Interview
-                </Button>
-                <Button size="lg" variant="success" className="completion-btn">
-                  View Interview Pack
-                </Button>
-              </div>
-            </div>
+            <iframe
+            src="https://my.spline.design/voiceinteractionanimation-2TyeWSP24w6QzdGddVpF30we/"
+            frameBorder="0"
+            width="100%"
+            height="100%"
+            title="Askora Voice Interaction Animation"
+            className="askora-iframe"
+          />
           ) : (
-            <AIAssistant isListening={isListening} isSpeaking={isSpeaking} />
+            <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      {/* Wave animation behind iframe */}
+       <div className={`particle-orb-container ${isSpeaking ? 'active' : ''}`}>
+            {/* Central energy core */}
+            <div className="energy-core"></div>
+            
+            {/* Multi-layered particle system */}
+            <div className="particle-layer layer-1">
+              {Array.from({length: 8}).map((_, i) => (
+                <div key={`layer1-${i}`} className={`particle particle-layer-1 particle-${i + 1}`}></div>
+              ))}
+            </div>
+            
+            <div className="particle-layer layer-2">
+              {Array.from({length: 12}).map((_, i) => (
+                <div key={`layer2-${i}`} className={`particle particle-layer-2 particle-${i + 9}`}></div>
+              ))}
+            </div>
+            
+            <div className="particle-layer layer-3">
+              {Array.from({length: 16}).map((_, i) => (
+                <div key={`layer3-${i}`} className={`particle particle-layer-3 particle-${i + 21}`}></div>
+              ))}
+            </div>
+            
+            {/* Floating energy particles */}
+            <div className="floating-particles">
+              {Array.from({length: 20}).map((_, i) => (
+                <div key={`float-${i}`} className={`floating-particle float-${i + 1}`}></div>
+              ))}
+            </div>
+            
+            {/* Dynamic pulse waves */}
+            <div className="pulse-wave wave-1"></div>
+            <div className="pulse-wave wave-2"></div>
+            <div className="pulse-wave wave-3"></div>
+            <div className="pulse-wave wave-4"></div>
+            
+            {/* Energy beams */}
+            <div className="energy-beam beam-1"></div>
+            <div className="energy-beam beam-2"></div>
+            <div className="energy-beam beam-3"></div>
+            <div className="energy-beam beam-4"></div>
+          </div>
+
+          <iframe
+            src="https://my.spline.design/voiceinteractionanimation-2TyeWSP24w6QzdGddVpF30we/"
+            frameBorder="0"
+            width="100%"
+            height="100%"
+            title="Askora Voice Interaction Animation"
+            className="askora-iframe"
+          />
+    </div>
           )}
         </div>
 
-        {/* Right Panel - Controls and Forms (Light) */}
         <div className="right-panel">
-          {step === "initial" && (
-            <div className="right-content-center">
-              <Card className="intro-card">
+  
+
+  {/* Your existing content remains the same */}
+  {step === "initial" && (
+    <div className="right-content-center">
+      <Card className="intro-card">
+        {/* Star Background */}
+  <div className="star-background">
+    <div className="star star-1">
+      <img src="/star.png" alt="star" />
+    </div>
+    <div className="star star-2">
+      <img src="/star.png" alt="star" />
+    </div>
+    <div className="star star-3">
+      <img src="/star.png" alt="star" />
+    </div>
+    <div className="star star-4">
+      <img src="/star.png" alt="star" />
+    </div>
+    <div className="star star-5">
+      <img src="/star.png" alt="star" />
+    </div>
+  </div>
                 <CardHeader className="intro-header">
                   <CardTitle className="intro-title">Ready to Start?</CardTitle>
                   <p className="intro-description">
@@ -1010,9 +1050,9 @@ const handleDetailsSubmit = async () => {
                     Click "Start Creating Interview" to begin the process.
                   </p>
                 </CardContent>
-              </Card>
-            </div>
-          )}
+             </Card>
+    </div>
+  )}
 
           {step === "greeting" && (
             <div className="right-content-center">
@@ -1517,63 +1557,48 @@ const handleDetailsSubmit = async () => {
           )}
 
           {step === "completed" && (
-            <Card>
-              <CardHeader className="completion-header">
-                <CardTitle>Interview Pack Created! 🎉</CardTitle>
-                <p className="completion-description">
-                  Your interview is ready to use
+            <Card style={{ 
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0'
+            }}>
+              <CardHeader style={{ textAlign: 'center', padding: '2rem 2rem 1rem 2rem' }}>
+                <CardTitle style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
+                  Thank You! 🎉
+                </CardTitle>
+                <p style={{ color: '#64748b', margin: 0, fontSize: '1.1rem' }}>
+                  Your interview has been successfully created
                 </p>
               </CardHeader>
-              <CardContent>
-                <div className="completion-content">
-                  <div className="result-summary">
-                    <h3 className="result-title">{interviewDetails.title}</h3>
-                    <div className="result-grid">
-                      <div className="result-item">
-                        <span className="result-label">Category:</span>{" "}
-                        {interviewDetails.category}
-                      </div>
-                      <div className="result-item">
-                        <span className="result-label">Difficulty:</span>{" "}
-                        {interviewDetails.difficulty}
-                      </div>
-                      <div className="result-item">
-                        <span className="result-label">Duration:</span>{" "}
-                        {interviewDetails.duration
-                          ? `${interviewDetails.duration} minutes`
-                          : "Not specified"}
-                      </div>
-                      <div className="result-item">
-                        <span className="result-label">Questions:</span>{" "}
-                        {questions.length}
-                      </div>
-                      {interviewDetails.tags.length > 0 && (
-                        <div className="result-item">
-                          <span className="result-label">Tags:</span>{" "}
-                          {interviewDetails.tags.join(", ")}
-                        </div>
-                      )}
-                    </div>
-                    {interviewDetails.description && (
-                      <div className="result-description">
-                        <span className="result-label">Description:</span>
-                        <p className="description-text">
-                          {interviewDetails.description}
-                        </p>
-                      </div>
-                    )}
+              <CardContent style={{ textAlign: 'center', padding: '1rem 2rem 2rem 2rem' }}>
+                <div>
+                  <div style={{ marginBottom: '2rem' }}>
+                    <p style={{ 
+                      color: '#374151',
+                      fontSize: '1rem',
+                      lineHeight: '1.6',
+                      margin: 0
+                    }}>
+                      Others can now check out your interview and benefit from your expertise!
+                    </p>
                   </div>
 
-                  <div className="final-actions">
+                  <div>
                     <Button
-                      onClick={resetInterview}
-                      variant="outline"
-                      className="final-btn bg-transparent"
+                      onClick={() => window.location.href = '/dashboard'}
+                      style={{
+                        backgroundColor: '#3b82f6',
+                        color: 'white',
+                        padding: '0.75rem 2rem',
+                        fontSize: '1.1rem',
+                        borderRadius: '8px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: '500'
+                      }}
                     >
-                      Create Another Interview
-                    </Button>
-                    <Button className="final-btn" variant="default">
-                      View Interview Pack
+                      Go Back to Dashboard
                     </Button>
                   </div>
                 </div>
