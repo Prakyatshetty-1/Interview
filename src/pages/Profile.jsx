@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FiEdit2,
   FiCamera,
@@ -41,12 +41,255 @@ const Card = ({
 );
 
 export default function Profile() {
-  const [aboutText, setAboutText] = useState(
-    "I'm Bhavith Shetty, a creative developer and designer passionate about building digital experiences that are both functional and emotionally engaging. My work spans across web development, game design, and AI-powered applications — with a strong focus on clean design, user-first thinking, and innovation."
-  );
-  const [isEditingAbout, setIsEditingAbout] = useState(false);
-  const [tempAboutText, setTempAboutText] = useState(aboutText);
   const navigate = useNavigate();
+  
+  // User data state
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Edit states
+  const [isEditingAbout, setIsEditingAbout] = useState(false);
+  const [tempAboutText, setTempAboutText] = useState("");
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [tempProfileData, setTempProfileData] = useState({});
+  const [newInterest, setNewInterest] = useState("");
+
+  // Static skills data (can be moved to user model later)
+  const [skills] = useState({
+    technical: [
+      { name: "JavaScript", level: 90, color: "#f7df1e" },
+      { name: "React", level: 85, color: "#61dafb" },
+      { name: "Python", level: 88, color: "#3776ab" },
+      { name: "Node.js", level: 80, color: "#339933" },
+      { name: "SQL", level: 75, color: "#336791" },
+      { name: "System Design", level: 70, color: "#9333ea" },
+    ],
+    soft: [
+      { name: "Communication", level: 92 },
+      { name: "Problem Solving", level: 88 },
+      { name: "Leadership", level: 85 },
+      { name: "Teamwork", level: 90 },
+    ],
+  });
+
+  // Static achievements data (can be moved to user model later)
+  const [achievements] = useState([
+    {
+      title: "Top Performer",
+      description: "Ranked in top 5% globally",
+      icon: <FiAward />,
+      color: "#ffd700",
+    },
+    {
+      title: "Problem Solver",
+      description: "Solved 250+ coding problems",
+      icon: <FiCode />,
+      color: "#9333ea",
+    },
+    {
+      title: "Interview Expert",
+      description: "95% success rate in mock interviews",
+      icon: <FiTarget />,
+      color: "#10b981",
+    },
+    {
+      title: "Mentor",
+      description: "Helped 50+ candidates",
+      icon: <FiUsers />,
+      color: "#f59e0b",
+    },
+  ]);
+
+  // Dynamic interview stats that use user data
+  const interviewStats = {
+    totalInterviews: user?.stats?.totalInterviews || 0,
+    successRate: user?.stats?.successRate || 0,
+    avgRating: user?.stats?.avgRating || 0,
+    totalPracticeHours: user?.stats?.totalPracticeHours || 0,
+    streak: user?.stats?.streak || 0,
+    favTopics: user?.interests || ["System Design", "Data Structures", "Algorithms"],
+  };
+
+  // Fetch user profile data
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch('http://localhost:5000/api/profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+
+      const userData = await response.json();
+      setUser(userData);
+      setTempAboutText(userData.aboutText || "");
+      setTempProfileData({
+        username: userData.username || userData.name,
+        fullName: userData.fullName || userData.name,
+        company: userData.company || "",
+        education: userData.education || "",
+        interests: userData.interests || [],
+      });
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  // Update about section
+  const updateAboutText = async (newAboutText) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    console.log("Sending about text update:", newAboutText);
+
+    const response = await fetch('http://localhost:5000/api/profile/about', {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ aboutText: newAboutText }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update about section');
+    }
+
+    const result = await response.json();
+    console.log("About text updated successfully:", result);
+    
+    // Update the user state with the new about text
+    setUser(prev => ({ ...prev, aboutText: newAboutText }));
+    return result;
+  } catch (err) {
+    console.error('Error updating about:', err);
+    throw err;
+  }
+};
+
+// Debug: Add this useEffect to log state changes
+useEffect(() => {
+  console.log("isEditingAbout changed:", isEditingAbout);
+}, [isEditingAbout]);
+
+useEffect(() => {
+  console.log("tempAboutText changed:", tempAboutText);
+}, [tempAboutText]);
+
+useEffect(() => {
+  console.log("user.aboutText changed:", user?.aboutText);
+}, [user?.aboutText]);
+
+  // Update profile data
+  const updateProfile = async (profileData) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      const result = await response.json();
+      setUser(result.user);
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      setError('Failed to update profile');
+    }
+  };
+  const handleProfileEditClick = () => {
+    setIsEditingProfile(true);
+    setTempProfileData({
+      username: user?.username || user?.name || "",
+      fullName: user?.fullName || user?.name || "",
+      company: user?.company || "",
+      education: user?.education || "",
+      interests: user?.interests || [],
+    });
+  };
+
+  const handleProfileSave = async () => {
+    await updateProfile(tempProfileData);
+    setIsEditingProfile(false);
+  };
+
+  const handleProfileCancel = () => {
+    setTempProfileData({
+      username: user?.username || user?.name || "",
+      fullName: user?.fullName || user?.name || "",
+      company: user?.company || "",
+      education: user?.education || "",
+      interests: user?.interests || [],
+    });
+    setIsEditingProfile(false);
+  };
+
+  const handleInputChange = (field, value) => {
+    setTempProfileData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const addInterest = () => {
+    if (
+      newInterest.trim() &&
+      !tempProfileData.interests.includes(newInterest.trim())
+    ) {
+      setTempProfileData((prev) => ({
+        ...prev,
+        interests: [...prev.interests, newInterest.trim()],
+      }));
+      setNewInterest("");
+    }
+  };
+
+  const removeInterest = (interest) => {
+    setTempProfileData((prev) => ({
+      ...prev,
+      interests: prev.interests.filter((i) => i !== interest),
+    }));
+  };
+
+  const handleProfilePicChange = () => {
+    alert("Profile picture change functionality would be implemented here");
+  };
 
   const items = [
     {
@@ -117,143 +360,78 @@ export default function Profile() {
     },
   ];
 
-  // Profile data state
-  const [profileData, setProfileData] = useState({
-    username: "Bhaviths22",
-    fullName: "Bhavith Shetty",
-    company: "Tech Innovators Inc.",
-    education: "Computer Science, MIT",
-    interests: [
-      "Web Development",
-      "Game Design",
-      "AI/ML",
-      "UI/UX Design",
-      "Photography",
-    ],
-  });
+  // Loading state
+  if (loading) {
+    return (
+      <div className="profile-container">
+        <div className="dashboard-bg-orbs">
+          <div className="dashboard-orb dashboard-orb1"></div>
+          <div className="dashboard-orb dashboard-orb2"></div>
+          <div className="dashboard-orb dashboard-orb3"></div>
+          <div className="dashboard-orb dashboard-orb4"></div>
+          <div className="dashboard-orb dashboard-orb5"></div>
+        </div>
+        <div className="logo-containernew">
+          <span className="logonew">Askora</span>
+        </div>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '50vh',
+          color: 'white',
+          fontSize: '18px'
+        }}>
+          Loading your profile...
+        </div>
+      </div>
+    );
+  }
 
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [tempProfileData, setTempProfileData] = useState(profileData);
-  const [newInterest, setNewInterest] = useState("");
+  // Error state
+  if (error) {
+    return (
+      <div className="profile-container">
+        <div className="dashboard-bg-orbs">
+          <div className="dashboard-orb dashboard-orb1"></div>
+          <div className="dashboard-orb dashboard-orb2"></div>
+          <div className="dashboard-orb dashboard-orb3"></div>
+          <div className="dashboard-orb dashboard-orb4"></div>
+          <div className="dashboard-orb dashboard-orb5"></div>
+        </div>
+        <div className="logo-containernew">
+          <span className="logonew">Askora</span>
+        </div>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '50vh',
+          color: 'white',
+          fontSize: '18px',
+          gap: '20px'
+        }}>
+          <p>Error loading profile: {error}</p>
+          <button 
+            onClick={fetchUserProfile}
+            style={{
+              backgroundColor: '#9333ea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '10px 20px',
+              cursor: 'pointer'
+            }}
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  // Skills data
-  const [skills] = useState({
-    technical: [
-      { name: "JavaScript", level: 90, color: "#f7df1e" },
-      { name: "React", level: 85, color: "#61dafb" },
-      { name: "Python", level: 88, color: "#3776ab" },
-      { name: "Node.js", level: 80, color: "#339933" },
-      { name: "SQL", level: 75, color: "#336791" },
-      { name: "System Design", level: 70, color: "#9333ea" },
-    ],
-    soft: [
-      { name: "Communication", level: 92 },
-      { name: "Problem Solving", level: 88 },
-      { name: "Leadership", level: 85 },
-      { name: "Teamwork", level: 90 },
-    ],
-  });
-
-  // Achievements data
-  const [achievements] = useState([
-    {
-      title: "Top Performer",
-      description: "Ranked in top 5% globally",
-      icon: <FiAward />,
-      color: "#ffd700",
-    },
-    {
-      title: "Problem Solver",
-      description: "Solved 250+ coding problems",
-      icon: <FiCode />,
-      color: "#9333ea",
-    },
-    {
-      title: "Interview Expert",
-      description: "95% success rate in mock interviews",
-      icon: <FiTarget />,
-      color: "#10b981",
-    },
-    {
-      title: "Mentor",
-      description: "Helped 50+ candidates",
-      icon: <FiUsers />,
-      color: "#f59e0b",
-    },
-  ]);
-
-  // Interview stats
-  const [interviewStats] = useState({
-    totalInterviews: 47,
-    successRate: 89,
-    avgRating: 4.7,
-    totalPracticeHours: 156,
-    streak: 12,
-    favTopics: ["System Design", "Data Structures", "Algorithms", "Behavioral"],
-  });
-
-  // Event handlers
-  const handleAboutEditClick = () => {
-    setIsEditingAbout(true);
-    setTempAboutText(aboutText);
-  };
-
-  const handleAboutSave = () => {
-    setAboutText(tempAboutText);
-    setIsEditingAbout(false);
-  };
-
-  const handleAboutCancel = () => {
-    setTempAboutText(aboutText);
-    setIsEditingAbout(false);
-  };
-
-  const handleProfileEditClick = () => {
-    setIsEditingProfile(true);
-    setTempProfileData({ ...profileData });
-  };
-
-  const handleProfileSave = () => {
-    setProfileData({ ...tempProfileData });
-    setIsEditingProfile(false);
-  };
-
-  const handleProfileCancel = () => {
-    setTempProfileData({ ...profileData });
-    setIsEditingProfile(false);
-  };
-
-  const handleInputChange = (field, value) => {
-    setTempProfileData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const addInterest = () => {
-    if (
-      newInterest.trim() &&
-      !tempProfileData.interests.includes(newInterest.trim())
-    ) {
-      setTempProfileData((prev) => ({
-        ...prev,
-        interests: [...prev.interests, newInterest.trim()],
-      }));
-      setNewInterest("");
-    }
-  };
-
-  const removeInterest = (interest) => {
-    setTempProfileData((prev) => ({
-      ...prev,
-      interests: prev.interests.filter((i) => i !== interest),
-    }));
-  };
-
-  const handleProfilePicChange = () => {
-    alert("Profile picture change functionality would be implemented here");
-  };
-
+  // Main render
   return (
     <>
       <div className="profile-container">
@@ -288,9 +466,9 @@ export default function Profile() {
               backgroundColor: "rgba(15, 16, 31, 0.6)",
               borderRadius: "24px",
               border: "1px solid rgba(147, 51, 234, 0.2)",
-              height: "2000px", // Use full available height
-              overflowY: "auto", // Only vertical scrolling when needed
-              overflowX: "hidden", // No horizontal scrolling
+              height: "2000px",
+              overflowY: "auto",
+              overflowX: "hidden",
             }}
           >
             {/* Profile Header */}
@@ -302,7 +480,27 @@ export default function Profile() {
                 gap: "20px",
               }}
             >
-              <div className="rightprofpic"></div>
+              <div className="rightprofpic">
+                {user?.profilePicture ? (
+                  <img 
+                    src={user.profilePicture} 
+                    alt="Profile" 
+                    style={{ width: '100%', height: '100%', borderRadius: '50%' }}
+                  />
+                ) : (
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: 'white'
+                  }}>
+                  </div>
+                )}
+              </div>
               <div
                 style={{
                   color: "white",
@@ -316,7 +514,7 @@ export default function Profile() {
                     margin: "0 0 10px 0",
                   }}
                 >
-                  {profileData.username}
+                  {user?.username || user?.name}
                 </h1>
                 <div
                   style={{
@@ -340,7 +538,7 @@ export default function Profile() {
                         fontWeight: "600",
                       }}
                     >
-                      40
+                      {user?.stats?.followers || 0}
                     </span>{" "}
                     Followers
                   </p>
@@ -359,7 +557,7 @@ export default function Profile() {
                         fontWeight: "600",
                       }}
                     >
-                      194
+                      {user?.stats?.following || 0}
                     </span>{" "}
                     Following
                   </p>
@@ -382,11 +580,12 @@ export default function Profile() {
                       marginLeft: "5px",
                     }}
                   >
-                    900,322
+                    {user?.stats?.globalRank || "N/A"}
                   </span>
                 </h2>
               </div>
             </div>
+
 
             <button
               style={{
@@ -434,7 +633,7 @@ export default function Profile() {
                   <div className="performance-value performance-value-purple">
                     <CountUp
                       from={0}
-                      to={interviewStats.totalInterviews}
+                      to={user?.stats?.totalInterviews || 0}
                       separator=","
                       direction="up"
                       duration={1}
@@ -447,7 +646,7 @@ export default function Profile() {
                   <div className="performance-value performance-value-green">
                     <CountUp
                       from={0}
-                      to={interviewStats.successRate}
+                      to={user?.stats?.successRate || 0}
                       separator=","
                       direction="up"
                       duration={1}
@@ -462,7 +661,7 @@ export default function Profile() {
                     <FiStar size={16} />
                     <CountUp
                       from={0}
-                      to={interviewStats.avgRating}
+                      to={user?.stats?.avgRating || 0}
                       separator=","
                       direction="up"
                       duration={1}
@@ -475,7 +674,7 @@ export default function Profile() {
                   <div className="performance-value performance-value-brown">
                     <CountUp
                       from={0}
-                      to={interviewStats.streak}
+                      to={user?.stats?.streak || 0}
                       separator=","
                       direction="up"
                       duration={1}
@@ -528,7 +727,7 @@ export default function Profile() {
                   <div className="analytics-value analytics-value-purple">
                     <CountUp
                       from={0}
-                      to={interviewStats.totalPracticeHours}
+                      to={user?.stats?.totalPracticeHours || 0}
                       separator=","
                       direction="up"
                       duration={1}
@@ -542,7 +741,7 @@ export default function Profile() {
                   <div className="analytics-value analytics-value-green">
                     <CountUp
                       from={0}
-                      to={254}
+                      to={user?.stats?.problemsSolved || 0}
                       separator=","
                       direction="up"
                       duration={1}
@@ -556,7 +755,7 @@ export default function Profile() {
                   <div className="analytics-value analytics-value-yellow">
                     <CountUp
                       from={0}
-                      to={23}
+                      to={user?.stats?.mockInterviews || 0}
                       separator=","
                       direction="up"
                       duration={1}
@@ -570,7 +769,7 @@ export default function Profile() {
                   <div className="analytics-value analytics-value-red">
                     <CountUp
                       from={2000}
-                      to={2847}
+                      to={user?.stats?.globalRank || 2000}
                       separator=","
                       direction="up"
                       duration={1}
@@ -578,14 +777,14 @@ export default function Profile() {
                     />
                   </div>
                   <div className="analytics-label">Global Rank</div>
-                  <div className="analytics-change">↑ 156 this month</div>
+                  <div className="analytics-change">↗ 156 this month</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Right Panel */}
-           <div
+          <div
             style={{
               height: "100%",
               width: "100%",
@@ -593,144 +792,229 @@ export default function Profile() {
             }}
           >
             <div className="upperrightprof">
-              <div className="profpicss"></div>
-              <div className="aboutprof">
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <h1>About me</h1>
-                  {!isEditingAbout && (
-                    <button
-                      onClick={handleAboutEditClick}
-                      style={{
-                        backgroundColor: "transparent",
-                        border: "1px solid #9333ea",
-                        borderRadius: "50%",
-                        padding: "4px 8px",
-                        fontSize: "16px",
-                        color: "#9333ea",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        marginRight: "40px",
-                        marginTop: "-20px",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = "#9333ea";
-                        e.target.style.color = "#ffffff";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = "transparent";
-                        e.target.style.color = "#9333ea";
-                      }}
-                    >
-                      <FiEdit2 />
-                    </button>
-                  )}
-                </div>
-
-                {isEditingAbout ? (
-                  <div>
-                    <textarea
-                      value={tempAboutText}
-                      onChange={(e) => setTempAboutText(e.target.value)}
-                      style={{
-                        width: "100%",
-                        minHeight: "120px",
-                        padding: "10px",
-                        border: "1px solid #9333ea",
-                        borderRadius: "6px",
-                        fontSize: "14px",
-                        fontFamily: "inherit",
-                        resize: "vertical",
-                        outline: "none",
-                        backgroundColor: "#1a1a1a",
-                        color: "#ffffff",
-                      }}
-                      placeholder="Tell us about yourself..."
-                    />
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "10px",
-                        marginTop: "10px",
-                      }}
-                    >
-                      <button
-                        onClick={handleAboutSave}
-                        style={{
-                          backgroundColor: "#9333ea",
-                          color: "#ffffff",
-                          border: "none",
-                          borderRadius: "4px",
-                          padding: "6px 12px",
-                          fontSize: "12px",
-                          cursor: "pointer",
-                          transition: "all 0.2s ease",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = "#7c3aed";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = "#9333ea";
-                        }}
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={handleAboutCancel}
-                        style={{
-                          backgroundColor: "transparent",
-                          color: "#9333ea",
-                          border: "1px solid #9333ea",
-                          borderRadius: "4px",
-                          padding: "6px 12px",
-                          fontSize: "12px",
-                          cursor: "pointer",
-                          transition: "all 0.2s ease",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = "#9333ea";
-                          e.target.style.color = "#ffffff";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = "transparent";
-                          e.target.style.color = "#9333ea";
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
+              <div className="profpicss">
+                {user?.profilePicture ? (
+                  <img
+                    src={user.profilePicture}
+                    alt="Profile"
+                    style={{ width: '100%', height: '100%', borderRadius: '50%' }}
+                  />
                 ) : (
-                  <p
-                    style={{
-                      cursor: "pointer",
-                      padding: "10px",
-                      borderRadius: "6px",
-                      transition: "all 0.2s ease",
-                      border: "1px solid transparent",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor =
-                        "rgba(147, 51, 234, 0.1)";
-                      e.target.style.border =
-                        "1px solid rgba(147, 51, 234, 0.3)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = "transparent";
-                      e.target.style.border = "1px solid transparent";
-                    }}
-                    onClick={handleAboutEditClick}
-                  >
-                    {aboutText}
-                  </p>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
+                    fontSize: '48px',
+                    fontWeight: 'bold',
+                    color: 'white'
+                  }}>
+                  </div>
                 )}
               </div>
+              {/* About Me Section - FIXED VERSION */}
+<div className="aboutprof">
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "10px",
+    }}
+  >
+    <h1>About me</h1>
+    {!isEditingAbout && (
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log("Edit button clicked - setting isEditingAbout to true");
+          setIsEditingAbout(true);
+          setTempAboutText(user?.aboutText || "");
+        }}
+        style={{
+          backgroundColor: "transparent",
+          border: "1px solid #9333ea",
+          borderRadius: "6px",
+          padding: "8px 12px",
+          fontSize: "14px",
+          color: "#9333ea",
+          cursor: "pointer",
+          transition: "all 0.2s ease",
+          marginRight: "40px",
+          marginTop: "-20px",
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = "#9333ea";
+          e.target.style.color = "#ffffff";
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = "transparent";
+          e.target.style.color = "#9333ea";
+        }}
+      >
+        <FiEdit2 size={14} />
+        Edit
+      </button>
+    )}
+  </div>
+
+  {isEditingAbout ? (
+    <div style={{ width: "100%" }}>
+      <textarea
+        value={tempAboutText}
+        onChange={(e) => {
+          console.log("Textarea changed:", e.target.value);
+          setTempAboutText(e.target.value);
+        }}
+        style={{
+          width: "calc(100% - 20px)",
+          minHeight: "120px",
+          padding: "12px",
+          border: "1px solid #9333ea",
+          borderRadius: "8px",
+          fontSize: "14px",
+          fontFamily: "inherit",
+          resize: "vertical",
+          outline: "none",
+          backgroundColor: "rgba(26, 26, 26, 0.8)",
+          color: "#ffffff",
+          lineHeight: "1.5",
+        }}
+        placeholder="Tell us about yourself..."
+        autoFocus
+      />
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginTop: "12px",
+          justifyContent: "flex-end",
+        }}
+      >
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("Cancel button clicked");
+            setTempAboutText(user?.aboutText || "");
+            setIsEditingAbout(false);
+          }}
+          style={{
+            backgroundColor: "transparent",
+            color: "#9333ea",
+            border: "1px solid #9333ea",
+            borderRadius: "6px",
+            padding: "8px 16px",
+            fontSize: "14px",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = "#9333ea";
+            e.target.style.color = "#ffffff";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = "transparent";
+            e.target.style.color = "#9333ea";
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("Save button clicked with text:", tempAboutText);
+            
+            if (!tempAboutText.trim()) {
+              alert("Please enter some text before saving.");
+              return;
+            }
+            
+            try {
+              // First set editing to false for better UX
+              setIsEditingAbout(false);
+              
+              // Call the API
+              await updateAboutText(tempAboutText.trim());
+              
+              console.log("About text saved successfully");
+            } catch (error) {
+              console.error("Error saving about text:", error);
+              // Re-enable editing if save fails
+              setIsEditingAbout(true);
+              alert("Failed to save. Please try again.");
+            }
+          }}
+          disabled={!tempAboutText.trim()}
+          style={{
+            backgroundColor: tempAboutText.trim() ? "#9333ea" : "#666",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "6px",
+            padding: "8px 16px",
+            fontSize: "14px",
+            cursor: tempAboutText.trim() ? "pointer" : "not-allowed",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            if (tempAboutText.trim()) {
+              e.target.style.backgroundColor = "#7c3aed";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (tempAboutText.trim()) {
+              e.target.style.backgroundColor = "#9333ea";
+            }
+          }}
+        >
+          Save Changes
+        </button>
+      </div>
+    </div>
+  ) : (
+    <div
+      style={{
+        cursor: "pointer",
+        padding: "12px",
+        borderRadius: "8px",
+        transition: "all 0.2s ease",
+        border: "1px solid transparent",
+        minHeight: "60px",
+        backgroundColor: "rgba(255, 255, 255, 0.02)",
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.backgroundColor = "rgba(147, 51, 234, 0.1)";
+        e.target.style.border = "1px solid rgba(147, 51, 234, 0.3)";
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.backgroundColor = "rgba(255, 255, 255, 0.02)";
+        e.target.style.border = "1px solid transparent";
+      }}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("About text div clicked - setting isEditingAbout to true");
+        setIsEditingAbout(true);
+        setTempAboutText(user?.aboutText || "");
+      }}
+    >
+      <p style={{
+        margin: 0,
+        color: user?.aboutText ? "#ffffff" : "#8f8f8f",
+        lineHeight: "1.5",
+        fontSize: "14px"
+      }}>
+        {user?.aboutText || "Click here to add information about yourself..."}
+      </p>
+    </div>
+  )}
+</div>
             </div>
 
             <HeatMap />
