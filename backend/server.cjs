@@ -418,3 +418,120 @@ app.patch('/api/leetcode/stats/attempting', authMiddleware, async (req, res) => 
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
+app.get('/api/saved', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('saves');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json(user.saves);
+  } catch (error) {
+    console.error('Error fetching saved items:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Save an interview for current user
+app.post('/api/save', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { interviewId = null, title, imageUrl } = req.body;
+
+    if (!title) return res.status(400).json({ message: 'title is required' });
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Avoid duplicates: check by interviewId if provided, else by title+imageUrl
+    const exists = user.saves.some(s => {
+      if (interviewId && s.interviewId) return s.interviewId === interviewId;
+      return s.title === title && s.imageUrl === imageUrl;
+    });
+
+    if (exists) return res.status(400).json({ message: 'Already saved' });
+
+    user.saves.push({ interviewId, title, imageUrl });
+    await user.save();
+
+    res.status(201).json({ message: 'Saved successfully', saves: user.saves });
+  } catch (error) {
+    console.error('Error saving item:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Unsave: remove saved interview for current user
+app.delete('/api/unsave', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { interviewId = null, title, imageUrl } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Remove by interviewId if provided, else match title+imageUrl
+    user.saves = user.saves.filter(s => {
+      if (interviewId && s.interviewId) return s.interviewId !== interviewId;
+      return !(s.title === title && s.imageUrl === imageUrl);
+    });
+
+    await user.save();
+    res.status(200).json({ message: 'Unsaved successfully', saves: user.saves });
+  } catch (error) {
+    console.error('Error unsaving item:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// POST /api/profile/attempts  -> add a new attempt for the logged-in user
+app.post('/api/profile/attempts', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { interviewId = null, date = null, level = 1, outcome = '', notes = '' } = req.body;
+
+    // date fallback
+    const attemptDate = date ? new Date(date) : new Date();
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.attempts.push({ interviewId, date: attemptDate, level, outcome, notes });
+    await user.save();
+
+    res.status(201).json({ message: 'Attempt recorded', attempt: user.attempts[user.attempts.length - 1] });
+  } catch (err) {
+    console.error('Error recording attempt:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// GET /api/profile/attempts -> get attempts for logged-in user
+app.get('/api/profile/attempts', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('attempts');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Return attempts sorted by date ascending
+    const attempts = (user.attempts || []).slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+    res.status(200).json(attempts);
+  } catch (err) {
+    console.error('Error fetching attempts:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Optional: delete an attempt (by attempt _id)
+app.delete('/api/profile/attempts/:attemptId', authMiddleware, async (req, res) => {
+  try {
+    const { attemptId } = req.params;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.attempts = user.attempts.filter(a => String(a._id) !== String(attemptId));
+    await user.save();
+
+    res.status(200).json({ message: 'Attempt removed' });
+  } catch (err) {
+    console.error('Error deleting attempt:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
