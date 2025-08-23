@@ -1,6 +1,346 @@
 [
   {
     "difficulty": "Easy",
+    "title": "System Tray Application",
+    "creator": "Ramana",
+    "tags": ["Desktop Dev", "System Integration"],
+    "path": "/DesktopDev.png",
+    "popularity": 42,
+    "company": "SysTrayApps",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "IoT Mobile Dashboard",
+    "creator": "Sunitha",
+    "tags": ["Mobile Dev", "IoT"],
+    "path": "/MobileDev.png",
+    "popularity": 71,
+    "company": "IoTConnect",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Distributed ML Training",
+    "creator": "Chandrashekhar",
+    "tags": ["ML Engineer", "Distributed Computing"],
+    "path": "/MLEngineering.png",
+    "popularity": 87,
+    "company": "Nvidia",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Data Profiling Tool",
+    "creator": "Latha",
+    "tags": ["Data Scientist", "Data Profiling"],
+    "path": "/DataScientist.png",
+    "popularity": 54,
+    "company": "ProfileData",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Real-time ETL Pipeline",
+    "creator": "Srikanth",
+    "tags": ["Data Engineer", "Real-time Processing"],
+    "path": "/DataEngineer.png",
+    "popularity": 75,
+    "company": "RealTimeETL",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Neuromorphic Computing Model",
+    "creator": "Shweta",
+    "tags": ["AI Researcher", "Neuromorphic"],
+    "path": "/AIResearch.png",
+    "popularity": 89,
+    "company": "Intel",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Zero Trust Security Model",
+    "creator": "Praveen",
+    "tags": ["Security Engineer", "Zero Trust"],
+    "path": "/SecurityEngineering.png",
+    "popularity": 76,
+    "company": "ZeroTrustSec",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "State Management Library",
+    "creator": "Anjali",
+    "tags": ["Front End", "State Management"],
+    "path": "/FrontEndDev.png",
+    "popularity": 58,
+    "company": "StateMaster",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Serverless API Gateway",
+    "creator": "Sudhir",
+    "tags": ["Cloud Engineer", "Serverless"],
+    "path": "/CloudEngineering.png",
+    "popularity": 74,
+    "company": "ServerlessTech",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Multi-modal AI System",
+    "creator": "Kavitha",
+    "tags": ["AI Researcher", "Multi-modal"],
+    "path": "/AIResearch.png",
+    "popularity": 90,
+    "company": "Microsoft",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Expense Tracking Application",
+    "creator": "Madhavi",
+    "tags": ["Accounting", "Personal Finance"],
+    "path": "/Accounting.png",
+    "popularity": 52,
+    "company": "FinTrack Solutions",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Invoice Management System",
+    "creator": "Ravi Kumar",
+    "tags": ["Accounting", "Business Management"],
+    "path": "/Accounting.png",
+    "popularity": 68,
+    "company": "BizFinance Pro",
+    "paid": true
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Financial Reporting Dashboard",
+    "creator": "Sridevi",
+    "tags": ["Accounting", "Data Analytics"],
+    "path": "/Accounting.png",
+    "popularity": 75,
+    "company": "FinanceBoard Inc",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Tax Calculation Engine",
+    "creator": "Ashwin",
+    "tags": ["Accounting", "Tax Software"],
+    "path": "/Accounting.png",
+    "popularity": 63,
+    "company": "TaxEase Systems",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Budget Planner Tool",
+    "creator": "Lakshmi Priya",
+    "tags": ["Accounting", "Budget Management"],
+    "path": "/Accounting.png",
+    "popularity": 56,
+    "company": "PlanMyBudget",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "2D Platformer Game",
+    "creator": "Arjun Reddy",
+    "tags": ["Game Development", "Unity 2D"],
+    "path": "/GameDeveloper.png",
+    "popularity": 61,
+    "company": "Pixel Studios",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Multiplayer Battle Arena",
+    "creator": "Preethi",
+    "tags": ["Game Development", "Networking"],
+    "path": "/GameDeveloper.png",
+    "popularity": 78,
+    "company": "Epic Games",
+    "paid": true
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Open World RPG System",
+    "creator": "Vikrant",
+    "tags": ["Game Development", "Unreal Engine"],
+    "path": "/GameDeveloper.png",
+    "popularity": 85,
+    "company": "GameForge Studios",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Mobile Puzzle Game",
+    "creator": "Anitha",
+    "tags": ["Game Development", "Mobile Gaming"],
+    "path": "/GameDeveloper.png",
+    "popularity": 67,
+    "company": "CasualPlay Games",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Arcade Shooter Game",
+    "creator": "Karthik Raj",
+    "tags": ["Game Development", "JavaScript"],
+    "path": "/GameDeveloper.png",
+    "popularity": 54,
+    "company": "WebGames Pro",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "VR Racing Simulator",
+    "creator": "Deepa",
+    "tags": ["Game Development", "Virtual Reality"],
+    "path": "/GameDeveloper.png",
+    "popularity": 82,
+    "company": "VR Innovations",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Structural Analysis Tool",
+    "creator": "Rajesh Kumar",
+    "tags": ["Mechanical Engineering", "FEA"],
+    "path": "/MechanicalEngineering.png",
+    "popularity": 59,
+    "company": "StructureCAD",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Heat Transfer Simulation",
+    "creator": "Meera Nair",
+    "tags": ["Mechanical Engineering", "Thermal Analysis"],
+    "path": "/MechanicalEngineering.png",
+    "popularity": 71,
+    "company": "ThermoSim Solutions",
+    "paid": true
+  },
+  {
+    "difficulty": "Hard",
+    "title": "CFD Flow Analysis System",
+    "creator": "Suresh Babu",
+    "tags": ["Mechanical Engineering", "Fluid Dynamics"],
+    "path": "/MechanicalEngineering.png",
+    "popularity": 79,
+    "company": "FlowDynamics Pro",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Vibration Analysis Platform",
+    "creator": "Kavitha Rao",
+    "tags": ["Mechanical Engineering", "Modal Analysis"],
+    "path": "/MechanicalEngineering.png",
+    "popularity": 65,
+    "company": "VibroTech",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Material Property Database",
+    "creator": "Venkatesh",
+    "tags": ["Mechanical Engineering", "Materials"],
+    "path": "/MechanicalEngineering.png",
+    "popularity": 48,
+    "company": "MaterialsDB",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Robotics Control System",
+    "creator": "Priya Sharma",
+    "tags": ["Mechanical Engineering", "Robotics"],
+    "path": "/MechanicalEngineering.png",
+    "popularity": 84,
+    "company": "RoboControl Inc",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Circuit Simulation Tool",
+    "creator": "Anil Kumar",
+    "tags": ["Electrical Engineering", "Circuit Analysis"],
+    "path": "/ElectricalEngineering.png",
+    "popularity": 62,
+    "company": "CircuitSim Pro",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Power System Analysis",
+    "creator": "Swathi",
+    "tags": ["Electrical Engineering", "Power Systems"],
+    "path": "/ElectricalEngineering.png",
+    "popularity": 73,
+    "company": "PowerGrid Solutions",
+    "paid": true
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Smart Grid Management",
+    "creator": "Naveen Kumar",
+    "tags": ["Electrical Engineering", "Smart Grid"],
+    "path": "/ElectricalEngineering.png",
+    "popularity": 80,
+    "company": "GridTech Systems",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Motor Control Algorithm",
+    "creator": "Rashmi Reddy",
+    "tags": ["Electrical Engineering", "Motor Control"],
+    "path": "/ElectricalEngineering.png",
+    "popularity": 69,
+    "company": "MotorDrive Tech",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Signal Processing Library",
+    "creator": "Ramesh",
+    "tags": ["Electrical Engineering", "DSP"],
+    "path": "/ElectricalEngineering.png",
+    "popularity": 57,
+    "company": "SignalPro",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "RF Communication System",
+    "creator": "Sunitha Rao",
+    "tags": ["Electrical Engineering", "RF Design"],
+    "path": "/ElectricalEngineering.png",
+    "popularity": 77,
+    "company": "RF Innovations",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "PCB Design Automation",
+    "creator": "Gopal Krishna",
+    "tags": ["Electrical Engineering", "PCB Design"],
+    "path": "/ElectricalEngineering.png",
+    "popularity": 66,
+    "company": "PCB Designer Pro",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
     "title": "React Component Basics",
     "creator": "Arjun",
     "tags": ["Front End", "React"],
@@ -894,7 +1234,7 @@
     "title": "Service Mesh Setup",
     "creator": "Naresh",
     "tags": ["Site Reliability Engineer", "Istio"],
-    "path": "/SiteReliabilityEngineering.png",
+    "path": "/SiteReliabilityEngineer.png",
     "popularity": 60,
     "company": "MeshNet",
     "paid": false
@@ -929,104 +1269,700 @@
     "company": "ContentHeadless",
     "paid": false
   },
+  
   {
     "difficulty": "Easy",
-    "title": "System Tray Application",
-    "creator": "Ramana",
-    "tags": ["Desktop Dev", "System Integration"],
-    "path": "/DesktopDev.png",
-    "popularity": 42,
-    "company": "SysTrayApps",
-    "paid": false
-  },
-  {
-    "difficulty": "Med.",
-    "title": "IoT Mobile Dashboard",
-    "creator": "Sunitha",
-    "tags": ["Mobile Dev", "IoT"],
-    "path": "/MobileDev.png",
-    "popularity": 71,
-    "company": "IoTConnect",
-    "paid": false
-  },
-  {
-    "difficulty": "Hard",
-    "title": "Distributed ML Training",
-    "creator": "Chandrashekhar",
-    "tags": ["ML Engineer", "Distributed Computing"],
-    "path": "/MLEngineering.png",
-    "popularity": 87,
-    "company": "Nvidia",
-    "paid": true
-  },
-  {
-    "difficulty": "Easy",
-    "title": "Data Profiling Tool",
-    "creator": "Latha",
-    "tags": ["Data Scientist", "Data Profiling"],
-    "path": "/DataScientist.png",
-    "popularity": 54,
-    "company": "ProfileData",
-    "paid": false
-  },
-  {
-    "difficulty": "Med.",
-    "title": "Real-time ETL Pipeline",
-    "creator": "Srikanth",
-    "tags": ["Data Engineer", "Real-time Processing"],
-    "path": "/DataEngineer.png",
-    "popularity": 75,
-    "company": "RealTimeETL",
-    "paid": false
-  },
-  {
-    "difficulty": "Hard",
-    "title": "Neuromorphic Computing Model",
-    "creator": "Shweta",
-    "tags": ["AI Researcher", "Neuromorphic"],
-    "path": "/AIResearch.png",
-    "popularity": 89,
-    "company": "Intel",
-    "paid": true
-  },
-  {
-    "difficulty": "Med.",
-    "title": "Zero Trust Security Model",
-    "creator": "Praveen",
-    "tags": ["Security Engineer", "Zero Trust"],
-    "path": "/SecurityEngineering.png",
-    "popularity": 76,
-    "company": "ZeroTrustSec",
-    "paid": false
-  },
-  {
-    "difficulty": "Easy",
-    "title": "State Management Library",
-    "creator": "Anjali",
-    "tags": ["Front End", "State Management"],
-    "path": "/FrontEndDev.png",
+    "title": "Concrete Mix Design Calculator",
+    "creator": "Rajesh Patel",
+    "tags": ["Civil Engineer", "Concrete Design"],
+    "path": "/CivilEngineer.png",
     "popularity": 58,
-    "company": "StateMaster",
+    "company": "BuildTech Solutions",
     "paid": false
   },
   {
     "difficulty": "Med.",
-    "title": "Serverless API Gateway",
-    "creator": "Sudhir",
-    "tags": ["Cloud Engineer", "Serverless"],
-    "path": "/CloudEngineering.png",
-    "popularity": 74,
-    "company": "ServerlessTech",
+    "title": "Structural Load Analysis",
+    "creator": "Priyanka Singh",
+    "tags": ["Civil Engineer", "Structural Analysis"],
+    "path": "/CivilEngineer.png",
+    "popularity": 72,
+    "company": "StructurePro",
+    "paid": true
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Bridge Design Optimization",
+    "creator": "Arjun Sharma",
+    "tags": ["Civil Engineer", "Bridge Engineering"],
+    "path": "/CivilEngineer.png",
+    "popularity": 81,
+    "company": "MegaStructures Inc",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Water Distribution Network",
+    "creator": "Sneha Reddy",
+    "tags": ["Civil Engineer", "Hydraulics"],
+    "path": "/CivilEngineer.png",
+    "popularity": 67,
+    "company": "AquaFlow Systems",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Road Alignment Planning",
+    "creator": "Vikram Joshi",
+    "tags": ["Civil Engineer", "Transportation"],
+    "path": "/CivilEngineer.png",
+    "popularity": 54,
+    "company": "RoadWorks",
     "paid": false
   },
   {
     "difficulty": "Hard",
-    "title": "Multi-modal AI System",
-    "creator": "Kavitha",
-    "tags": ["AI Researcher", "Multi-modal"],
-    "path": "/AIResearch.png",
-    "popularity": 90,
-    "company": "Microsoft",
+    "title": "Seismic Analysis Simulator",
+    "creator": "Meera Nair",
+    "tags": ["Civil Engineer", "Earthquake Engineering"],
+    "path": "/CivilEngineer.png",
+    "popularity": 79,
+    "company": "SeismoTech",
     "paid": true
-  }
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Process Flow Diagram Tool",
+    "creator": "Suresh Kumar",
+    "tags": ["Chemical Engineer", "Process Design"],
+    "path": "/ChemicalEngineer.png",
+    "popularity": 61,
+    "company": "ProcessPro",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Distillation Column Design",
+    "creator": "Kavitha Rao",
+    "tags": ["Chemical Engineer", "Separation Processes"],
+    "path": "/ChemicalEngineer.png",
+    "popularity": 74,
+    "company": "ChemSeparation Tech",
+    "paid": true
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Reactor Optimization System",
+    "creator": "Anand Gupta",
+    "tags": ["Chemical Engineer", "Reactor Design"],
+    "path": "/ChemicalEngineer.png",
+    "popularity": 83,
+    "company": "ReactorWorks",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Heat Exchanger Calculator",
+    "creator": "Deepa Menon",
+    "tags": ["Chemical Engineer", "Heat Transfer"],
+    "path": "/ChemicalEngineer.png",
+    "popularity": 69,
+    "company": "ThermalDesign Pro",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Material Balance Solver",
+    "creator": "Ravi Chandra",
+    "tags": ["Chemical Engineer", "Mass Balance"],
+    "path": "/ChemicalEngineer.png",
+    "popularity": 56,
+    "company": "BalanceCalc",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Process Control Simulation",
+    "creator": "Shalini Iyer",
+    "tags": ["Chemical Engineer", "Process Control"],
+    "path": "/ChemicalEngineer.png",
+    "popularity": 77,
+    "company": "ControlSim Industries",
+    "paid": true
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Network Vulnerability Scanner",
+    "creator": "Amit Verma",
+    "tags": ["Cyber Security", "Network Security"],
+    "path": "/CyberSecurity.png",
+    "popularity": 65,
+    "company": "SecureNet",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Malware Detection System",
+    "creator": "Priya Agarwal",
+    "tags": ["Cyber Security", "Malware Analysis"],
+    "path": "/CyberSecurity.png",
+    "popularity": 78,
+    "company": "CyberDefense Pro",
+    "paid": true
+  },
+  {
+    "difficulty": "Hard",
+    "title": "Advanced Threat Intelligence",
+    "creator": "Rohan Khanna",
+    "tags": ["Cyber Security", "Threat Intelligence"],
+    "path": "/CyberSecurity.png",
+    "popularity": 85,
+    "company": "ThreatGuard",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Incident Response Platform",
+    "creator": "Anjali Sharma",
+    "tags": ["Cyber Security", "Incident Response"],
+    "path": "/CyberSecurity.png",
+    "popularity": 73,
+    "company": "ResponseTech",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Password Strength Analyzer",
+    "creator": "Karthik Reddy",
+    "tags": ["Cyber Security", "Authentication"],
+    "path": "/CyberSecurity.png",
+    "popularity": 59,
+    "company": "AuthSecure",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "AI-Powered Security Analytics",
+    "creator": "Nisha Patel",
+    "tags": ["Cyber Security", "AI Security"],
+    "path": "/CyberSecurity.png",
+    "popularity": 82,
+    "company": "AI SecureVision",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Blockchain Security Audit",
+    "creator": "Varun Singh",
+    "tags": ["Cyber Security", "Blockchain"],
+    "path": "/CyberSecurity.png",
+    "popularity": 71,
+    "company": "BlockSecure",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Digital Circuit Simulator",
+    "creator": "Lakshmi Prasad",
+    "tags": ["Electronics Engineer", "Digital Circuits"],
+    "path": "/ElectronicsEngineer.png",
+    "popularity": 63,
+    "company": "CircuitLab",
+    "paid": false
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Microcontroller Programming",
+    "creator": "Rahul Desai",
+    "tags": ["Electronics Engineer", "Embedded Systems"],
+    "path": "/ElectronicsEngineer.png",
+    "popularity": 75,
+    "company": "EmbeddedTech",
+    "paid": true
+  },
+  {
+    "difficulty": "Hard",
+    "title": "RF Filter Design Tool",
+    "creator": "Swathi Krishnan",
+    "tags": ["Electronics Engineer", "RF Engineering"],
+    "path": "/ElectronicsEngineer.png",
+    "popularity": 80,
+    "company": "RF Solutions Pro",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "IoT Sensor Network",
+    "creator": "Ganesh Kumar",
+    "tags": ["Electronics Engineer", "IoT"],
+    "path": "/ElectronicsEngineer.png",
+    "popularity": 70,
+    "company": "IoT Innovations",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Analog Signal Analyzer",
+    "creator": "Divya Nair",
+    "tags": ["Electronics Engineer", "Analog Electronics"],
+    "path": "/ElectronicsEngineer.png",
+    "popularity": 57,
+    "company": "AnalogPro",
+    "paid": false
+  },
+  {
+    "difficulty": "Hard",
+    "title": "VLSI Design Automation",
+    "creator": "Sunil Agarwal",
+    "tags": ["Electronics Engineer", "VLSI"],
+    "path": "/ElectronicsEngineer.png",
+    "popularity": 84,
+    "company": "VLSI Design House",
+    "paid": true
+  },
+  {
+    "difficulty": "Med.",
+    "title": "Power Electronics Controller",
+    "creator": "Rekha Jain",
+    "tags": ["Electronics Engineer", "Power Electronics"],
+    "path": "/ElectronicsEngineer.png",
+    "popularity": 68,
+    "company": "PowerControl Systems",
+    "paid": false
+  },
+  {
+    "difficulty": "Easy",
+    "title": "Component Tester Application",
+    "creator": "Mohan Rao",
+    "tags": ["Electronics Engineer", "Testing"],
+    "path": "/ElectronicsEngineer.png",
+    "popularity": 52,
+    "company": "TestEquip",
+    "paid": false
+
+  },
+    {
+      "difficulty": "Med.",
+      "title": "Autonomous Navigation System",
+      "creator": "Arjun Patel",
+      "tags": ["Robotics Engineer", "Autonomous Systems"],
+      "path": "/Robotics.png",
+      "popularity": 75,
+      "company": "RoboNav Technologies",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Servo Motor Controller",
+      "creator": "Priya Sharma",
+      "tags": ["Robotics Engineer", "Motor Control"],
+      "path": "/Robotics.png",
+      "popularity": 61,
+      "company": "ServoTech",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Machine Learning Vision",
+      "creator": "Vikash Singh",
+      "tags": ["Robotics Engineer", "Computer Vision"],
+      "path": "/Robotics.png",
+      "popularity": 89,
+      "company": "VisionBot Systems",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Robotic Arm Kinematics",
+      "creator": "Sneha Gupta",
+      "tags": ["Robotics Engineer", "Kinematics"],
+      "path": "/Robotics.png",
+      "popularity": 72,
+      "company": "ArmTech Robotics",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Sensor Fusion Module",
+      "creator": "Rahul Mehta",
+      "tags": ["Robotics Engineer", "Sensors"],
+      "path": "/Robotics.png",
+      "popularity": 58,
+      "company": "SensorBot",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Swarm Robotics Controller",
+      "creator": "Anita Desai",
+      "tags": ["Robotics Engineer", "Swarm Intelligence"],
+      "path": "/Robotics.png",
+      "popularity": 91,
+      "company": "SwarmTech Industries",
+      "paid": true
+    },{
+      "difficulty": "Med.",
+      "title": "Flight Control System",
+      "creator": "Kiran Reddy",
+      "tags": ["Aerospace Engineer", "Flight Control"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 78,
+      "company": "AeroControl Systems",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Propulsion Calculator",
+      "creator": "Meera Iyer",
+      "tags": ["Aerospace Engineer", "Propulsion"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 64,
+      "company": "PropCalc Solutions",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Satellite Orbit Predictor",
+      "creator": "Rajesh Kumar",
+      "tags": ["Aerospace Engineer", "Orbital Mechanics"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 87,
+      "company": "OrbitTech Aerospace",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Aerodynamics Simulator",
+      "creator": "Kavya Nair",
+      "tags": ["Aerospace Engineer", "Aerodynamics"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 73,
+      "company": "AeroSim Technologies",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Weight and Balance Tool",
+      "creator": "Suresh Pillai",
+      "tags": ["Aerospace Engineer", "Aircraft Design"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 55,
+      "company": "DesignAero",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Spacecraft Thermal Analysis",
+      "creator": "Deepika Rao",
+      "tags": ["Aerospace Engineer", "Thermal Systems"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 82,
+      "company": "ThermalSpace Systems",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Avionics Interface Designer",
+      "creator": "Anil Joshi",
+      "tags": ["Aerospace Engineer", "Avionics"],
+      "path": "/AerospaceEngineer.png",
+      "popularity": 69,
+      "company": "AvionicsDesign Pro",
+      "paid": false
+    },{
+      "difficulty": "Hard",
+      "title": "Engine Performance Optimizer",
+      "creator": "Vikram Singh",
+      "tags": ["Automotive Engineer", "Engine Design"],
+      "path": "/AutomotiveEngineer.png",
+      "popularity": 91,
+      "company": "AutoTech Dynamics",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Suspension Dynamics Analyzer",
+      "creator": "Priya Sharma",
+      "tags": ["Automotive Engineer", "Vehicle Dynamics"],
+      "path": "/AutomotiveEngineer.png",
+      "popularity": 76,
+      "company": "DriveForce Engineering",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Fuel Efficiency Calculator",
+      "creator": "Ramesh Gupta",
+      "tags": ["Automotive Engineer", "Efficiency Analysis"],
+      "path": "/AutomotiveEngineer.png",
+      "popularity": 58,
+      "company": "EcoMotors Solutions",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Electric Powertrain Designer",
+      "creator": "Sneha Patel",
+      "tags": ["Automotive Engineer", "Electric Vehicles"],
+      "path": "/AutomotiveEngineer.png",
+      "popularity": 88,
+      "company": "ElectricDrive Systems",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Crash Test Simulator",
+      "creator": "Arjun Reddy",
+      "tags": ["Automotive Engineer", "Safety Systems"],
+      "path": "/AutomotiveEngineer.png",
+      "popularity": 72,
+      "company": "SafetyFirst Automotive",
+      "paid": false
+    },{
+      "difficulty": "Hard",
+      "title": "Ship Hull Optimizer",
+      "creator": "Captain Rohit Menon",
+      "tags": ["Marine Engineer", "Naval Architecture"],
+      "path": "/MarineEngineer.png",
+      "popularity": 79,
+      "company": "OceanTech Marine",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Propulsion System Analyzer",
+      "creator": "Lakshmi Nambiar",
+      "tags": ["Marine Engineer", "Propulsion"],
+      "path": "/MarineEngineer.png",
+      "popularity": 67,
+      "company": "PropelMarine Systems",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Ballast Water Calculator",
+      "creator": "Kiran Yadav",
+      "tags": ["Marine Engineer", "Stability"],
+      "path": "/MarineEngineer.png",
+      "popularity": 52,
+      "company": "StabilityMarine Pro",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Offshore Platform Designer",
+      "creator": "Sanjay Iyer",
+      "tags": ["Marine Engineer", "Offshore Structures"],
+      "path": "/MarineEngineer.png",
+      "popularity": 85,
+      "company": "DeepSea Engineering",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Marine Engine Diagnostics",
+      "creator": "Anita Kulkarni",
+      "tags": ["Marine Engineer", "Engine Systems"],
+      "path": "/MarineEngineer.png",
+      "popularity": 63,
+      "company": "MarineService Tech",
+      "paid": false
+    },{
+      "difficulty": "Hard",
+      "title": "Reactor Core Simulator",
+      "creator": "Dr. Ashwin Bhat",
+      "tags": ["Nuclear Engineer", "Reactor Physics"],
+      "path": "/NuclearEngineer.png",
+      "popularity": 93,
+      "company": "Nuclear Dynamics Corp",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Radiation Dose Calculator",
+      "creator": "Meera Agarwal",
+      "tags": ["Nuclear Engineer", "Radiation Safety"],
+      "path": "/NuclearEngineer.png",
+      "popularity": 71,
+      "company": "RadSafe Solutions",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Decay Chain Visualizer",
+      "creator": "Naveen Kumar",
+      "tags": ["Nuclear Engineer", "Nuclear Physics"],
+      "path": "/NuclearEngineer.png",
+      "popularity": 49,
+      "company": "AtomViz Technologies",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Fuel Cycle Optimizer",
+      "creator": "Dr. Ravi Krishnan",
+      "tags": ["Nuclear Engineer", "Fuel Management"],
+      "path": "/NuclearEngineer.png",
+      "popularity": 89,
+      "company": "FuelCycle Systems",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Containment Stress Analyzer",
+      "creator": "Pooja Desai",
+      "tags": ["Nuclear Engineer", "Structural Analysis"],
+      "path": "/NuclearEngineer.png",
+      "popularity": 74,
+      "company": "StructuralNuc Engineering",
+      "paid": false
+    },{
+      "difficulty": "Hard",
+      "title": "Bioprocess Optimization Suite",
+      "creator": "Dr. Manish Thakur",
+      "tags": ["Biotechnology Engineer", "Bioprocessing"],
+      "path": "/BiotechnologyEngineer.png",
+      "popularity": 86,
+      "company": "BioOptimize Systems",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Fermentation Monitor",
+      "creator": "Rashmi Jain",
+      "tags": ["Biotechnology Engineer", "Fermentation"],
+      "path": "/BiotechnologyEngineer.png",
+      "popularity": 68,
+      "company": "FermentTech Solutions",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Protein Purification Planner",
+      "creator": "Sunil Mishra",
+      "tags": ["Biotechnology Engineer", "Protein Engineering"],
+      "path": "/BiotechnologyEngineer.png",
+      "popularity": 56,
+      "company": "ProteinPure Pro",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Bioreactor Design Tool",
+      "creator": "Dr. Kavitha Srinivasan",
+      "tags": ["Biotechnology Engineer", "Equipment Design"],
+      "path": "/BiotechnologyEngineer.png",
+      "popularity": 84,
+      "company": "BioreactorTech Industries",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Cell Culture Optimizer",
+      "creator": "Abhishek Chandra",
+      "tags": ["Biotechnology Engineer", "Cell Culture"],
+      "path": "/BiotechnologyEngineer.png",
+      "popularity": 70,
+      "company": "CellGrow Technologies",
+      "paid": false
+    },{
+      "difficulty": "Hard",
+      "title": "Medical Device Simulator",
+      "creator": "Dr. Nisha Arun",
+      "tags": ["Biomedical Engineer", "Device Design"],
+      "path": "/BiomedicalEngineer.png",
+      "popularity": 92,
+      "company": "MedDevice Innovations",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Prosthetic Limb Designer",
+      "creator": "Rakesh Verma",
+      "tags": ["Biomedical Engineer", "Prosthetics"],
+      "path": "/BiomedicalEngineer.png",
+      "popularity": 77,
+      "company": "ProstheTech Systems",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Heart Rate Analyzer",
+      "creator": "Shilpa Mehta",
+      "tags": ["Biomedical Engineer", "Signal Processing"],
+      "path": "/BiomedicalEngineer.png",
+      "popularity": 61,
+      "company": "BioSignal Analytics",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Tissue Engineering Toolkit",
+      "creator": "Dr. Varun Kapoor",
+      "tags": ["Biomedical Engineer", "Tissue Engineering"],
+      "path": "/BiomedicalEngineer.png",
+      "popularity": 90,
+      "company": "RegeneraTech Labs",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Imaging System Calibrator",
+      "creator": "Aditi Saxena",
+      "tags": ["Biomedical Engineer", "Medical Imaging"],
+      "path": "/BiomedicalEngineer.png",
+      "popularity": 75,
+      "company": "ImageMed Technologies",
+      "paid": false
+    },{
+      "difficulty": "Hard",
+      "title": "Experimental Design Optimizer",
+      "creator": "Dr. Siddharth Bansal",
+      "tags": ["Research Engineer", "Statistical Analysis"],
+      "path": "/ResearchEngineer.png",
+      "popularity": 87,
+      "company": "ResearchOpt Solutions",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Data Analysis Pipeline",
+      "creator": "Neha Tiwari",
+      "tags": ["Research Engineer", "Data Science"],
+      "path": "/ResearchEngineer.png",
+      "popularity": 73,
+      "company": "DataFlow Research",
+      "paid": false
+    },
+    {
+      "difficulty": "Easy",
+      "title": "Literature Review Manager",
+      "creator": "Gaurav Pandey",
+      "tags": ["Research Engineer", "Knowledge Management"],
+      "path": "/ResearchEngineer.png",
+      "popularity": 59,
+      "company": "LitReview Pro",
+      "paid": false
+    },
+    {
+      "difficulty": "Hard",
+      "title": "Simulation Framework Builder",
+      "creator": "Dr. Priyanka Malhotra",
+      "tags": ["Research Engineer", "Computational Modeling"],
+      "path": "/ResearchEngineer.png",
+      "popularity": 91,
+      "company": "SimulatePro Technologies",
+      "paid": true
+    },
+    {
+      "difficulty": "Med.",
+      "title": "Research Collaboration Portal",
+      "creator": "Vivek Rajan",
+      "tags": ["Research Engineer", "Collaboration Tools"],
+      "path": "/ResearchEngineer.png",
+      "popularity": 66,
+      "company": "CollabResearch Systems",
+      "paid": false
+    }
+
 ]

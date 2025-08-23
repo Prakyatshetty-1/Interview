@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useRef, useEffect } from "react"
@@ -7,9 +8,10 @@ import "./SearchBar.css"
 import { BiSort } from "react-icons/bi"
 import { FaFilter } from "react-icons/fa"
 import ShinyText from "../react-bits/ShinyText"
-import cardDataJson from "../data/CardData.json"
 
-export default function SearchBar() {
+
+export default function SearchBar({ onCardClick }) {
+
   const [searchTerm, setSearchTerm] = useState("")
   const [sortOrder, setSortOrder] = useState("desc")
   const [cardData, setCardData] = useState([])
@@ -22,11 +24,44 @@ export default function SearchBar() {
   const [selectedStatus, setSelectedStatus] = useState([])
   const [selectedLanguages, setSelectedLanguages] = useState([])
   const [topicsSearch, setTopicsSearch] = useState("")
-  const [matchType, setMatchType] = useState("All") // "All" or "Any"
+
+  const [matchType, setMatchType] = useState("All")
   const [isTopicsExpanded, setIsTopicsExpanded] = useState(false)
   const [isTopicsModalOpen, setIsTopicsModalOpen] = useState(false)
 
-  // Advanced filter form state with support for "is not" conditions
+  const categoryImageMap = {
+    "accounting": "/Accounting.png",
+    "ai research": "/AIResearch.png",
+    "aerospace engineer": "/AerospaceEngineer.png",
+    "application security engineer": "/ApplicationSecurityEngineer.png",
+    "back end": "/BackEndDev.png",
+    "chemical engineer": "/ChemicalEngineer.png",
+    "civil engineer": "/CivilEngineer.png",
+    "cloud engineer": "/CloudEngineering.png",
+    "cyber security": "/CyberSecurity.png",
+    "data engineer": "/DataEngineer.png",
+    "data scientist": "/DataScientist.png",
+    "desktop dev": "/DesktopDev.png",
+    "devops engineer": "/DevOpsEngineer.png",
+    "electrical engineering": "/ElectricalEngineering.png",
+    "electronics engineer": "/ElectronicsEngineer.png",
+    "front end": "/FrontEndDev.png",
+    "full stack": "/FullStackWebDev.png",
+    "game development": "/GameDeveloper.png",
+    "ml engineer": "/MLEngineering.png",
+    "mechanical engineering": "/MechanicalEngineering.png",
+    "mobile dev": "/MobileDev.png",
+    "robotics engineer": "/Robotics.png",
+    "security engineer": "/SecurityEngineering.png",
+    "site reliability engineer": "/SiteReliabilityEngineer.png",
+  };
+
+  const getImageForCategory = (category) => {
+  if (!category) return "/default.png";
+  const key = String(category).toLowerCase();
+  return categoryImageMap[key] || "/default.png";
+};
+
   const [advancedFilters, setAdvancedFilters] = useState({
     status: { condition: "is", value: "" },
     difficulty: { condition: "is", value: "" },
@@ -34,7 +69,8 @@ export default function SearchBar() {
     language: { condition: "is", value: "" },
   })
 
-  // Track which filters are using "is not" condition
+
+
   const [excludeFilters, setExcludeFilters] = useState({
     status: false,
     difficulty: false,
@@ -46,11 +82,12 @@ export default function SearchBar() {
   const advancedFilterRef = useRef(null)
   const cardsPerPage = 25
 
-  // Character limits configuration
+
   const TITLE_CHAR_LIMIT = 20
   const TAG_CHAR_LIMIT = 10
+  const MAX_TAGS_DISPLAY = 2 // New constant for maximum tags to display
 
-  // Close dropdown when clicking outside
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (filterRef.current && !filterRef.current.contains(event.target)) {
@@ -61,40 +98,103 @@ export default function SearchBar() {
       }
     }
     document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Helper function to truncate text
-  const truncateText = (text, limit) => {
-    if (text.length <= limit) return text
-    return text.substring(0, limit) + "..."
+  const truncateText = (text = "", limit) => {
+    if (!text) return ""
+    return text.length <= limit ? text : text.substring(0, limit) + "..."
   }
 
-  // Helper function to truncate tags
-  const truncateTags = (tags) => {
-    return tags.map((tag) => truncateText(tag, TAG_CHAR_LIMIT))
+  // Updated function to limit tags to maximum 3 and truncate text
+  const truncateTags = (tags = []) => {
+    if (!Array.isArray(tags)) return []
+    
+    // First limit to MAX_TAGS_DISPLAY, then truncate text of each tag
+    return tags
+      .slice(0, MAX_TAGS_DISPLAY)
+      .map((t) => truncateText(t, TAG_CHAR_LIMIT))
   }
 
+  // fetch backend packs and map them to card shape
   useEffect(() => {
-    setCardData(cardDataJson)
-  }, [])
+  const fetchPacks = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      // Prefer env var if set, otherwise fallback to localhost
+      const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+      const res = await fetch(`${API_BASE}/api/interviews/all`, { headers });
+
+      // If response isn't JSON, read text so we can debug unexpected HTML (e.g. index.html)
+      const text = await res.text().catch(() => "");
+      if (!res.ok) {
+        // include response body in thrown error for debugging
+        throw new Error(`Fetch failed: ${res.status} ${text}`);
+      }
+
+      // Try parsing JSON from text (some servers may return text even when 200)
+      let data;
+      try {
+        data = text ? JSON.parse(text) : [];
+      } catch (e) {
+        // couldn't parse JSON -> probably HTML or broken JSON
+        console.warn("SearchBar: response text (not valid JSON):", text);
+        data = [];
+      }
+
+      // Accept an array or object with .packs
+      let packsArray = [];
+      if (Array.isArray(data)) packsArray = data;
+      else if (data && Array.isArray(data.packs)) packsArray = data.packs;
+      else packsArray = [];
+
+      // Map to card shape and attach category image
+      const mapped = packsArray.map((pack) => ({
+        id: pack._id || pack.id || String(Math.random()).slice(2),
+        title: pack.title || "Untitled",
+        originalTitle: pack.title || "Untitled",
+        originalTags: Array.isArray(pack.tags) ? pack.tags : pack.tags ? [pack.tags] : pack.category ? [pack.category] : [],
+        tags: Array.isArray(pack.tags) ? pack.tags : pack.tags ? [pack.tags] : pack.category ? [pack.category] : [],
+        difficulty: pack.difficulty || "Med.",
+        status: pack.status || "",
+        language: pack.language || "",
+        creator: pack.user?.name || pack.creator || "Unknown",
+        category: pack.category || "",
+        // Use your helper to choose an image by category
+        path: getImageForCategory(pack.category),
+      }));
+
+      setCardData(mapped);
+    } catch (err) {
+      console.error("Error fetching packs in SearchBar:", err);
+      setCardData([]);
+    }
+  };
+
+  fetchPacks();
+}, []);
+  
 
   const processedCardData = useMemo(() => {
-    return cardData.map((card) => ({
+    return (cardData || []).map((card) => ({
       ...card,
-      title: truncateText(card.title, TITLE_CHAR_LIMIT),
-      tags: truncateTags(card.tags),
-      originalTitle: card.title,
-      originalTags: card.tags,
+      title: truncateText(card.title || card.originalTitle || "", TITLE_CHAR_LIMIT),
+      tags: truncateTags(card.originalTags || card.tags || []),
+      originalTitle: card.originalTitle || card.title || "",
+      originalTags: card.originalTags || card.tags || [],
+
     }))
   }, [cardData])
 
   const allTopics = useMemo(() => {
     const topics = new Set()
-    cardData.forEach((card) => {
-      card.tags.forEach((tag) => topics.add(tag))
+
+    ;(cardData || []).forEach((card) => {
+      ;(card.originalTags || card.tags || []).forEach((tag) => topics.add(tag))
+
     })
     return Array.from(topics).sort()
   }, [cardData])
@@ -107,127 +207,96 @@ export default function SearchBar() {
   const allStatuses = ["Solved", "Unsolved", "Attempted"]
   const allLanguages = ["JavaScript", "Python", "Java", "C++", "Dart", "Go", "Rust"]
 
-  // FIXED: Updated filtering logic to properly handle "is not" conditions
-  const filteredCards = useMemo(() => {
-    let filtered = processedCardData
 
-    // Apply search term filter
+  const filteredCards = useMemo(() => {
+    let filtered = processedCardData || []
+
     if (searchTerm.trim()) {
+      const s = searchTerm.toLowerCase()
       filtered = filtered.filter(
         (card) =>
-          card.originalTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          card.originalTags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())),
+          (card.originalTitle || "").toLowerCase().includes(s) ||
+          (card.originalTags || []).some((tag) => (tag || "").toLowerCase().includes(s)),
       )
     }
 
-    // Apply filters based on match type
     if (matchType === "All") {
-      // All filters must match
       if (selectedDifficulties.length > 0) {
-        if (excludeFilters.difficulty) {
-          // Exclude selected difficulties
-          filtered = filtered.filter((card) => !selectedDifficulties.includes(card.difficulty))
-        } else {
-          // Include only selected difficulties
-          filtered = filtered.filter((card) => selectedDifficulties.includes(card.difficulty))
-        }
+        filtered = excludeFilters.difficulty
+          ? filtered.filter((card) => !selectedDifficulties.includes(card.difficulty))
+          : filtered.filter((card) => selectedDifficulties.includes(card.difficulty))
       }
 
       if (selectedTopics.length > 0) {
-        if (excludeFilters.topics) {
-          // Exclude cards that have ANY of the selected topics
-          filtered = filtered.filter((card) => !selectedTopics.some((topic) => card.originalTags.includes(topic)))
-        } else {
-          // Include cards that have ANY of the selected topics
-          filtered = filtered.filter((card) => selectedTopics.some((topic) => card.originalTags.includes(topic)))
-        }
+        filtered = excludeFilters.topics
+          ? filtered.filter((card) => !(selectedTopics.some((topic) => (card.originalTags || []).includes(topic))))
+          : filtered.filter((card) => selectedTopics.some((topic) => (card.originalTags || []).includes(topic)))
       }
 
       if (selectedStatus.length > 0) {
-        if (excludeFilters.status) {
-          // Exclude selected statuses
-          filtered = filtered.filter((card) => !selectedStatus.includes(card.status))
-        } else {
-          // Include only selected statuses
-          filtered = filtered.filter((card) => selectedStatus.includes(card.status))
-        }
+        filtered = excludeFilters.status ? filtered.filter((card) => !selectedStatus.includes(card.status)) : filtered.filter((card) => selectedStatus.includes(card.status))
       }
 
       if (selectedLanguages.length > 0) {
-        if (excludeFilters.language) {
-          // Exclude selected languages
-          filtered = filtered.filter((card) => !selectedLanguages.includes(card.language))
-        } else {
-          // Include only selected languages
-          filtered = filtered.filter((card) => selectedLanguages.includes(card.language))
-        }
+        filtered = excludeFilters.language ? filtered.filter((card) => !selectedLanguages.includes(card.language)) : filtered.filter((card) => selectedLanguages.includes(card.language))
       }
     } else {
-      // Any filter can match
       filtered = filtered.filter((card) => {
         const matchesDifficulty =
           selectedDifficulties.length === 0 ||
-          (excludeFilters.difficulty
-            ? !selectedDifficulties.includes(card.difficulty)
-            : selectedDifficulties.includes(card.difficulty))
+          (excludeFilters.difficulty ? !selectedDifficulties.includes(card.difficulty) : selectedDifficulties.includes(card.difficulty))
 
         const matchesTopics =
           selectedTopics.length === 0 ||
-          (excludeFilters.topics
-            ? !selectedTopics.some((topic) => card.originalTags.includes(topic))
-            : selectedTopics.some((topic) => card.originalTags.includes(topic)))
+          (excludeFilters.topics ? !selectedTopics.some((topic) => (card.originalTags || []).includes(topic)) : selectedTopics.some((topic) => (card.originalTags || []).includes(topic)))
 
         const matchesStatus =
-          selectedStatus.length === 0 ||
-          (excludeFilters.status ? !selectedStatus.includes(card.status) : selectedStatus.includes(card.status))
+          selectedStatus.length === 0 || (excludeFilters.status ? !selectedStatus.includes(card.status) : selectedStatus.includes(card.status))
 
         const matchesLanguage =
-          selectedLanguages.length === 0 ||
-          (excludeFilters.language
-            ? !selectedLanguages.includes(card.language)
-            : selectedLanguages.includes(card.language))
+          selectedLanguages.length === 0 || (excludeFilters.language ? !selectedLanguages.includes(card.language) : selectedLanguages.includes(card.language))
+
 
         return matchesDifficulty || matchesTopics || matchesStatus || matchesLanguage
       })
     }
 
-    // Apply sorting
+
     if (selectedFilter === "Easy to Hard") {
-      filtered = [...filtered].sort((a, b) => {
-        const getDifficultyOrder = (difficulty) => {
-          switch (difficulty.toLowerCase()) {
-            case "easy":
-              return 1
-            case "med.":
-              return 2
-            case "hard":
-              return 3
-            default:
-              return 2
-          }
+      const order = (d) => {
+        switch ((d || "").toLowerCase()) {
+          case "easy":
+            return 1
+          case "med.":
+          case "medium":
+            return 2
+          case "hard":
+            return 3
+          default:
+            return 2
         }
-        return getDifficultyOrder(a.difficulty) - getDifficultyOrder(b.difficulty)
-      })
+      }
+      filtered = [...filtered].sort((a, b) => order(a.difficulty) - order(b.difficulty))
     } else if (selectedFilter === "Hard to Easy") {
-      filtered = [...filtered].sort((a, b) => {
-        const getDifficultyOrder = (difficulty) => {
-          switch (difficulty.toLowerCase()) {
-            case "easy":
-              return 1
-            case "med.":
-              return 2
-            case "hard":
-              return 3
-            default:
-              return 2
-          }
+      const order = (d) => {
+        switch ((d || "").toLowerCase()) {
+          case "easy":
+            return 1
+          case "med.":
+          case "medium":
+            return 2
+          case "hard":
+            return 3
+          default:
+            return 2
         }
-        return getDifficultyOrder(b.difficulty) - getDifficultyOrder(a.difficulty)
-      })
+      }
+      filtered = [...filtered].sort((a, b) => order(b.difficulty) - order(a.difficulty))
     } else {
       filtered = [...filtered].sort((a, b) => {
-        const aVal = a.originalTitle.toLowerCase()
-        const bVal = b.originalTitle.toLowerCase()
+        const aVal = (a.originalTitle || "").toLowerCase()
+        const bVal = (b.originalTitle || "").toLowerCase()
+
         return sortOrder === "asc" ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal)
       })
     }
@@ -243,21 +312,18 @@ export default function SearchBar() {
     sortOrder,
     processedCardData,
     matchType,
-    excludeFilters, // Added dependency
+
+    excludeFilters,
   ])
 
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredCards.length / cardsPerPage)
+  const totalPages = Math.max(1, Math.ceil((filteredCards || []).length / cardsPerPage))
   const startIndex = (currentPage - 1) * cardsPerPage
   const endIndex = startIndex + cardsPerPage
-  const currentCards = filteredCards.slice(startIndex, endIndex)
+  const currentCards = (filteredCards || []).slice(startIndex, endIndex)
 
-  // Reset to first page when filters change
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, selectedDifficulties, selectedTopics, selectedStatus, selectedLanguages, selectedFilter])
+  useEffect(() => setCurrentPage(1), [searchTerm, selectedDifficulties, selectedTopics, selectedStatus, selectedLanguages, selectedFilter])
 
-  // Calculate pagination range
+
   const getPaginationRange = () => {
     const maxPagesToShow = 5
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2))
@@ -268,73 +334,51 @@ export default function SearchBar() {
     return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
   }
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page)
-  }
 
-  const handlePrevPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1))
-  }
+  const handlePageChange = (page) => setCurrentPage(page)
+  const handlePrevPage = () => setCurrentPage((p) => Math.max(p - 1, 1))
+  const handleNextPage = () => setCurrentPage((p) => Math.min(p + 1, totalPages))
 
-  const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-  }
 
   const handleFilterSelect = (filterValue, displayName) => {
     setSelectedFilter(displayName)
     setIsFilterOpen(false)
   }
 
-  const handleAdvancedFilterToggle = () => {
-    setIsAdvancedFilterOpen(!isAdvancedFilterOpen)
-  }
 
-  // Handle advanced filter changes
-  const handleAdvancedFilterChange = (filterType, field, value) => {
-    setAdvancedFilters((prev) => ({
-      ...prev,
-      [filterType]: {
-        ...prev[filterType],
-        [field]: value,
-      },
-    }))
-  }
+  const handleAdvancedFilterToggle = () => setIsAdvancedFilterOpen((s) => !s)
 
-  const handleTopicChipToggle = (topic) => {
+  const handleAdvancedFilterChange = (filterType, field, value) =>
+    setAdvancedFilters((prev) => ({ ...prev, [filterType]: { ...prev[filterType], [field]: value } }))
+
+  const handleTopicChipToggle = (topic) =>
+
     setAdvancedFilters((prev) => ({
       ...prev,
       topics: {
         ...prev.topics,
-        values: prev.topics.values.includes(topic)
-          ? prev.topics.values.filter((t) => t !== topic)
-          : [...prev.topics.values, topic],
+
+        values: prev.topics.values.includes(topic) ? prev.topics.values.filter((t) => t !== topic) : [...prev.topics.values, topic],
       },
     }))
-  }
 
-  // FIXED: Updated save function to properly handle "is not" conditions
   const handleSaveAsSmartList = () => {
-    // Reset existing filters
+
     setSelectedDifficulties([])
     setSelectedTopics([])
     setSelectedStatus([])
     setSelectedLanguages([])
 
-    // Reset exclude filters
-    const newExcludeFilters = {
-      status: false,
-      difficulty: false,
-      topics: false,
-      language: false,
-    }
 
-    // Apply filters based on advanced filter selections
+    const newExcludeFilters = { status: false, difficulty: false, topics: false, language: false }
+
     const newDifficulties = []
     const newTopics = []
     const newStatuses = []
     const newLanguages = []
 
-    // Process each advanced filter
+
+
     Object.entries(advancedFilters).forEach(([filterType, filterData]) => {
       if (filterType === "topics") {
         if (filterData.values && filterData.values.length > 0) {
@@ -361,29 +405,18 @@ export default function SearchBar() {
       }
     })
 
-    // Update the main filter states
+
     setSelectedDifficulties(newDifficulties)
     setSelectedTopics(newTopics)
     setSelectedStatus(newStatuses)
     setSelectedLanguages(newLanguages)
     setExcludeFilters(newExcludeFilters)
 
-    // Close the advanced filter dropdown
     setIsAdvancedFilterOpen(false)
-    // Close the topics modal as well
     setIsTopicsModalOpen(false)
-
-    console.log("Smart list saved with filters:", {
-      difficulties: newDifficulties,
-      topics: newTopics,
-      statuses: newStatuses,
-      languages: newLanguages,
-      excludeFilters: newExcludeFilters,
-      matchType,
-    })
   }
 
-  // Updated reset function
+
   const handleResetFilters = () => {
     setSelectedDifficulties([])
     setSelectedTopics([])
@@ -391,19 +424,11 @@ export default function SearchBar() {
     setSelectedLanguages([])
     setTopicsSearch("")
     setMatchType("All")
-    setIsTopicsExpanded(false) // Add this line
-    setExcludeFilters({
-      status: false,
-      difficulty: false,
-      topics: false,
-      language: false,
-    })
-    setAdvancedFilters({
-      status: { condition: "is", value: "" },
-      difficulty: { condition: "is", value: "" },
-      topics: { condition: "is", values: [] },
-      language: { condition: "is", value: "" },
-    })
+
+    setIsTopicsExpanded(false)
+    setExcludeFilters({ status: false, difficulty: false, topics: false, language: false })
+    setAdvancedFilters({ status: { condition: "is", value: "" }, difficulty: { condition: "is", value: "" }, topics: { condition: "is", values: [] }, language: { condition: "is", value: "" } })
+
   }
 
   return (
@@ -411,85 +436,35 @@ export default function SearchBar() {
       <div className="search-bar-container5">
         <div className="search-input-wrapper5">
           <svg className="search-icon5" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-              clipRule="evenodd"
-            />
+
+            <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
           </svg>
-          <input
-            type="text"
-            placeholder="Search by title"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input5"
-          />
+          <input type="text" placeholder="Search by title" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="search-input5" />
         </div>
+
         <div className="filter-buttons5">
-          {/* Simple Filter Button */}
           <div className="custom-filter-dropdown5" ref={filterRef}>
-            <button className="filter-icon-btn5" onClick={() => setIsFilterOpen(!isFilterOpen)}>
-              <BiSort style={{ width: "32px", height: "32px" }} />
-            </button>
+            <button className="filter-icon-btn5" onClick={() => setIsFilterOpen((s) => !s)}><BiSort style={{ width: "32px", height: "32px" }} /></button>
             {isFilterOpen && (
               <div className="filter-dropdown-menu5">
-                <div
-                  className={`filter-dropdown-item5 ${selectedFilter === "All" ? "selected" : ""}`}
-                  onClick={() => handleFilterSelect("all", "All")}
-                >
+                <div className={`filter-dropdown-item5 ${selectedFilter === "All" ? "selected" : ""}`} onClick={() => handleFilterSelect("all", "All")}>
                   <span>All</span>
-                  <svg
-                    className={`tick-mark5 ${selectedFilter === "All" ? "" : "hidden"}`}
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                  </svg>
                 </div>
-                <div
-                  className={`filter-dropdown-item5 ${selectedFilter === "Easy to Hard" ? "selected" : ""}`}
-                  onClick={() => handleFilterSelect("easy-to-hard", "Easy to Hard")}
-                >
+                <div className={`filter-dropdown-item5 ${selectedFilter === "Easy to Hard" ? "selected" : ""}`} onClick={() => handleFilterSelect("easy-to-hard", "Easy to Hard")}>
                   <span>Easy to Hard</span>
-                  <svg
-                    className={`tick-mark5 ${selectedFilter === "Easy to Hard" ? "" : "hidden"}`}
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                  </svg>
                 </div>
-                <div
-                  className={`filter-dropdown-item5 ${selectedFilter === "Hard to Easy" ? "selected" : ""}`}
-                  onClick={() => handleFilterSelect("hard-to-easy", "Hard to Easy")}
-                >
+                <div className={`filter-dropdown-item5 ${selectedFilter === "Hard to Easy" ? "selected" : ""}`} onClick={() => handleFilterSelect("hard-to-easy", "Hard to Easy")}>
                   <span>Hard to Easy</span>
-                  <svg
-                    className={`tick-mark5 ${selectedFilter === "Hard to Easy" ? "" : "hidden"}`}
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                  </svg>
                 </div>
-                <div
-                  className={`filter-dropdown-item5 ${selectedFilter === "Popular Questions" ? "selected" : ""}`}
-                  onClick={() => handleFilterSelect("popular", "Popular Questions")}
-                >
+                <div className={`filter-dropdown-item5 ${selectedFilter === "Popular Questions" ? "selected" : ""}`} onClick={() => handleFilterSelect("popular", "Popular Questions")}>
                   <span>Popular Questions</span>
-                  <svg
-                    className={`tick-mark5 ${selectedFilter === "Popular Questions" ? "" : "hidden"}`}
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                  </svg>
+
                 </div>
               </div>
             )}
           </div>
 
-          {/* Advanced Filter Button */}
+
           <div className="advanced-filter-dropdown5" ref={advancedFilterRef}>
             <button className="filter-btn5" onClick={handleAdvancedFilterToggle}>
               <FaFilter style={{ width: "16px", height: "16px" }} />
@@ -739,77 +714,51 @@ export default function SearchBar() {
         </div>
       </div>
 
-      {/* Results info */}
-      {filteredCards.length > 0 && (
+
+      {(filteredCards || []).length > 0 && (
         <div className="results-info5">
-          <ShinyText
-            text={`Showing ${startIndex + 1}-${Math.min(endIndex, filteredCards.length)} of ${filteredCards.length} results`}
-            disabled={false}
-            speed={3}
-            className="custom-class"
-          />
+          <ShinyText text={`Showing ${startIndex + 1}-${Math.min(endIndex, (filteredCards || []).length)} of ${(filteredCards || []).length} results`} disabled={false} speed={3} className="custom-class" />
         </div>
       )}
 
-      {/* Card grid */}
-      <div className="topicholder5">
-        {currentCards.length > 0 ? (
-          currentCards.map((card, index) => <Card key={startIndex + index} {...card} />)
-        ) : (
-          <p className="no-results5">No matching cards found.</p>
-        )}
-      </div>
+    <div className="topicholder5">
+      {currentCards.length > 0 ? (
+        currentCards.map((card, index) => (
+          <Card
+            key={card.id || startIndex + index}
+            {...card}
+            onClick={() => onCardClick(card.id)}
+          />
+        ))
+      ) : (
+        <p className="no-results5">No matching cards found.</p>
+      )}
+    </div>
 
-      {/* Pagination */}
-      {filteredCards.length > cardsPerPage && (
+      {(filteredCards || []).length > cardsPerPage && (
         <div className="pagination-container5">
-          <button
-            className="pagination-btn5 pagination-nav5"
-            onClick={handlePrevPage}
-            disabled={currentPage === 1}
-            title="Previous page"
-          >
-            <ChevronLeft size={16} />
-            Previous
-          </button>
+          <button className="pagination-btn5 pagination-nav5" onClick={handlePrevPage} disabled={currentPage === 1} title="Previous page"><ChevronLeft size={16} /> Previous</button>
           <div className="pagination-numbers5">
             {getPaginationRange()[0] > 1 && (
               <>
-                <button className="pagination-btn5 pagination-number5" onClick={() => handlePageChange(1)}>
-                  1
-                </button>
+                <button className="pagination-btn5 pagination-number5" onClick={() => handlePageChange(1)}>1</button>
+
                 {getPaginationRange()[0] > 2 && <span className="pagination-ellipsis">...</span>}
               </>
             )}
             {getPaginationRange().map((page) => (
-              <button
-                key={page}
-                className={`pagination-btn5 pagination-number5 ${currentPage === page ? "active" : ""}`}
-                onClick={() => handlePageChange(page)}
-              >
-                {page}
-              </button>
+
+              <button key={page} className={`pagination-btn5 pagination-number5 ${currentPage === page ? "active" : ""}`} onClick={() => handlePageChange(page)}>{page}</button>
             ))}
             {getPaginationRange()[getPaginationRange().length - 1] < totalPages && (
               <>
-                {getPaginationRange()[getPaginationRange().length - 1] < totalPages - 1 && (
-                  <span className="pagination-ellipsis">...</span>
-                )}
-                <button className="pagination-btn5 pagination-number5" onClick={() => handlePageChange(totalPages)}>
-                  {totalPages}
-                </button>
+                {getPaginationRange()[getPaginationRange().length - 1] < totalPages - 1 && <span className="pagination-ellipsis">...</span>}
+                <button className="pagination-btn5 pagination-number5" onClick={() => handlePageChange(totalPages)}>{totalPages}</button>
               </>
             )}
           </div>
-          <button
-            className="pagination-btn5 pagination-nav5"
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-            title="Next page"
-          >
-            Next
-            <ChevronRight size={16} />
-          </button>
+          <button className="pagination-btn5 pagination-nav5" onClick={handleNextPage} disabled={currentPage === totalPages} title="Next page">Next <ChevronRight size={16} /></button>
+
         </div>
       )}
     </div>

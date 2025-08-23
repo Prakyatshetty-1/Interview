@@ -1,7 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import MainLanding from './MainLanding';
 import Signup from './pages/Signup';
-import Login from './pages/Login'
+import Login from './pages/Login';
 import Preference from './pages/Preference';
 import Dashboard from './pages/Dashboard';
 import Welcome from './pages/Welcome';
@@ -10,24 +10,26 @@ import CreateInterview from './pages/CreateInterview';
 import Saves from './pages/Saves';
 import Profile from './pages/Profile';
 import InterviewPortal from './pages/InterviewPortal';
+import ViewProfile from './pages/ViewProfile';
+import Questionfolder from './pages/Questionfolder';
 import './App.css';
 
 function App() {
   return (
-    <Router>
       <Routes>
         <Route path="/" element={<MainLanding />} />
         <Route path="/signup" element={<Signup />} />
         <Route path='/login' element={<Login/>}/>
-        <Route path='/Preference' element={<Preference/>}/>
+        <Route path='/preference' element={<Preference/>}/>
         <Route path='/dashboard' element={<Welcome/>}/>
-        <Route path='/Interview' element={<InterviewPage/>}/>
-        <Route path='/Create' element={<CreateInterview/>}/>
-        <Route path='/Saves' element={<Saves/>}/>
-        <Route path='/Profile' element={<Profile/>}/>
-        <Route path='/InterviewPortal' element={<InterviewPortal/>}/>
+        <Route path='/interview' element={<InterviewPage/>}/>
+        <Route path='/create' element={<CreateInterview/>}/>
+        <Route path='/saves' element={<Saves/>}/>
+        <Route path='/profile' element={<Profile/>}/>
+        <Route path="/interview/:id" element={<InterviewPortal />} />
+        <Route path='/viewprofile' element={<ViewProfile/>}/>
+        <Route path='/questionfolder' element={<Questionfolder/>}/>
       </Routes>
-    </Router>
   );
 }
 

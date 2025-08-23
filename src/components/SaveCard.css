@@ -1,0 +1,154 @@
+.cardfol-background{
+    width: 260px;
+    height: 260px;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: none;
+    margin-top: 20px;
+}
+.card-content-section{
+     display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+}
+.bott{
+    position: absolute;
+    bottom: 20px;
+    margin-left: 20px;
+}
+.cardfoldertitle{
+    color: white;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.2;
+}
+.numberofquestion1{
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 400;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+.profile-avatars {
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar-container {
+            position: relative;
+            margin-left: -12px;
+            z-index: 2;
+        }
+
+        .avatar-container:first-child {
+            margin-left: 0;
+            z-index: 1;
+        }
+
+        .avatar-container:nth-child(2) {
+            z-index: 2;
+        }
+
+        .avatar-container:nth-child(3) {
+            z-index: 3;
+        }
+        .avatar-container:nth-child(4) {
+            z-index: 4;
+        }
+        .avatar-container:nth-child(5) {
+            z-index: 5;
+        }
+
+        .avatar {
+            width: 27px;
+            height: 27px;
+            border-radius: 50%;
+            border: 2px solid ;
+            object-fit: cover;
+            background-color: #ddd;
+            display: block;
+        }
+.avatar-container:nth-child(1) .avatar {
+    border-color: #667eea;
+}
+
+.avatar-container:nth-child(2) .avatar {
+    border-color: #764ba2;
+}
+
+.avatar-container:nth-child(3) .avatar {
+    border-color: #f093fb;
+}
+
+.avatar-container:nth-child(4) .avatar {
+    border-color: #f5576c;
+}
+
+.avatar-container:nth-child(5) .avatar {
+    border-color: #4facfe;
+}
+.save-button-wrapper {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  z-index: 10; /* Ensure it's on top */
+  pointer-events: auto;
+}
+
+.save-button-wrapper button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.save-button-wrapper button:hover {
+  background-color: #0056b3;
+}
+.save-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ff5722;
+  color: white;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.save-btn:hover {
+  background-color: #e64a19;
+}
+.popup-message {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #323232;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+  animation: fadeInOut 2s ease forwards;
+  z-index: 9999;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+
+       

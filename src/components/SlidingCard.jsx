@@ -145,7 +145,9 @@ const SliderCard = (props) => {
         },
         {
           title: "Tesla",
-          path: "/DesktopDev.png"
+
+          path: "/Tesla.png"
+
         },
         {
           title: "Adobe",

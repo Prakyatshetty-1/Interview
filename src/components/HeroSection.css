@@ -2,7 +2,7 @@
 .hero-page {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  min-height:100%;
 }
 
 /* Hero Section Styles */
@@ -14,7 +14,7 @@
   background-color: rgba(15, 16, 31, 0.6);
   margin: 0;
   padding: 0;
-  min-height: 600px;
+  min-height: 00px;
 }
 
 .hero-container {

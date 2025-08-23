@@ -33,15 +33,22 @@ const items = [
       onClick: () => navigate('/Profile'),
     },
   
-    {
-      icon: <img src="/settingsicon.png" alt="Settings"style={{ width: '48px', height: '48px' }} />,
-      label: "Settings",
-      onClick: () => alert("Settings!"),
+   {
+      icon: <img src="/ViewProfile.png" alt="Settings"style={{ width: '48px', height: '48px' }} />,
+      label: "Explore",
+       onClick: () => navigate('/ViewProfile'),
     },
   ];
 
   return (
     <div className="body-container2">
+      <div className="dashboard-bg-orbs">
+  <div className="dashboard-orb dashboard-orb1"></div>
+  <div className="dashboard-orb dashboard-orb2"></div>
+  <div className="dashboard-orb dashboard-orb3"></div>
+  <div className="dashboard-orb dashboard-orb4"></div>
+  <div className="dashboard-orb dashboard-orb5"></div>
+</div>
       <div className="logo-containernew">
         <span className="logonew">Askora</span>
       </div>
@@ -79,5 +86,3 @@ const items = [
   );
 }
 export default InterviewPage;
-
-<div className="flexing"><h1>Askora </h1><h1 className="purple">Interview</h1></div> 

@@ -1,21 +1,16 @@
+
+// src/pages/InterviewPortal.jsx
 import React, { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Mic, MicOff, VolumeX, Loader2, Play } from "lucide-react";
 
-// Define the static interview questions
-const interviewQuestions = [
-  "Tell me about yourself.",
-  "Why are you interested in this position?",
-  "What are your greatest strengths?",
-  "What are your greatest weaknesses?",
-  "Where do you see yourself in five years?",
-];
-
-// Google Gemini API configuration
-const GOOGLE_API_KEY = "AIzaSyBPLTvb7mPD7BBJZhAZDWu4_1XGCdCQpRk";
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GOOGLE_API_KEY}`;
-
 export default function InterviewPortal() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const [interviewStarted, setInterviewStarted] = useState(false);
+  const [interviewQuestions, setInterviewQuestions] = useState([]); // array of strings for UI
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -28,273 +23,558 @@ export default function InterviewPortal() {
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
 
-  
-  // Effect to initialize Speech Recognition and Speech Synthesis
-  useEffect(() => {
-    // Initialize SpeechRecognition
-    if (
-      typeof window !== "undefined" &&
-      (window.SpeechRecognition || window.webkitSpeechRecognition)
-    ) {
-      const SpeechRecognitionConstructor =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognitionConstructor();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = "en-US";
 
-      recognitionRef.current.onresult = (event) => {
-        const speechResult = event.results[0][0].transcript;
-        setUserAnswerText(speechResult);
-        setIsListening(false);
-        setTranscript((prev) => [
-          ...prev,
-          { type: "answer", text: speechResult },
-        ]);
-        processUserAnswer(speechResult);
+  // stable refs to avoid state/closure races
+  const currentQuestionIndexRef = useRef(0);
+  const inFlightRef = useRef(false);
+  const interviewQuestionsRef = useRef([]); // <-- latest questions for callbacks
+  const isSpeakingRef = useRef(false); // More reliable speech tracking
+
+  const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+
+  const initRecognition = () => {
+    try {
+      if (!(typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition))) {
+        recognitionRef.current = null;
+        return;
+      }
+
+      const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const rec = new SpeechRecognitionConstructor();
+
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = "en-US";
+
+      rec.onstart = () => {
+        // when engine reports start, ensure UI is consistent
+        setIsListening(true);
       };
 
-      recognitionRef.current.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
+      rec.onresult = (event) => {
+        try {
+          // Stop right away to avoid receiving additional results or duplicates
+          try { rec.stop(); } catch (e) { /* ignore */ }
+          setIsListening(false);
+
+          const speechResult = (event.results?.[0]?.[0]?.transcript || "").trim();
+          console.log("[recognition] result:", speechResult);
+
+          if (!speechResult) {
+            setError("No speech detected. Please try again.");
+            return;
+          }
+
+          if (inFlightRef.current) {
+            console.warn("[recognition] onresult but a request is already in flight — ignoring extra result.");
+            return;
+          }
+
+          setUserAnswerText(speechResult);
+          setTranscript((prev) => [...prev, { type: "answer", text: speechResult }]);
+
+          // fetch the current question from the stable ref
+          const qIndex = typeof currentQuestionIndexRef.current === "number" ? currentQuestionIndexRef.current : currentQuestionIndex;
+          const question = Array.isArray(interviewQuestionsRef.current) ? interviewQuestionsRef.current[qIndex] : undefined;
+
+          processUserAnswer(speechResult, question, qIndex);
+        } catch (e) {
+          console.error("[recognition] onresult error:", e);
+        }
+      };
+
+      rec.onerror = (event) => {
+        console.error("[recognition] onerror:", event.error);
         setIsListening(false);
         if (event.error === "not-allowed") {
-          setError(
-            "Microphone access denied. Please allow microphone access in your browser settings."
-          );
+          setError("Microphone access denied. Please allow microphone access in your browser settings.");
         } else if (event.error === "no-speech") {
           setError("No speech detected. Please try again.");
+        } else {
+          // attempt gentle reinit
+          setTimeout(() => {
+            try {
+              initRecognition();
+            } catch (e) {
+              console.error("Failed to reinit recognition:", e);
+            }
+          }, 400);
         }
       };
 
-      recognitionRef.current.onend = () => {
-        if (isListening) {
-          setIsListening(false);
-        }
+      rec.onend = () => {
+        // normal end; keep UI consistent
+        setIsListening(false);
       };
+
+      recognitionRef.current = rec;
+      console.log("Speech recognition initialized.");
+    } catch (err) {
+      console.error("initRecognition error:", err);
+      recognitionRef.current = null;
     }
+  };
 
-    // Initialize SpeechSynthesis
+  // fetch pack & map questions robustly
+  useEffect(() => {
+    const fetchPack = async () => {
+      if (!id) return;
+      try {
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(`${API_BASE}/api/interviews/${id}`, { headers });
+
+        const text = await res.text().catch(() => "");
+        if (!res.ok) {
+          if (res.status === 401) {
+            setError("Unauthorized. Please log in to access this interview pack.");
+            console.error("Fetch pack unauthorized:", text);
+            return;
+          }
+          throw new Error(`${res.status} ${text}`);
+        }
+
+        let pack;
+        try {
+          pack = text ? JSON.parse(text) : {};
+        } catch (e) {
+          console.warn("Could not parse pack JSON:", text);
+          setError("Server returned non-JSON response for pack.");
+          return;
+        }
+
+        let questions = [];
+        if (Array.isArray(pack.questions)) {
+          if (pack.questions.length > 0) {
+            if (typeof pack.questions[0] === "string") {
+              questions = pack.questions;
+            } else if (typeof pack.questions[0] === "object") {
+              questions = pack.questions.map((q) => q.question || q.text || q.prompt || "").filter(Boolean);
+            }
+          }
+        } else if (Array.isArray(pack.items)) {
+          questions = pack.items.map((i) => (typeof i === "string" ? i : i.question || i.text || "")).filter(Boolean);
+        }
+
+        if (!questions || questions.length === 0) {
+          console.warn("Pack loaded but no questions found. Pack:", pack);
+          setError("This pack doesn't contain any questions.");
+          setInterviewQuestions([]);
+          interviewQuestionsRef.current = [];
+        } else {
+          setInterviewQuestions(questions);
+          interviewQuestionsRef.current = questions; // keep the ref up-to-date
+          setError("");
+        }
+      } catch (err) {
+        console.error("Error fetching interview pack:", err);
+        setError("Failed to fetch interview pack. See console for details.");
+      }
+    };
+
+    fetchPack();
+  }, [id]);
+
+  // init speech APIs once on mount
+  useEffect(() => {
+    initRecognition();
+
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       synthRef.current = window.speechSynthesis;
     }
 
-    // Add general checks for both APIs
+
     if (typeof window !== "undefined") {
-      if (
-        !(window.SpeechRecognition || window.webkitSpeechRecognition) &&
-        !("speechSynthesis" in window)
-      ) {
-        setError(
-          "Neither Speech Recognition nor Speech Synthesis is supported. Please use Google Chrome for the best experience."
-        );
-      } else if (
-        !(window.SpeechRecognition || window.webkitSpeechRecognition)
-      ) {
-        setError(
-          "Speech Recognition is not supported. Please use Google Chrome for the best experience."
-        );
+      if (!(window.SpeechRecognition || window.webkitSpeechRecognition) && !("speechSynthesis" in window)) {
+        setError("Neither Speech Recognition nor Speech Synthesis is supported. Use Chrome for best experience.");
+      } else if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
+        setError("Speech Recognition is not supported. Use Chrome for best experience.");
       } else if (!("speechSynthesis" in window)) {
-        setError(
-          "Speech Synthesis is not supported. Voice feedback will not be available."
-        );
+        setError("Speech Synthesis is not supported. Voice feedback will not be available.");
       }
     }
-  }, [isListening]);
 
-  const callGeminiAPI = async (question, answer) => {
-    try {
-      const response = await fetch(GEMINI_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `You are a professional job interviewer. The candidate was asked: "${question}". Their answer was: "${answer}". Provide constructive feedback on this answer in 3-4 sentences, focusing on strengths and areas for improvement. Keep your feedback concise and helpful. Do not ask the next question.`,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 200,
-          },
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_HARASSMENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE",
-            },
-            {
-              category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE",
-            },
-            {
-              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE",
-            },
-            {
-              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE",
-            },
-          ],
-        }),
-      });
+    return () => {
+      // More thorough cleanup
+      if (recognitionRef.current) {
+        try { 
+          recognitionRef.current.stop(); 
+          recognitionRef.current.abort?.();
+        } catch (e) {}
+        recognitionRef.current = null;
+      }
+      
+      if (synthRef.current) {
+        try { 
+          synthRef.current.cancel(); 
+        } catch (e) {}
+      }
+      
+      // Reset refs
+      isSpeakingRef.current = false;
+      inFlightRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API Error Response:", errorText);
-        throw new Error(
-          `HTTP error! status: ${response.status} - ${errorText}`
-        );
+  // speak text & return when finished - IMPROVED VERSION
+  const speakText = (text) => {
+    return new Promise((resolve) => {
+      if (!synthRef.current) {
+        resolve();
+        return;
       }
 
-      const data = await response.json();
+      // Wait for any existing speech to finish before starting new one
+      const startSpeech = () => {
+        if (isSpeakingRef.current) {
+          // If already speaking, wait a bit and try again
+          setTimeout(startSpeech, 100);
+          return;
+        }
 
-      if (
-        !data.candidates ||
-        !data.candidates[0] ||
-        !data.candidates[0].content
-      ) {
-        console.error("Unexpected API response structure:", data);
-        throw new Error("Invalid response from AI service");
-      }
+        setIsSpeaking(true);
+        isSpeakingRef.current = true;
 
-      return data.candidates[0].content.parts[0].text;
-    } catch (error) {
-      console.error("Error calling Gemini API:", error);
-      if (error.message.includes("404")) {
-        throw new Error(
-          "AI service temporarily unavailable. Please try again later."
-        );
+        // Cancel any pending speeches more safely
+        try {
+          synthRef.current.cancel();
+          // Wait a moment for cancel to take effect
+          setTimeout(() => {
+            const utter = new window.SpeechSynthesisUtterance(String(text));
+            utter.lang = "en-US";
+            utter.rate = 0.95;
+            
+            utter.onstart = () => {
+              console.log("Speech started:", text.substring(0, 50));
+            };
+            
+            utter.onend = () => {
+              console.log("Speech ended");
+              setIsSpeaking(false);
+              isSpeakingRef.current = false;
+              resolve();
+            };
+            
+            utter.onerror = (err) => {
+              console.error("SpeechSynthesis error", err);
+              setIsSpeaking(false);
+              isSpeakingRef.current = false;
+              // Don't reject, just resolve to continue the flow
+              resolve();
+            };
+            
+            try {
+              synthRef.current.speak(utter);
+            } catch (e) {
+              console.error("Error calling speak:", e);
+              setIsSpeaking(false);
+              isSpeakingRef.current = false;
+              resolve();
+            }
+          }, 50);
+        } catch (e) {
+          console.error("Error canceling speech:", e);
+          setIsSpeaking(false);
+          isSpeakingRef.current = false;
+          resolve();
+        }
+      };
+
+      startSpeech();
+    });
+  };
+
+  // robust call to backend AI proxy (retries & timeouts)
+  const callAIFeedback = async (question, answer, maxRetries = 2) => {
+    const url = `${API_BASE}/api/ai/feedback`;
+    const token = localStorage.getItem("token");
+    const headers = { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        const res = await fetch(url, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ question, answer }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        const text = await res.text().catch(() => "");
+        if (!res.ok) {
+          console.warn(`[callAIFeedback] attempt ${attempt} failed: ${res.status} ${text}`);
+          if (attempt < maxRetries) {
+            await wait(500 * (attempt + 1));
+            continue;
+          } else {
+            // try to return fallback message if present in body
+            try {
+              const parsed = text ? JSON.parse(text) : {};
+              return parsed.feedback || parsed.error || `AI service returned ${res.status}`;
+            } catch {
+              return `AI service returned ${res.status}: ${text || "No body"}`;
+            }
+          }
+        }
+
+        let json;
+        try {
+          json = text ? JSON.parse(text) : {};
+        } catch (e) {
+          console.warn("[callAIFeedback] could not parse JSON response:", text);
+          if (attempt < maxRetries) {
+            await wait(500 * (attempt + 1));
+            continue;
+          } else {
+            return "No feedback available (invalid AI response)";
+          }
+        }
+
+        const fallback = json.feedback || json.result || json.message || (json.data && json.data.feedback) || null;
+        if (!fallback) return "No feedback available";
+        return fallback;
+      } catch (err) {
+        if (err.name === "AbortError") {
+          console.warn(`[callAIFeedback] attempt ${attempt} aborted (timeout)`);
+        } else {
+          console.error(`[callAIFeedback] attempt ${attempt} error:`, err);
+        }
+        if (attempt < maxRetries) {
+          await wait(500 * (attempt + 1));
+          continue;
+        }
+        return "No feedback available (network error)";
       }
-      throw error;
     }
   };
 
-  const speakText = (text, onEndCallback) => {
-    if (!synthRef.current) {
-      console.warn("Speech Synthesis API not supported. Cannot speak text.");
-      onEndCallback?.();
+  // ask question: put in transcript, speak it, then start listening - IMPROVED
+  const askQuestion = async (index) => {
+    if (!interviewQuestionsRef.current || index >= interviewQuestionsRef.current.length) {
+      const completionMessage = "Interview completed! Thank you for your time.";
+      setTranscript((prev) => [...prev, { type: "feedback", text: completionMessage }]);
+      await speakText(completionMessage);
+      setInterviewStarted(false);
       return;
     }
 
-    setIsSpeaking(true);
-    const utterance = new window.SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
-    utterance.rate = 0.9;
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      onEndCallback?.();
-    };
-    utterance.onerror = (event) => {
-      console.error("Speech synthesis error:", event.error);
-      setIsSpeaking(false);
-      onEndCallback?.();
-    };
-    synthRef.current.speak(utterance);
+    currentQuestionIndexRef.current = index;
+    setCurrentQuestionIndex(index);
+
+    const question = interviewQuestionsRef.current[index];
+    setTranscript((prev) => [...prev, { type: "question", text: question }]);
+
+    // Stop any ongoing recognition before speaking
+    if (isListening) {
+      stopListening();
+      // Wait for recognition to fully stop
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    await speakText(question);
+
+    // Ensure recognizer is ready
+    if (!recognitionRef.current) {
+      initRecognition();
+    }
+
+    // Longer delay to ensure speech synthesis is completely finished
+    setTimeout(() => startListening(), 300);
   };
 
   const startInterview = () => {
+    if (!interviewQuestionsRef.current || interviewQuestionsRef.current.length === 0) {
+      setError("No questions available for this pack.");
+      return;
+    }
     setInterviewStarted(true);
+    currentQuestionIndexRef.current = 0;
+
     setCurrentQuestionIndex(0);
     setTranscript([]);
     setFeedback("");
     setUserAnswerText("");
-    setError("");
+
+    inFlightRef.current = false;
     askQuestion(0);
   };
 
-  const askQuestion = (index) => {
-    if (index < interviewQuestions.length) {
-      const question = interviewQuestions[index];
-      setTranscript((prev) => [...prev, { type: "question", text: question }]);
-      speakText(question, () => {
-        startListening();
-      });
-    } else {
-      const completionMessage = "Interview completed! Thank you for your time.";
-      setTranscript((prev) => [
-        ...prev,
-        { type: "feedback", text: completionMessage },
-      ]);
-      speakText(completionMessage, () => {
-        setInterviewStarted(false);
-      });
-    }
-  };
-
-  const startListening = () => {
-    if (recognitionRef.current && !isListening) {
+  // Helper function for actually starting recognition
+  const actuallyStartListening = async () => {
+    const tryStart = async (attempt = 0) => {
       try {
+        // More aggressive TTS cancellation
+        if (synthRef.current) {
+          try { 
+            synthRef.current.cancel(); 
+            // Wait for cancel to take effect
+            await new Promise(resolve => setTimeout(resolve, 100));
+          } catch (e) {
+            console.warn("Error canceling TTS:", e);
+          }
+        }
+
         recognitionRef.current.start();
-        setIsListening(true);
         setUserAnswerText("Listening...");
         setError("");
+        console.log("Started recognition for question index:", currentQuestionIndexRef.current);
       } catch (e) {
-        console.error("Error starting speech recognition:", e);
-        setIsListening(false);
-        setError(
-          "Failed to start microphone. Please ensure microphone access is granted and try again."
-        );
+        console.warn("Error starting recognition:", e);
+        const msg = (e && e.name) ? e.name : (e && e.message) ? e.message : String(e);
+        
+        if (attempt < 3 && /invalidstateerror|started|already started/i.test(msg)) {
+          // Clean up recognition state more thoroughly
+          try { 
+            recognitionRef.current.stop(); 
+            recognitionRef.current.abort?.();
+          } catch (s) {}
+          
+          // Reinitialize recognition if needed
+          setTimeout(() => {
+            initRecognition();
+            tryStart(attempt + 1);
+          }, 300 + attempt * 200);
+        } else {
+          setIsListening(false);
+          setError("Failed to start microphone. Check permissions and try again.");
+          setTimeout(initRecognition, 400);
+        }
       }
-    } else if (!recognitionRef.current) {
+    };
+
+    tryStart();
+  };
+
+  // resilient startListening that handles InvalidStateError by reinit/retry - IMPROVED
+  const startListening = async () => {
+    if (!recognitionRef.current) {
       setError("Speech Recognition is not available in your browser.");
+      return;
     }
+    if (isListening) return;
+
+    // Wait for speech synthesis to complete before starting recognition
+    if (isSpeakingRef.current) {
+      console.log("Waiting for speech to finish before starting recognition...");
+      const waitForSpeech = () => {
+        if (isSpeakingRef.current) {
+          setTimeout(waitForSpeech, 100);
+        } else {
+          // Add extra delay to ensure TTS is fully finished
+          setTimeout(() => actuallyStartListening(), 200);
+        }
+      };
+      waitForSpeech();
+      return;
+    }
+
+    actuallyStartListening();
+
   };
 
   const stopListening = () => {
     if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop();
+
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        console.warn("Error stopping recognizer:", e);
+      }
+
       setIsListening(false);
     }
   };
 
-  const processUserAnswer = async (answer) => {
-    setIsLoadingLLM(true);
-    setFeedback("");
-    setError("");
+
+  // process user answer -> call backend -> speak feedback -> advance
+  const processUserAnswer = async (answer, passedQuestion = null, passedIndex = null) => {
+    if (inFlightRef.current) {
+      console.warn("processUserAnswer called while inFlight -> ignoring duplicate.");
+      return;
+    }
+    inFlightRef.current = true;
 
     try {
-      const llmFeedback = await callGeminiAPI(
-        interviewQuestions[currentQuestionIndex],
-        answer
-      );
-      setFeedback(llmFeedback);
-      setTranscript((prev) => [
-        ...prev,
-        { type: "feedback", text: llmFeedback },
-      ]);
+      let question = passedQuestion;
+      let qIndex = passedIndex;
+      if (!question) {
+        qIndex = (typeof currentQuestionIndexRef.current === "number") ? currentQuestionIndexRef.current : qIndex;
+        question = interviewQuestionsRef.current?.[qIndex];
+      }
 
-      speakText(llmFeedback, () => {
-        const nextIndex = currentQuestionIndex + 1;
-        setCurrentQuestionIndex(nextIndex);
-        askQuestion(nextIndex);
-      });
-    } catch (error) {
-      console.error("Error processing user answer with LLM:", error);
-      const errorMessage = `There was an error processing your answer: ${
-        error.message || "Please try again."
-      }`;
-      setFeedback(errorMessage);
-      setTranscript((prev) => [
-        ...prev,
-        { type: "feedback", text: errorMessage },
-      ]);
-      speakText(errorMessage, () => {
-        const nextIndex = currentQuestionIndex + 1;
-        setCurrentQuestionIndex(nextIndex);
-        askQuestion(nextIndex);
-      });
+      if (!answer || answer.trim().length === 0) {
+        const errMsg = "No answer detected. Moving to next question.";
+        setFeedback(errMsg);
+        setTranscript((prev) => [...prev, { type: "feedback", text: errMsg }]);
+        await speakText(errMsg);
+        
+        const next = currentQuestionIndexRef.current + 1;
+        currentQuestionIndexRef.current = next;
+        setCurrentQuestionIndex(next);
+        askQuestion(next);
+        return;
+      }
+
+      if (!question) {
+        console.warn("[processUserAnswer] no question available for index:", qIndex);
+        const errMsg = "Internal error: question missing. Moving to next question.";
+        setFeedback(errMsg);
+        setTranscript((prev) => [...prev, { type: "feedback", text: errMsg }]);
+        await speakText(errMsg);
+        
+        const next = currentQuestionIndexRef.current + 1;
+        currentQuestionIndexRef.current = next;
+        setCurrentQuestionIndex(next);
+        askQuestion(next);
+        return;
+      }
+
+      setIsLoadingLLM(true);
+      setFeedback("");
+      setError("");
+
+      console.log("[processUserAnswer] calling AI with:", { question, answer });
+      const aiFeedback = await callAIFeedback(question, answer);
+      console.log("[processUserAnswer] aiFeedback:", aiFeedback);
+
+      const safeFeedback = aiFeedback || "No feedback available";
+      setFeedback(safeFeedback);
+      setTranscript((prev) => [...prev, { type: "feedback", text: safeFeedback }]);
+
+      await speakText(safeFeedback);
+
+      const next = currentQuestionIndexRef.current + 1;
+      currentQuestionIndexRef.current = next;
+      setCurrentQuestionIndex(next);
+      askQuestion(next);
+    } catch (err) {
+      console.error("Error processing answer:", err);
+      const errMsg = "There was an error processing your answer. Moving to next question.";
+      setFeedback(errMsg);
+      setTranscript((prev) => [...prev, { type: "feedback", text: errMsg }]);
+      await speakText(errMsg);
+
+      const next = currentQuestionIndexRef.current + 1;
+      currentQuestionIndexRef.current = next;
+      setCurrentQuestionIndex(next);
+      askQuestion(next);
     } finally {
       setIsLoadingLLM(false);
+      inFlightRef.current = false;
     }
   };
 
+  // UI (kept similar to your original)
   return (
-    <div className="askora-interview-portal">
+   <div className="askora-interview-portal">
+
       <div className="askora-interview-card">
         {/* Left Panel - Iframe */}
         <div className="askora-left-panel">
@@ -492,7 +772,8 @@ export default function InterviewPortal() {
         </div>
       </div>
 
-      <style jsx>{`
+    <style jsx>{`
+
         .askora-interview-portal {
           height: 100vh;
           display: flex;
@@ -1234,4 +1515,6 @@ export default function InterviewPortal() {
       `}</style>
     </div>
   );
+
 }
+

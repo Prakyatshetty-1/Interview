@@ -4,6 +4,7 @@ import './Signup.css';
 import SignupImage from "../assets/Image3.png";
 import { Link } from 'react-router-dom';
 
+
 const Signup = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -21,11 +22,35 @@ const Signup = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
-    navigate("/Preference");
-  };
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch('http://localhost:5000/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log("Form submitted successfully");
+      alert("Signup successful!");
+      navigate("/Preference");
+    } else {
+      console.error("Form submission failed:", data.message);
+      alert(data.message || "Signup failed. Try again.");
+    }
+  } catch (error) {
+    console.error('Error submitting form:', error);
+    alert("Something went wrong. Please try again later.");
+  }
+};
+
+
 
   const handleGoogleSignIn = () => {
     console.log("Google sign in clicked");

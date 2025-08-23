@@ -1,111 +1,132 @@
 .cardfol-background {
-  width: 260px;
-  height: 260px;
-  position: relative;
-  background-size: cover;
-  background-position: center;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  border: none;
-  margin-top: 20px;
+    width: 260px;
+    height: 260px;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: none;
+    margin-top: 20px;
+    transition: 
+        transform 0.4s cubic-bezier(0.25, 1, 0.3, 1),
+        box-shadow 0.4s ease,
+        filter 0.4s ease;
+    cursor: pointer;
 }
-.card-content-section {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  text-align: left;
+
+/* Hover Animation */
+.cardfol-background:hover {
+    transform: scale(1.05) rotateX(4deg) rotateY(2deg);
+    box-shadow: 0 28px 60px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.05) saturate(1.1);
 }
-.bott {
-  position: absolute;
-  bottom: 20px;
-  margin-left: 20px;
+
+/* Gradient overlay effect */
+.cardfol-background::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom, 
+        rgba(0, 0, 0, 0.02) 0%, 
+        rgba(0, 0, 0, 0.15) 20%, 
+        rgba(0, 0, 0, 0.5) 50%, 
+        rgba(0, 0, 0, 0.8) 80%, 
+        rgba(0, 0, 0, 0.95) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
 }
-.cardfoldertitle {
-  color: white;
-  font-weight: 400;
-  font-size: 20px;
-  line-height: 1.2;
+
+.cardfol-background:hover::before {
+    opacity: 1;
 }
-.numberofquestion1 {
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 400;
-  font-size: 14px;
-  margin-bottom: 20px;
+.card-content-section{
+     display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+     transition: transform 0.4s ease;
+}
+
+.bott{
+    position: absolute;
+    bottom: 0px;
+    margin-left: 20px;
+    display: flex;
+   gap: 40px;
+}
+
+.cardfoldertitle{
+    color: white;
+    font-weight: 400;
+    font-size: 25px;
+    line-height: 1.2;
+}
+.numberofquestion1{
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 400;
+    font-size: 13px;
+    margin-bottom: 20px;
 }
 .profile-avatars {
-  display: flex;
-  align-items: center;
-}
+            display: flex;
+            align-items: center;
+        }
 
-.avatar-container {
-  position: relative;
-  margin-left: -12px;
-  z-index: 2;
-}
+        .avatar-container {
+            position: relative;
+            margin-left: -12px;
+            z-index: 2;
+        }
 
-.avatar-container:first-child {
-  margin-left: 0;
-  z-index: 1;
-}
+        .avatar-container:first-child {
+            margin-left: 0;
+            z-index: 1;
+        }
 
-.avatar-container:nth-child(2) {
-  z-index: 2;
-}
+        .avatar-container:nth-child(2) {
+            z-index: 2;
+        }
 
-.avatar-container:nth-child(3) {
-  z-index: 3;
-}
-.avatar-container:nth-child(4) {
-  z-index: 4;
-}
-.avatar-container:nth-child(5) {
-  z-index: 5;
-}
+        .avatar-container:nth-child(3) {
+            z-index: 3;
+        }
+        .avatar-container:nth-child(4) {
+            z-index: 4;
+        }
+        .avatar-container:nth-child(5) {
+            z-index: 5;
+        }
 
-.avatar {
-  width: 27px;
-  height: 27px;
-  border-radius: 50%;
-  border: 2px solid;
-  object-fit: cover;
-  background-color: #ddd;
-  display: block;
-}
+        .avatar {
+            width: 27px;
+            height: 27px;
+            border-radius: 50%;
+            border: 2px solid ;
+            object-fit: cover;
+            background-color: #ddd;
+            display: block;
+        }
 .avatar-container:nth-child(1) .avatar {
-  border-color: #667eea;
+    border-color: #667eea;
 }
 
 .avatar-container:nth-child(2) .avatar {
-  border-color: #764ba2;
+    border-color: #764ba2;
 }
 
 .avatar-container:nth-child(3) .avatar {
-  border-color: #f093fb;
+    border-color: #f093fb;
 }
 
 .avatar-container:nth-child(4) .avatar {
-  border-color: #f5576c;
+    border-color: #f5576c;
 }
 
 .avatar-container:nth-child(5) .avatar {
-  border-color: #4facfe;
+    border-color: #4facfe;
 }
-
-.save-button-wrapper {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  z-index: 10; /* Ensure it's above other content if needed */
-}
-.save-button-wrapper button {
-  background-color: #2e2e2e;   /* dark background */
-  color: white;                /* white text */
-  font-weight: 600;            /* bold text */
-  padding: 0.5rem 1.2rem;      /* padding for size */
-  border: none;                /* remove default border */
-  border-radius: 8px;          /* rounded corners */
-  cursor: pointer;             /* pointer on hover */
-  font-size: 1rem;             /* readable size */
-  transition: background-color 0.3s ease;
-}
+       

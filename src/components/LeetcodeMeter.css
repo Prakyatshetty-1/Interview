@@ -9,6 +9,7 @@
   padding: 2rem;
   width: 400px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
 }
 
 .content {
@@ -152,4 +153,6 @@
 .total-count {
   color: #9ca3af;
   font-size: 0.875rem;
+
 }
+
