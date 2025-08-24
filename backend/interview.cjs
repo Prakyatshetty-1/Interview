@@ -1,8 +1,9 @@
+// Interview.cjs
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const { ObjectId } = require("mongodb");
-const { Interview } = require("./db.cjs"); // mongoose model
+const { Interview } = require("./db.cjs"); // mongoose model exported from db.cjs
 const SECRET_KEY = "askorishere";
 
 // Middleware to check JWT
@@ -21,8 +22,9 @@ function authenticateToken(req, res, next) {
 // ✅ Public route - Get ALL interview packs (no login needed)
 router.get("/all", async (req, res) => {
   try {
+    // Use the Interview model. Populate creator/user name if available.
     const interviews = await Interview.find()
-      .populate("user", "name") // show creator's name
+      .populate("user", "name")
       .lean()
       .exec();
     res.json(interviews);
@@ -43,6 +45,7 @@ router.post("/save", authenticateToken, async (req, res) => {
     }
 
     const interview = new Interview({
+      // store the user who created this pack
       user: new ObjectId(userId),
       title: title || "Untitled Interview",
       category,
@@ -55,6 +58,9 @@ router.post("/save", authenticateToken, async (req, res) => {
         difficulty: q.difficulty || difficulty,
         expectedDuration: q.expectedDuration || duration || 5,
       })),
+      // If your Interview schema uses timestamps: true, createdAt will be set automatically.
+      // Setting createdAt explicitly is safe and ensures the field exists for older records.
+      createdAt: new Date()
     });
 
     const savedInterview = await interview.save();
@@ -69,6 +75,7 @@ router.post("/save", authenticateToken, async (req, res) => {
 router.get("/by-tag/:tag", async (req, res) => {
   try {
     const tagParam = decodeURIComponent(req.params.tag).trim();
+    // case-insensitive exact tag match
     const interviews = await Interview.find({
       tags: { $regex: new RegExp(`^${tagParam}$`, "i") }
     }).lean().exec();
