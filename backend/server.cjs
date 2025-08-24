@@ -62,6 +62,12 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
+// ✅ Helper Functions for Google Auth
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 // ✅ Database connection and server startup
 connectToDb().then(() => {
   mongoose.connect(MONGO_URI)
@@ -92,8 +98,12 @@ app.post('/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
 
     const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
-      expiresIn: '1h'
+      expiresIn: '7d'
     });
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
 
     res.status(200).json({ 
       message: 'Login successful', 
@@ -102,10 +112,13 @@ app.post('/login', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        username: user.username
+        username: user.username,
+        authProvider: user.authProvider || 'local',
+        photoURL: user.photoURL
       }
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -115,14 +128,147 @@ app.post('/signup', async (req, res) => {
     console.log('Received signup data:', req.body);
 
     const { name, email, password } = req.body;
-    const newUser = new User({ name, email, password });
+
+    // Basic validation
+    if (!name || !email || !password) {
+      return res.status(400).json({ 
+        message: 'Please provide all required fields: name, email, and password' 
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ 
+        message: 'User with this email already exists' 
+      });
+    }
+
+    const newUser = new User({ 
+      name, 
+      email, 
+      password,
+      authProvider: 'local',
+      lastLogin: new Date()
+    });
     await newUser.save();
 
-    console.log('User saved:', newUser);
-    res.status(201).json({ message: 'User created successfully' });
+    // Generate token
+    const token = jwt.sign({ id: newUser._id, email: newUser.email }, SECRET_KEY, {
+      expiresIn: '7d'
+    });
+
+    console.log('User saved:', newUser.email);
+    res.status(201).json({ 
+      message: 'User created successfully',
+      token,
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        username: newUser.username,
+        authProvider: newUser.authProvider,
+        photoURL: newUser.photoURL
+      }
+    });
   } catch (error) {
-    console.error('Error during signup:', error.message);
+    console.error('Error during signup:', error);
     res.status(500).json({ message: 'Error creating user', error: error.message });
+  }
+});
+
+// 🆕 Google Authentication Route
+app.post('/google-signup', async (req, res) => {
+  try {
+    console.log('Received Google auth data:', req.body);
+    
+    const { name, email, uid, photoURL } = req.body;
+
+    // Validation
+    if (!name || !email || !uid) {
+      return res.status(400).json({ 
+        message: 'Missing required Google authentication data' 
+      });
+    }
+
+    if (!validateEmail(email)) {
+      return res.status(400).json({ 
+        message: 'Invalid email address from Google' 
+      });
+    }
+
+    // Check if user already exists with this Google ID
+    let user = await User.findOne({ googleId: uid });
+    
+    if (user) {
+      // Update last login
+      user.lastLogin = new Date();
+      await user.save();
+      
+      const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
+        expiresIn: '7d'
+      });
+      
+      console.log('Google user logged in:', user.email);
+      
+      return res.status(200).json({
+        message: 'Google sign-in successful',
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          username: user.username,
+          authProvider: user.authProvider,
+          photoURL: user.photoURL
+        }
+      });
+    }
+
+    // Check if user exists with same email but different provider
+    const existingEmailUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingEmailUser && !existingEmailUser.googleId) {
+      return res.status(400).json({ 
+        message: 'An account with this email already exists. Please sign in with your password.' 
+      });
+    }
+
+    // Create new Google user
+    user = new User({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      googleId: uid,
+      photoURL: photoURL || null,
+      authProvider: 'google',
+      lastLogin: new Date()
+    });
+
+    await user.save();
+
+    const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
+      expiresIn: '7d'
+    });
+
+    console.log('New Google user created:', user.email);
+
+    res.status(201).json({
+      message: 'Google account created successfully',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        authProvider: user.authProvider,
+        photoURL: user.photoURL
+      }
+    });
+
+  } catch (error) {
+    console.error('Google signup error:', error);
+    res.status(500).json({ 
+      message: 'Internal server error during Google authentication' 
+    });
   }
 });
 

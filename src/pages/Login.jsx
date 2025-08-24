@@ -4,6 +4,9 @@ import './Login.css';
 import LoginImage from "../assets/Image3.png";
 import { Link, useNavigate } from 'react-router-dom';
 
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth, provider } from '../FirebaseOauth/firebase.js'; // Adjust path if needed
+
 // Custom Toast Component
 const Toast = ({ message, description, type = 'success', isVisible, onClose }) => {
   useEffect(() => {
@@ -76,6 +79,8 @@ const Toast = ({ message, description, type = 'success', isVisible, onClose }) =
 };
 
 const Login = () => {
+const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -163,9 +168,74 @@ const Login = () => {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    console.log("Google sign in clicked");
-    showToast('Coming Soon', 'Google Sign-In will be available soon', 'success');
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+        
+        try {
+          console.log("Starting Google Sign-In...");
+          const result = await signInWithPopup(auth, provider);
+          
+          // This gives you a Google Access Token
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential?.accessToken;
+          const user = result.user;
+          
+          console.log("Google Sign-In successful:", user);
+          
+          // Prepare user data to send to backend
+          const userData = {
+            name: user.displayName,
+            email: user.email,
+            uid: user.uid,
+            photoURL: user.photoURL
+          };
+          
+          console.log("Sending user data to backend:", userData);
+          
+          // Send Google user data to your backend
+          const response = await fetch('http://localhost:5000/google-signup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+          });
+          
+          const data = await response.json();
+          console.log('Google signup response:', data);
+          
+          if (response.ok) {
+            // Store the token in localStorage
+            if (data.token) {
+              localStorage.setItem('token', data.token);
+              localStorage.setItem('user', JSON.stringify(data.user));
+            }
+            
+            alert("Google Sign-In successful!");
+            navigate("/Preference");
+          } else {
+            console.error("Failed to register user on backend:", data.message);
+            alert(data.message || "Sign-in successful but failed to complete registration");
+          }
+          
+        } catch (error) {
+          console.error("Google Sign-In error:", error);
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          
+          // Handle specific error cases
+          if (errorCode === 'auth/popup-closed-by-user') {
+            alert("Sign-in was cancelled");
+          } else if (errorCode === 'auth/popup-blocked') {
+            alert("Popup was blocked by browser. Please allow popups for this site.");
+          } else if (errorCode === 'auth/network-request-failed') {
+            alert("Network error. Please check your internet connection.");
+          } else {
+            alert("Google Sign-In failed: " + errorMessage);
+          }
+        } finally {
+          setIsLoading(false);
+        }
   };
 
   const handleGitHubSignIn = () => {
