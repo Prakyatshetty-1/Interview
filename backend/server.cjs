@@ -178,9 +178,12 @@ app.post('/signup', async (req, res) => {
 });
 
 // 🆕 Google Authentication Route
+// Modified server.cjs - Separate Google Signup and Login endpoints
+
+// 🆕 Google Sign Up Route (for new users)
 app.post('/google-signup', async (req, res) => {
   try {
-    console.log('Received Google auth data:', req.body);
+    console.log('Received Google signup data:', req.body);
     
     const { name, email, uid, photoURL } = req.body;
 
@@ -198,30 +201,11 @@ app.post('/google-signup', async (req, res) => {
     }
 
     // Check if user already exists with this Google ID
-    let user = await User.findOne({ googleId: uid });
-    
-    if (user) {
-      // Update last login
-      user.lastLogin = new Date();
-      await user.save();
-      
-      const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
-        expiresIn: '7d'
-      });
-      
-      console.log('Google user logged in:', user.email);
-      
-      return res.status(200).json({
-        message: 'Google sign-in successful',
-        token,
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          username: user.username,
-          authProvider: user.authProvider,
-          photoURL: user.photoURL
-        }
+    let existingGoogleUser = await User.findOne({ googleId: uid });
+    if (existingGoogleUser) {
+      return res.status(400).json({ 
+        message: 'An account with this Google account already exists. Please use Sign In instead.',
+        code: 'USER_EXISTS'
       });
     }
 
@@ -229,12 +213,13 @@ app.post('/google-signup', async (req, res) => {
     const existingEmailUser = await User.findOne({ email: email.toLowerCase() });
     if (existingEmailUser && !existingEmailUser.googleId) {
       return res.status(400).json({ 
-        message: 'An account with this email already exists. Please sign in with your password.' 
+        message: 'An account with this email already exists with email/password. Please sign in with your password or use a different email.',
+        code: 'EMAIL_EXISTS'
       });
     }
 
     // Create new Google user
-    user = new User({
+    const user = new User({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       googleId: uid,
@@ -267,7 +252,82 @@ app.post('/google-signup', async (req, res) => {
   } catch (error) {
     console.error('Google signup error:', error);
     res.status(500).json({ 
-      message: 'Internal server error during Google authentication' 
+      message: 'Internal server error during Google signup' 
+    });
+  }
+});
+
+// 🆕 Google Login Route (for existing users)
+app.post('/google-login', async (req, res) => {
+  try {
+    console.log('Received Google login data:', req.body);
+    
+    const { name, email, uid, photoURL } = req.body;
+
+    // Validation
+    if (!name || !email || !uid) {
+      return res.status(400).json({ 
+        message: 'Missing required Google authentication data' 
+      });
+    }
+
+    if (!validateEmail(email)) {
+      return res.status(400).json({ 
+        message: 'Invalid email address from Google' 
+      });
+    }
+
+    // Find user with this Google ID
+    let user = await User.findOne({ googleId: uid });
+    
+    if (!user) {
+      // Check if user exists with same email but different provider
+      const existingEmailUser = await User.findOne({ email: email.toLowerCase() });
+      if (existingEmailUser && !existingEmailUser.googleId) {
+        return res.status(400).json({ 
+          message: 'An account with this email exists but was created with email/password. Please sign in with your password.',
+          code: 'DIFFERENT_AUTH_METHOD'
+        });
+      }
+      
+      // User doesn't exist at all
+      return res.status(404).json({
+        message: 'No account found with this Google account. Please sign up first.',
+        code: 'USER_NOT_FOUND'
+      });
+    }
+
+    // User exists - perform login
+    user.lastLogin = new Date();
+    // Update photo URL if it has changed
+    if (photoURL && photoURL !== user.photoURL) {
+      user.photoURL = photoURL;
+    }
+    await user.save();
+    
+    const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
+      expiresIn: '7d'
+    });
+    
+    console.log('Google user logged in:', user.email);
+    
+    res.status(200).json({
+      message: 'Google login successful',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        authProvider: user.authProvider,
+        photoURL: user.photoURL
+      }
+    });
+
+  } catch (error) {
+    console.error('Google login error:', error);
+    res.status(500).json({ 
+      message: 'Internal server error during Google login' 
     });
   }
 });

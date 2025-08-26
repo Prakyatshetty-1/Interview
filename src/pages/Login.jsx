@@ -170,72 +170,125 @@ const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-        
-        try {
-          console.log("Starting Google Sign-In...");
-          const result = await signInWithPopup(auth, provider);
-          
-          // This gives you a Google Access Token
-          const credential = GoogleAuthProvider.credentialFromResult(result);
-          const token = credential?.accessToken;
-          const user = result.user;
-          
-          console.log("Google Sign-In successful:", user);
-          
-          // Prepare user data to send to backend
-          const userData = {
-            name: user.displayName,
-            email: user.email,
-            uid: user.uid,
-            photoURL: user.photoURL
-          };
-          
-          console.log("Sending user data to backend:", userData);
-          
-          // Send Google user data to your backend
-          const response = await fetch('http://localhost:5000/google-signup', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userData),
-          });
-          
-          const data = await response.json();
-          console.log('Google signup response:', data);
-          
-          if (response.ok) {
-            // Store the token in localStorage
-            if (data.token) {
-              localStorage.setItem('token', data.token);
-              localStorage.setItem('user', JSON.stringify(data.user));
-            }
-            
-            alert("Google Sign-In successful!");
-            navigate("/Preference");
+      
+  try {
+    console.log("Starting Google Sign-In...");
+    const result = await signInWithPopup(auth, provider);
+    
+    // This gives you a Google Access Token
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const token = credential?.accessToken;
+    const user = result.user;
+    
+    console.log("Google Sign-In successful:", user);
+    
+    // Prepare user data to send to backend
+    const userData = {
+      name: user.displayName,
+      email: user.email,
+      uid: user.uid,
+      photoURL: user.photoURL
+    };
+    
+    console.log("Sending user data to backend for login:", userData);
+    
+    // Send Google user data to your backend for LOGIN (not signup)
+    const response = await fetch('http://localhost:5000/google-login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+    
+    const data = await response.json();
+    console.log('Google login response:', data);
+    
+    if (response.ok) {
+      // Store the token in localStorage
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      
+      showToast('Login Successful!', 'Welcome back to Askora', 'success');
+      
+      // Check if user has filled preferences
+      try {
+        const prefResponse = await fetch("http://localhost:5000/api/preference/check", {
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+          },
+        });
+
+        const prefData = await prefResponse.json();
+
+        // Navigate after showing toast
+        setTimeout(() => {
+          if (prefResponse.ok && prefData.alreadySubmitted) {
+            navigate('/dashboard');
           } else {
-            console.error("Failed to register user on backend:", data.message);
-            alert(data.message || "Sign-in successful but failed to complete registration");
+            navigate('/Preference');
           }
-          
-        } catch (error) {
-          console.error("Google Sign-In error:", error);
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          
-          // Handle specific error cases
-          if (errorCode === 'auth/popup-closed-by-user') {
-            alert("Sign-in was cancelled");
-          } else if (errorCode === 'auth/popup-blocked') {
-            alert("Popup was blocked by browser. Please allow popups for this site.");
-          } else if (errorCode === 'auth/network-request-failed') {
-            alert("Network error. Please check your internet connection.");
-          } else {
-            alert("Google Sign-In failed: " + errorMessage);
-          }
-        } finally {
-          setIsLoading(false);
-        }
+        }, 2000);
+      } catch (err) {
+        console.error("Error checking preferences", err);
+        setTimeout(() => navigate('/Preference'), 2000);
+      }
+      
+    } else {
+      console.error("Failed to authenticate user:", data.message);
+      
+      // Handle specific error cases
+      if (response.status === 404 && data.code === 'USER_NOT_FOUND') {
+        showToast(
+          'Account Not Found', 
+          'No account found with this Google account. Please sign up first.', 
+          'error'
+        );
+      } else if (response.status === 400 && data.code === 'DIFFERENT_AUTH_METHOD') {
+        showToast(
+          'Different Sign-in Method', 
+          'This email is registered with password. Please use email/password login.', 
+          'error'
+        );
+      } else {
+        showToast(
+          'Login Failed', 
+          data.message || 'Google sign-in failed', 
+          'error'
+        );
+      }
+      
+      // Sign out from Google to prevent confusion
+      await auth.signOut();
+    }
+    
+  } catch (error) {
+    console.error("Google Sign-In error:", error);
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    
+    // Handle specific Firebase error cases
+    if (errorCode === 'auth/popup-closed-by-user') {
+      showToast('Sign-in Cancelled', 'Google sign-in was cancelled', 'error');
+    } else if (errorCode === 'auth/popup-blocked') {
+      showToast('Popup Blocked', 'Please allow popups for this site and try again', 'error');
+    } else if (errorCode === 'auth/network-request-failed') {
+      showToast('Network Error', 'Please check your internet connection', 'error');
+    } else {
+      showToast('Sign-in Failed', 'Google Sign-In failed: ' + errorMessage, 'error');
+    }
+    
+    // Ensure user is signed out from Google on error
+    try {
+      await auth.signOut();
+    } catch (signOutError) {
+      console.error("Error signing out:", signOutError);
+    }
+  } finally {
+    setIsLoading(false);
+  }
   };
 
   const handleGitHubSignIn = () => {
