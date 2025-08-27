@@ -1,9 +1,9 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth"; // Fixed import
+import { getAuth, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
+// Configuration for Google Auth
+const googleConfig = {
   apiKey: "AIzaSyC10qep9vmD6V9GHv0TJZvPjeCL9iwfVyk",
   authDomain: "interviewapp-c2082.firebaseapp.com",
   projectId: "interviewapp-c2082",
@@ -12,11 +12,37 @@ const firebaseConfig = {
   appId: "1:368524080705:web:19b137744f56924b0e78c0"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-auth.languageCode = 'en';
-const provider = new GoogleAuthProvider();
+// Configuration for GitHub Auth
+const githubConfig = {
+  apiKey: "AIzaSyDHdoUW6lww2jN2cGEyyX2mo5FBmmf8gKo",
+  authDomain: "interview-e832a.firebaseapp.com",
+  projectId: "interview-e832a",
+  storageBucket: "interview-e832a.firebasestorage.app",
+  messagingSenderId: "479078743626",
+  appId: "1:479078743626:web:05d987f8392c939235f0b3"
+};
 
-// Export the auth and provider so they can be imported in other files
-export { auth, provider };
+// Initialize Firebase apps with named instances
+const googleApp = initializeApp(googleConfig, 'googleApp');
+const githubApp = initializeApp(githubConfig, 'githubApp');
+
+// Initialize Auth for each app
+const googleAuth = getAuth(googleApp);
+googleAuth.languageCode = 'en';
+
+const githubAuth = getAuth(githubApp);
+githubAuth.languageCode = 'en';
+
+// Initialize Providers
+const googleProvider = new GoogleAuthProvider();
+
+const githubProvider = new GithubAuthProvider();
+githubProvider.addScope('user:email');
+
+// Export everything
+export { 
+  googleAuth, 
+  githubAuth, 
+  googleProvider, 
+  githubProvider 
+};

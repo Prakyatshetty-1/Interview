@@ -1,4 +1,4 @@
-// User.cjs - Updated with Google Authentication and LeetCode stats
+// User.cjs - Updated with Google and GitHub Authentication
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
@@ -15,12 +15,17 @@ const userSchema = new mongoose.Schema({
   password: { 
     type: String, 
     required: function() {
-      return !this.googleId; // Password required only if not Google user
+      return !this.googleId && !this.githubId; // Password required only if not OAuth user
     }
   },
   
-  // 🆕 Google Authentication fields
+  // OAuth Authentication fields
   googleId: {
+    type: String,
+    unique: true,
+    sparse: true // Allows null values but ensures uniqueness when present
+  },
+  githubId: {
     type: String,
     unique: true,
     sparse: true // Allows null values but ensures uniqueness when present
@@ -31,7 +36,7 @@ const userSchema = new mongoose.Schema({
   },
   authProvider: {
     type: String,
-    enum: ['local', 'google'],
+    enum: ['local', 'google', 'github'],
     default: 'local'
   },
   
@@ -57,7 +62,7 @@ const userSchema = new mongoose.Schema({
   profilePicture: { 
     type: String, 
     default: function() {
-      // Use Google photo if available, otherwise empty string
+      // Use OAuth photo if available, otherwise empty string
       return this.photoURL || '';
     }
   },
@@ -112,7 +117,7 @@ const userSchema = new mongoose.Schema({
     default: ['System Design', 'Data Structures', 'Algorithms'] 
   },
   
-  // 🆕 Additional tracking fields
+  // Additional tracking fields
   lastLogin: {
     type: Date,
     default: Date.now
@@ -121,7 +126,7 @@ const userSchema = new mongoose.Schema({
   timestamps: true // This adds createdAt and updatedAt fields
 });
 
-// 🆕 Modified pre-save middleware to handle Google users (no password)
+// Modified pre-save middleware to handle OAuth users (no password)
 userSchema.pre('save', async function (next) {
   // Only hash password if it's modified and exists
   if (!this.isModified('password') || !this.password) {
@@ -139,21 +144,29 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-// 🆕 Method to compare passwords (handles Google users)
+// Method to compare passwords (handles OAuth users)
 userSchema.methods.comparePassword = async function(candidatePassword) {
   if (!this.password) {
-    // Google users don't have passwords
+    // OAuth users don't have passwords
     return false;
   }
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// 🆕 Method to check if user is Google user
+// Method to check if user is OAuth user
 userSchema.methods.isGoogleUser = function() {
   return this.authProvider === 'google' && this.googleId;
 };
 
-// 🆕 Method to get user public profile (without sensitive data)
+userSchema.methods.isGitHubUser = function() {
+  return this.authProvider === 'github' && this.githubId;
+};
+
+userSchema.methods.isOAuthUser = function() {
+  return this.isGoogleUser() || this.isGitHubUser();
+};
+
+// Method to get user public profile (without sensitive data)
 userSchema.methods.getPublicProfile = function() {
   return {
     id: this._id,
@@ -175,18 +188,18 @@ userSchema.methods.getPublicProfile = function() {
   };
 };
 
-// 🆕 Method to get display photo (prioritizes Google photo)
+// Method to get display photo (prioritizes OAuth photo)
 userSchema.methods.getDisplayPhoto = function() {
   return this.photoURL || this.profilePicture || '';
 };
 
-// 🆕 Method to update last login
+// Method to update last login
 userSchema.methods.updateLastLogin = function() {
   this.lastLogin = new Date();
   return this.save();
 };
 
-// 🆕 Static method to find user by Google ID or email
+// Static method to find user by OAuth ID or email
 userSchema.statics.findByGoogleIdOrEmail = function(googleId, email) {
   return this.findOne({
     $or: [
@@ -196,14 +209,23 @@ userSchema.statics.findByGoogleIdOrEmail = function(googleId, email) {
   });
 };
 
-// 🆕 Virtual for total problems solved
+userSchema.statics.findByGitHubIdOrEmail = function(githubId, email) {
+  return this.findOne({
+    $or: [
+      { githubId: githubId },
+      { email: email.toLowerCase() }
+    ]
+  });
+};
+
+// Virtual for total problems solved
 userSchema.virtual('totalProblemsSolved').get(function() {
   return this.leetcodeStats.easy.solved + 
          this.leetcodeStats.medium.solved + 
          this.leetcodeStats.hard.solved;
 });
 
-// 🆕 Virtual for LeetCode progress percentage
+// Virtual for LeetCode progress percentage
 userSchema.virtual('leetcodeProgress').get(function() {
   const totalSolved = this.totalProblemsSolved;
   return Math.round((totalSolved / this.leetcodeStats.total) * 100);

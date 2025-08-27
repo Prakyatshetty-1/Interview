@@ -624,3 +624,157 @@ app.patch('/api/leetcode/stats/attempting', authMiddleware, async (req, res) => 
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
+// Add these routes to your server.cjs file after the existing Google authentication routes
+
+// GitHub Sign Up Route (for new users)
+app.post('/github-signup', async (req, res) => {
+  try {
+    console.log('Received GitHub signup data:', req.body);
+    
+    const { name, email, uid, photoURL } = req.body;
+
+    // Validation
+    if (!name || !email || !uid) {
+      return res.status(400).json({ 
+        message: 'Missing required GitHub authentication data' 
+      });
+    }
+
+    if (!validateEmail(email)) {
+      return res.status(400).json({ 
+        message: 'Invalid email address from GitHub' 
+      });
+    }
+
+    // Check if user already exists with this GitHub ID
+    let existingGitHubUser = await User.findOne({ githubId: uid });
+    if (existingGitHubUser) {
+      return res.status(400).json({ 
+        message: 'An account with this GitHub account already exists. Please use Sign In instead.',
+        code: 'USER_EXISTS'
+      });
+    }
+
+    // Check if user exists with same email but different provider
+    const existingEmailUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingEmailUser && !existingEmailUser.githubId) {
+      return res.status(400).json({ 
+        message: 'An account with this email already exists. Please use your existing login method.',
+        code: 'EMAIL_EXISTS'
+      });
+    }
+
+    // Create new GitHub user
+    const user = new User({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      githubId: uid,
+      photoURL: photoURL || '',
+      authProvider: 'github',
+      lastLogin: new Date()
+    });
+
+    await user.save();
+
+    const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
+      expiresIn: '7d'
+    });
+
+    console.log('New GitHub user created:', user.email);
+
+    res.status(201).json({
+      message: 'GitHub account created successfully',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        authProvider: user.authProvider,
+        photoURL: user.photoURL
+      }
+    });
+
+  } catch (error) {
+    console.error('GitHub signup error:', error);
+    res.status(500).json({ 
+      message: 'Internal server error during GitHub signup' 
+    });
+  }
+});
+
+// GitHub Login Route (for existing users)
+app.post('/github-login', async (req, res) => {
+  try {
+    console.log('Received GitHub login data:', req.body);
+    
+    const { name, email, uid, photoURL } = req.body;
+
+    // Validation
+    if (!name || !email || !uid) {
+      return res.status(400).json({ 
+        message: 'Missing required GitHub authentication data' 
+      });
+    }
+
+    if (!validateEmail(email)) {
+      return res.status(400).json({ 
+        message: 'Invalid email address from GitHub' 
+      });
+    }
+
+    // Find user with this GitHub ID
+    let user = await User.findOne({ githubId: uid });
+    
+    if (!user) {
+      // Check if user exists with same email but different provider
+      const existingEmailUser = await User.findOne({ email: email.toLowerCase() });
+      if (existingEmailUser && !existingEmailUser.githubId) {
+        return res.status(400).json({ 
+          message: 'An account with this email exists but was created with a different method. Please use your original login method.',
+          code: 'DIFFERENT_AUTH_METHOD'
+        });
+      }
+      
+      // User doesn't exist at all
+      return res.status(404).json({
+        message: 'No account found with this GitHub account. Please sign up first.',
+        code: 'USER_NOT_FOUND'
+      });
+    }
+
+    // User exists - perform login
+    user.lastLogin = new Date();
+    // Update photo URL if it has changed
+    if (photoURL && photoURL !== user.photoURL) {
+      user.photoURL = photoURL;
+    }
+    await user.save();
+    
+    const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
+      expiresIn: '7d'
+    });
+    
+    console.log('GitHub user logged in:', user.email);
+    
+    res.status(200).json({
+      message: 'GitHub login successful',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        authProvider: user.authProvider,
+        photoURL: user.photoURL
+      }
+    });
+
+  } catch (error) {
+    console.error('GitHub login error:', error);
+    res.status(500).json({ 
+      message: 'Internal server error during GitHub login' 
+    });
+  }
+});
