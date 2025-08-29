@@ -495,12 +495,63 @@ app.get('/api/preference/check', authMiddleware, async (req, res) => {
 });
 
 // ✅ Interview routes
-app.get("/api/interviews/by-tag/:tag", (req, res) => {
-  const tagParam = decodeURIComponent(req.params.tag).trim().toLowerCase();
-  const results = interviews.filter(iv => 
-    iv.tags?.some(t => t.trim().toLowerCase() === tagParam)
-  );
-  res.json(results);
+app.get("/api/interviews/by-tag/:tag", async (req, res) => {
+  try {
+    console.log("Tag-based interview search requested");
+    
+    const tagParam = decodeURIComponent(req.params.tag).trim().toLowerCase();
+    console.log("Searching for tag:", tagParam);
+
+    // Assuming your Interview model/collection exists
+    // You'll need to create an Interview model if you haven't already
+    const Interview = mongoose.model('Interview'); // Adjust this based on your model
+    
+    const results = await Interview.find({
+      tags: {
+        $elemMatch: {
+          $regex: new RegExp(`^${tagParam}$`, 'i') // Case-insensitive exact match
+        }
+      }
+    });
+
+    console.log("Found interviews:", results.length);
+    res.json(results);
+    
+  } catch (error) {
+    console.error("Error fetching interviews by tag:", error);
+    res.status(500).json({ 
+      message: "Error fetching interviews", 
+      error: error.message 
+    });
+  }
+});
+
+// Alternative approach if you need to search in a more flexible way
+app.get("/api/interviews/by-tag-flexible/:tag", async (req, res) => {
+  try {
+    const tagParam = decodeURIComponent(req.params.tag).trim().toLowerCase();
+    
+    // Multiple search strategies
+    const results = await Interview.find({
+      $or: [
+        // Exact match (case-insensitive)
+        { tags: { $elemMatch: { $regex: new RegExp(`^${tagParam}$`, 'i') } } },
+        // Partial match in category
+        { category: { $regex: new RegExp(tagParam, 'i') } },
+        // Partial match in title
+        { title: { $regex: new RegExp(tagParam, 'i') } }
+      ]
+    });
+
+    res.json(results);
+    
+  } catch (error) {
+    console.error("Error fetching interviews by tag:", error);
+    res.status(500).json({ 
+      message: "Error fetching interviews", 
+      error: error.message 
+    });
+  }
 });
 
 // Add these routes to your server.cjs file after the existing profile routes

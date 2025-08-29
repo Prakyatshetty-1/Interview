@@ -6,6 +6,7 @@ import Preference from './pages/Preference';
 import Dashboard from './pages/Dashboard';
 import Welcome from './pages/Welcome';
 import InterviewPage from './pages/InterviewPage';
+import InterviewsByTag from './pages/InterviewsByTag';
 import CreateInterview from './pages/CreateInterview';
 import Saves from './pages/Saves';
 import Profile from './pages/Profile';
@@ -23,6 +24,9 @@ function App() {
         <Route path='/preference' element={<Preference/>}/>
         <Route path='/dashboard' element={<Welcome/>}/>
         <Route path='/interview' element={<InterviewPage/>}/>
+        <Route path='/interviews' element={<InterviewsByTag/>}/>
+        {/* Fixed route to match the navigation from Topics.jsx */}
+        <Route path='/interviews/tag/:tag' element={<InterviewsByTag/>}/>
         <Route path='/create' element={<CreateInterview/>}/>
         <Route path='/saves' element={<Saves/>}/>
         <Route path='/profile' element={<Profile/>}/>
