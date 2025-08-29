@@ -25,8 +25,7 @@ function App() {
         <Route path='/dashboard' element={<Welcome/>}/>
         <Route path='/interview' element={<InterviewPage/>}/>
         <Route path='/interviews' element={<InterviewsByTag/>}/>
-        {/* Fixed route to match the navigation from Topics.jsx */}
-        <Route path='/interviews/tag/:tag' element={<InterviewsByTag/>}/>
+        <Route path='/questionfolder' element={<Questionfolder/>}/>
         <Route path='/create' element={<CreateInterview/>}/>
         <Route path='/saves' element={<Saves/>}/>
         <Route path='/profile' element={<Profile/>}/>

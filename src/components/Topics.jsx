@@ -88,21 +88,20 @@ const Topics = () => {
   const toggleExpanded = () => setIsExpanded(!isExpanded);
 
   const handleTopicClick = (topicName) => {
-    try {
-      console.log("Clicking topic:", topicName);
-      
-      // Clean and normalize the topic name for URL
-      const normalizedTag = topicName.trim().toLowerCase();
-      const urlSafeTag = encodeURIComponent(normalizedTag);
-      
-      const targetUrl = `/interviews/tag/${urlSafeTag}`;
-      console.log("Navigating to:", targetUrl);
-      
-      navigate(targetUrl);
-    } catch (error) {
-      console.error("Navigation error:", error);
-    }
-  };
+  try {
+    console.log("Clicking topic:", topicName);
+    
+    // Navigate to questionfolder with topic data
+    navigate('/questionfolder', { 
+      state: { 
+        topic: topicName,
+        count: allTopics.find(t => t.name === topicName)?.count || 0
+      }
+    });
+  } catch (error) {
+    console.error("Navigation error:", error);
+  }
+};
 
   return (
     <div className="topics-filter1">

@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'askorishere'; 
 const interviewRoutes = require("./interview.cjs");
 const { connectToDb } = require('./db.cjs');
-
+const { Interview } = require("./db.cjs");
 const aiRoutes = require("./ai.cjs");
 
 console.log("Starting server...");
@@ -826,6 +826,59 @@ app.post('/github-login', async (req, res) => {
     console.error('GitHub login error:', error);
     res.status(500).json({ 
       message: 'Internal server error during GitHub login' 
+    });
+  }
+});
+// Add this route in your server.cjs after the existing interview routes
+
+app.get('/api/interviews/topic/:topic', async (req, res) => {
+  try {
+    console.log("=== TOPIC ROUTE HIT ===");
+    const topicParam = decodeURIComponent(req.params.topic).trim();
+    console.log("Searching for topic:", topicParam);
+    console.log("Request URL:", req.url);
+
+    // Check if Interview model exists
+    if (!Interview) {
+      console.error("Interview model not found!");
+      return res.status(500).json({ error: "Interview model not defined" });
+    }
+
+    // Simple query first to test
+    const interviews = await Interview.find({})
+      .populate("user", "name")
+      .lean()
+      .exec();
+
+    console.log(`Total interviews in DB: ${interviews.length}`);
+    
+    // Filter by topic on the server side for now
+    const filteredInterviews = interviews.filter(interview => {
+      const categoryMatch = interview.category && interview.category.toLowerCase().includes(topicParam.toLowerCase());
+      const titleMatch = interview.title && interview.title.toLowerCase().includes(topicParam.toLowerCase());
+      const tagMatch = interview.tags && interview.tags.some(tag => 
+        tag.toLowerCase().includes(topicParam.toLowerCase())
+      );
+      return categoryMatch || titleMatch || tagMatch;
+    });
+
+    console.log(`Filtered interviews for "${topicParam}": ${filteredInterviews.length}`);
+    console.log("Sample interview:", filteredInterviews[0] ? {
+      title: filteredInterviews[0].title,
+      category: filteredInterviews[0].category,
+      tags: filteredInterviews[0].tags
+    } : "None found");
+
+    res.json(filteredInterviews);
+    
+  } catch (error) {
+    console.error("=== ERROR in topic route ===");
+    console.error("Error details:", error);
+    console.error("Stack:", error.stack);
+    res.status(500).json({ 
+      message: "Error fetching interviews", 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
