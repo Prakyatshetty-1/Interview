@@ -399,3 +399,46 @@ font-size: 18px;
     margin: 0 10px;
      margin-left: 20px;
 }
+.playvideo{
+  width: 200px;
+  height: 240px;
+  overflow: hidden;
+  border-radius: 40px;
+  margin-top: -5px;
+  position: relative;
+  display: inline-block;
+}
+.play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+/* Triangle inside circle */
+.play-icon {
+  width: 0;
+  height: 0;
+  border-left: 18px solid white;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  margin-left: 4px;
+}
+.flexvideoandtext{
+  display: flex;
+  gap: 15px;
+}
+.videoboxtitle{
+  color: white;
+  font-size: 29px;
+  font-weight: 400;
+  margin-top: 30%;
+}
