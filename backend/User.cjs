@@ -1,4 +1,3 @@
-// User.cjs
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
@@ -19,10 +18,49 @@ const AttemptSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-
-  username: { type: String, default: function() { return this.name; } },
+  email: { 
+    type: String, 
+    required: true, 
+    unique: true,
+    lowercase: true,
+    trim: true 
+  },
+  password: { 
+    type: String, 
+    required: function() {
+      return !this.googleId && !this.githubId; // Password required only if not OAuth user
+    }
+  },
+  
+  // OAuth Authentication fields
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true // Allows null values but ensures uniqueness when present
+  },
+  githubId: {
+    type: String,
+    unique: true,
+    sparse: true // Allows null values but ensures uniqueness when present
+  },
+  photoURL: {
+    type: String,
+    default: ''
+  },
+  authProvider: {
+    type: String,
+    enum: ['local', 'google', 'github'],
+    default: 'local'
+  },
+  
+  // Profile fields
+  username: { 
+    type: String, 
+    unique: true,
+    sparse: true, // Allows null values but ensures uniqueness when present
+    trim: true,
+    default: function() { return this.name; } 
+  },
   fullName: { type: String, default: function() { return this.name; } },
   company: { type: String, default: '' },
   education: { type: String, default: '' },
@@ -34,8 +72,15 @@ const userSchema = new mongoose.Schema({
     type: [String],
     default: ['Web Development', 'Problem Solving', 'System Design']
   },
-  profilePicture: { type: String, default: '' },
 
+  profilePicture: { 
+    type: String, 
+    default: function() {
+      // Use OAuth photo if available, otherwise empty string
+      return this.photoURL || '';
+    }
+  },
+  
   // Stats and achievements
   stats: {
     totalInterviews: { type: Number, default: 0 },
@@ -79,27 +124,129 @@ const userSchema = new mongoose.Schema({
     level: Number
   }],
 
-  favoriteTopics: {
-    type: [String],
-    default: ['System Design', 'Data Structures', 'Algorithms']
+  
+  // Preferences
+  favoriteTopics: { 
+    type: [String], 
+    default: ['System Design', 'Data Structures', 'Algorithms'] 
   },
-
   saves: { type: [SaveSchema], default: [] },
-  attempts: { type: [AttemptSchema], default: [] }
+  attempts: { type: [AttemptSchema], default: [] },
+
+  // Additional tracking fields
+  lastLogin: {
+    type: Date,
+    default: Date.now
+  }
+
 }, {
   timestamps: true
 });
 
-// Hash password before save
+
+// Modified pre-save middleware to handle OAuth users (no password)
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  // Only hash password if it's modified and exists
+  if (!this.isModified('password') || !this.password) {
+    return next();
+  }
+  
   try {
+    console.log('Hashing password for user:', this.email);
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    console.error('Error hashing password:', error);
+    next(error);
   }
+});
+
+// Method to compare passwords (handles OAuth users)
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) {
+    // OAuth users don't have passwords
+    return false;
+  }
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+// Method to check if user is OAuth user
+userSchema.methods.isGoogleUser = function() {
+  return this.authProvider === 'google' && this.googleId;
+};
+
+userSchema.methods.isGitHubUser = function() {
+  return this.authProvider === 'github' && this.githubId;
+};
+
+userSchema.methods.isOAuthUser = function() {
+  return this.isGoogleUser() || this.isGitHubUser();
+};
+
+// Method to get user public profile (without sensitive data)
+userSchema.methods.getPublicProfile = function() {
+  return {
+    id: this._id,
+    name: this.name,
+    username: this.username,
+    fullName: this.fullName,
+    company: this.company,
+    education: this.education,
+    aboutText: this.aboutText,
+    interests: this.interests,
+    photoURL: this.photoURL || this.profilePicture,
+    stats: this.stats,
+    leetcodeStats: this.leetcodeStats,
+    technicalSkills: this.technicalSkills,
+    softSkills: this.softSkills,
+    favoriteTopics: this.favoriteTopics,
+    createdAt: this.createdAt,
+    authProvider: this.authProvider
+  };
+};
+
+// Method to get display photo (prioritizes OAuth photo)
+userSchema.methods.getDisplayPhoto = function() {
+  return this.photoURL || this.profilePicture || '';
+};
+
+// Method to update last login
+userSchema.methods.updateLastLogin = function() {
+  this.lastLogin = new Date();
+  return this.save();
+};
+
+// Static method to find user by OAuth ID or email
+userSchema.statics.findByGoogleIdOrEmail = function(googleId, email) {
+  return this.findOne({
+    $or: [
+      { googleId: googleId },
+      { email: email.toLowerCase() }
+    ]
+  });
+};
+
+userSchema.statics.findByGitHubIdOrEmail = function(githubId, email) {
+  return this.findOne({
+    $or: [
+      { githubId: githubId },
+      { email: email.toLowerCase() }
+    ]
+  });
+};
+
+// Virtual for total problems solved
+userSchema.virtual('totalProblemsSolved').get(function() {
+  return this.leetcodeStats.easy.solved + 
+         this.leetcodeStats.medium.solved + 
+         this.leetcodeStats.hard.solved;
+});
+
+// Virtual for LeetCode progress percentage
+userSchema.virtual('leetcodeProgress').get(function() {
+  const totalSolved = this.totalProblemsSolved;
+  return Math.round((totalSolved / this.leetcodeStats.total) * 100);
 });
 
 const User = mongoose.model('User', userSchema);

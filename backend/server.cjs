@@ -10,8 +10,8 @@ const MONGO_URI = 'mongodb://localhost:27017/interview-app';
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'askorishere';
 const interviewRoutes = require("./interview.cjs");
-const { connectToDb, Interview } = require('./db.cjs'); // ensure db.cjs exports Interview and connectToDb
-
+const { connectToDb } = require('./db.cjs');
+const { Interview } = require("./db.cjs");
 const aiRoutes = require("./ai.cjs");
 
 console.log("Starting server...");
@@ -63,6 +63,12 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
+// ✅ Helper Functions for Google Auth
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 // ✅ Database connection and server startup
 connectToDb().then(() => {
   mongoose.connect(MONGO_URI)
@@ -93,20 +99,28 @@ app.post('/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
 
     const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
-      expiresIn: '1h'
+      expiresIn: '7d'
     });
 
-    res.status(200).json({
-      message: 'Login successful',
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    res.status(200).json({ 
+      message: 'Login successful', 
       token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
-        username: user.username
+        username: user.username,
+        authProvider: user.authProvider || 'local',
+        photoURL: user.photoURL
       }
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -116,67 +130,208 @@ app.post('/signup', async (req, res) => {
     console.log('Received signup data:', req.body);
 
     const { name, email, password } = req.body;
-    const newUser = new User({ name, email, password });
+
+    // Basic validation
+    if (!name || !email || !password) {
+      return res.status(400).json({ 
+        message: 'Please provide all required fields: name, email, and password' 
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ 
+        message: 'User with this email already exists' 
+      });
+    }
+
+    const newUser = new User({ 
+      name, 
+      email, 
+      password,
+      authProvider: 'local',
+      lastLogin: new Date()
+    });
     await newUser.save();
 
-    console.log('User saved:', newUser);
-    res.status(201).json({ message: 'User created successfully' });
+    // Generate token
+    const token = jwt.sign({ id: newUser._id, email: newUser.email }, SECRET_KEY, {
+      expiresIn: '7d'
+    });
+
+    console.log('User saved:', newUser.email);
+    res.status(201).json({ 
+      message: 'User created successfully',
+      token,
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        username: newUser.username,
+        authProvider: newUser.authProvider,
+        photoURL: newUser.photoURL
+      }
+    });
   } catch (error) {
-    console.error('Error during signup:', error.message);
+    console.error('Error during signup:', error);
     res.status(500).json({ message: 'Error creating user', error: error.message });
   }
 });
 
-// -------------------------------
-// NEW: Public route to list users
-// GET /api/users?q=optionalSearch
-// -------------------------------
-app.get('/api/users', async (req, res) => {
-  try {
-    const q = (req.query.q || '').trim();
-    let filter = {};
 
-    if (q) {
-      // case-insensitive search across several user fields
-      const re = new RegExp(q, 'i');
-      filter = {
-        $or: [
-          { name: re },
-          { username: re },
-          { fullName: re },
-          { company: re },
-          { education: re },
-          { favoriteTopics: re },
-          { interests: re }
-        ]
-      };
+// 🆕 Google Authentication Route
+// Modified server.cjs - Separate Google Signup and Login endpoints
+
+// 🆕 Google Sign Up Route (for new users)
+app.post('/google-signup', async (req, res) => {
+  try {
+    console.log('Received Google signup data:', req.body);
+    
+    const { name, email, uid, photoURL } = req.body;
+
+    // Validation
+    if (!name || !email || !uid) {
+      return res.status(400).json({ 
+        message: 'Missing required Google authentication data' 
+      });
     }
 
-    // select only useful fields for listing; exclude sensitive data
-    const users = await User.find(filter)
-      .select('-password -email -attempts -saves -__v')
-      .lean()
-      .exec();
+    if (!validateEmail(email)) {
+      return res.status(400).json({ 
+        message: 'Invalid email address from Google' 
+      });
+    }
 
-    // optional: map to ensure consistent frontend shape
-    const mapped = (users || []).map(u => ({
-      _id: u._id,
-      name: u.name || u.fullName || '',
-      username: u.username || u.name || '',
-      fullName: u.fullName || '',
-      profilePicture: u.profilePicture || u.profileImage || '',
-      company: u.company || '',
-      education: u.education || '',
-      favoriteTopics: u.favoriteTopics || [],
-      interests: u.interests || [],
-      stats: u.stats || {},
-      aboutText: u.aboutText || '',
-    }));
+    // Check if user already exists with this Google ID
+    let existingGoogleUser = await User.findOne({ googleId: uid });
+    if (existingGoogleUser) {
+      return res.status(400).json({ 
+        message: 'An account with this Google account already exists. Please use Sign In instead.',
+        code: 'USER_EXISTS'
+      });
+    }
 
-    res.status(200).json(mapped);
-  } catch (err) {
-    console.error('Error fetching users list:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    // Check if user exists with same email but different provider
+    const existingEmailUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingEmailUser && !existingEmailUser.googleId) {
+      return res.status(400).json({ 
+        message: 'An account with this email already exists with email/password. Please sign in with your password or use a different email.',
+        code: 'EMAIL_EXISTS'
+      });
+    }
+
+    // Create new Google user
+    const user = new User({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      googleId: uid,
+      photoURL: photoURL || null,
+      authProvider: 'google',
+      lastLogin: new Date()
+    });
+
+    await user.save();
+
+    const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
+      expiresIn: '7d'
+    });
+
+    console.log('New Google user created:', user.email);
+
+    res.status(201).json({
+      message: 'Google account created successfully',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        authProvider: user.authProvider,
+        photoURL: user.photoURL
+      }
+    });
+
+  } catch (error) {
+    console.error('Google signup error:', error);
+    res.status(500).json({ 
+      message: 'Internal server error during Google signup' 
+    });
+  }
+});
+
+// 🆕 Google Login Route (for existing users)
+app.post('/google-login', async (req, res) => {
+  try {
+    console.log('Received Google login data:', req.body);
+    
+    const { name, email, uid, photoURL } = req.body;
+
+    // Validation
+    if (!name || !email || !uid) {
+      return res.status(400).json({ 
+        message: 'Missing required Google authentication data' 
+      });
+    }
+
+    if (!validateEmail(email)) {
+      return res.status(400).json({ 
+        message: 'Invalid email address from Google' 
+      });
+    }
+
+    // Find user with this Google ID
+    let user = await User.findOne({ googleId: uid });
+    
+    if (!user) {
+      // Check if user exists with same email but different provider
+      const existingEmailUser = await User.findOne({ email: email.toLowerCase() });
+      if (existingEmailUser && !existingEmailUser.googleId) {
+        return res.status(400).json({ 
+          message: 'An account with this email exists but was created with email/password. Please sign in with your password.',
+          code: 'DIFFERENT_AUTH_METHOD'
+        });
+      }
+      
+      // User doesn't exist at all
+      return res.status(404).json({
+        message: 'No account found with this Google account. Please sign up first.',
+        code: 'USER_NOT_FOUND'
+      });
+    }
+
+    // User exists - perform login
+    user.lastLogin = new Date();
+    // Update photo URL if it has changed
+    if (photoURL && photoURL !== user.photoURL) {
+      user.photoURL = photoURL;
+    }
+    await user.save();
+    
+    const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
+      expiresIn: '7d'
+    });
+    
+    console.log('Google user logged in:', user.email);
+    
+    res.status(200).json({
+      message: 'Google login successful',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        authProvider: user.authProvider,
+        photoURL: user.photoURL
+      }
+    });
+
+  } catch (error) {
+    console.error('Google login error:', error);
+    res.status(500).json({ 
+      message: 'Internal server error during Google login' 
+    });
   }
 });
 
@@ -342,17 +497,64 @@ app.get('/api/preference/check', authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ Interview routes by tag - fixed to use Interview model
+
+// ✅ Interview routes
 app.get("/api/interviews/by-tag/:tag", async (req, res) => {
   try {
+    console.log("Tag-based interview search requested");
+    
     const tagParam = decodeURIComponent(req.params.tag).trim().toLowerCase();
+    console.log("Searching for tag:", tagParam);
+
+    // Assuming your Interview model/collection exists
+    // You'll need to create an Interview model if you haven't already
+    const Interview = mongoose.model('Interview'); // Adjust this based on your model
+    
     const results = await Interview.find({
-      tags: { $regex: new RegExp(`^${tagParam}$`, "i") }
-    }).lean().exec();
+      tags: {
+        $elemMatch: {
+          $regex: new RegExp(`^${tagParam}$`, 'i') // Case-insensitive exact match
+        }
+      }
+    });
+
+    console.log("Found interviews:", results.length);
     res.json(results);
-  } catch (err) {
-    console.error('Error fetching interviews by tag:', err);
-    res.status(500).json({ message: 'Server error' });
+    
+  } catch (error) {
+    console.error("Error fetching interviews by tag:", error);
+    res.status(500).json({ 
+      message: "Error fetching interviews", 
+      error: error.message 
+    });
+  }
+});
+
+// Alternative approach if you need to search in a more flexible way
+app.get("/api/interviews/by-tag-flexible/:tag", async (req, res) => {
+  try {
+    const tagParam = decodeURIComponent(req.params.tag).trim().toLowerCase();
+    
+    // Multiple search strategies
+    const results = await Interview.find({
+      $or: [
+        // Exact match (case-insensitive)
+        { tags: { $elemMatch: { $regex: new RegExp(`^${tagParam}$`, 'i') } } },
+        // Partial match in category
+        { category: { $regex: new RegExp(tagParam, 'i') } },
+        // Partial match in title
+        { title: { $regex: new RegExp(tagParam, 'i') } }
+      ]
+    });
+
+    res.json(results);
+    
+  } catch (error) {
+    console.error("Error fetching interviews by tag:", error);
+    res.status(500).json({ 
+      message: "Error fetching interviews", 
+      error: error.message 
+    });
   }
 });
 
@@ -500,6 +702,7 @@ app.delete('/api/unsave', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
 
 // Attempts (POST/GET/DELETE)
 app.post('/api/profile/attempts', authMiddleware, async (req, res) => {
@@ -702,3 +905,211 @@ app.get('/api/users/:id/leetcode-stats', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
+
+// Add these routes to your server.cjs file after the existing Google authentication routes
+
+// GitHub Sign Up Route (for new users)
+app.post('/github-signup', async (req, res) => {
+  try {
+    console.log('Received GitHub signup data:', req.body);
+    
+    const { name, email, uid, photoURL } = req.body;
+
+    // Validation
+    if (!name || !email || !uid) {
+      return res.status(400).json({ 
+        message: 'Missing required GitHub authentication data' 
+      });
+    }
+
+    if (!validateEmail(email)) {
+      return res.status(400).json({ 
+        message: 'Invalid email address from GitHub' 
+      });
+    }
+
+    // Check if user already exists with this GitHub ID
+    let existingGitHubUser = await User.findOne({ githubId: uid });
+    if (existingGitHubUser) {
+      return res.status(400).json({ 
+        message: 'An account with this GitHub account already exists. Please use Sign In instead.',
+        code: 'USER_EXISTS'
+      });
+    }
+
+    // Check if user exists with same email but different provider
+    const existingEmailUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingEmailUser && !existingEmailUser.githubId) {
+      return res.status(400).json({ 
+        message: 'An account with this email already exists. Please use your existing login method.',
+        code: 'EMAIL_EXISTS'
+      });
+    }
+
+    // Create new GitHub user
+    const user = new User({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      githubId: uid,
+      photoURL: photoURL || '',
+      authProvider: 'github',
+      lastLogin: new Date()
+    });
+
+    await user.save();
+
+    const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
+      expiresIn: '7d'
+    });
+
+    console.log('New GitHub user created:', user.email);
+
+    res.status(201).json({
+      message: 'GitHub account created successfully',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        authProvider: user.authProvider,
+        photoURL: user.photoURL
+      }
+    });
+
+  } catch (error) {
+    console.error('GitHub signup error:', error);
+    res.status(500).json({ 
+      message: 'Internal server error during GitHub signup' 
+    });
+  }
+});
+
+// GitHub Login Route (for existing users)
+app.post('/github-login', async (req, res) => {
+  try {
+    console.log('Received GitHub login data:', req.body);
+    
+    const { name, email, uid, photoURL } = req.body;
+
+    // Validation
+    if (!name || !email || !uid) {
+      return res.status(400).json({ 
+        message: 'Missing required GitHub authentication data' 
+      });
+    }
+
+    if (!validateEmail(email)) {
+      return res.status(400).json({ 
+        message: 'Invalid email address from GitHub' 
+      });
+    }
+
+    // Find user with this GitHub ID
+    let user = await User.findOne({ githubId: uid });
+    
+    if (!user) {
+      // Check if user exists with same email but different provider
+      const existingEmailUser = await User.findOne({ email: email.toLowerCase() });
+      if (existingEmailUser && !existingEmailUser.githubId) {
+        return res.status(400).json({ 
+          message: 'An account with this email exists but was created with a different method. Please use your original login method.',
+          code: 'DIFFERENT_AUTH_METHOD'
+        });
+      }
+      
+      // User doesn't exist at all
+      return res.status(404).json({
+        message: 'No account found with this GitHub account. Please sign up first.',
+        code: 'USER_NOT_FOUND'
+      });
+    }
+
+    // User exists - perform login
+    user.lastLogin = new Date();
+    // Update photo URL if it has changed
+    if (photoURL && photoURL !== user.photoURL) {
+      user.photoURL = photoURL;
+    }
+    await user.save();
+    
+    const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
+      expiresIn: '7d'
+    });
+    
+    console.log('GitHub user logged in:', user.email);
+    
+    res.status(200).json({
+      message: 'GitHub login successful',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        authProvider: user.authProvider,
+        photoURL: user.photoURL
+      }
+    });
+
+  } catch (error) {
+    console.error('GitHub login error:', error);
+    res.status(500).json({ 
+      message: 'Internal server error during GitHub login' 
+    });
+  }
+});
+// Add this route in your server.cjs after the existing interview routes
+
+app.get('/api/interviews/topic/:topic', async (req, res) => {
+  try {
+    console.log("=== TOPIC ROUTE HIT ===");
+    const topicParam = decodeURIComponent(req.params.topic).trim();
+    console.log("Searching for topic:", topicParam);
+    console.log("Request URL:", req.url);
+
+    // Check if Interview model exists
+    if (!Interview) {
+      console.error("Interview model not found!");
+      return res.status(500).json({ error: "Interview model not defined" });
+    }
+
+    // Simple query first to test
+    const interviews = await Interview.find({})
+      .populate("user", "name")
+      .lean()
+      .exec();
+
+    console.log(`Total interviews in DB: ${interviews.length}`);
+    
+    // Filter by topic on the server side for now
+    const filteredInterviews = interviews.filter(interview => {
+      const categoryMatch = interview.category && interview.category.toLowerCase().includes(topicParam.toLowerCase());
+      const titleMatch = interview.title && interview.title.toLowerCase().includes(topicParam.toLowerCase());
+      const tagMatch = interview.tags && interview.tags.some(tag => 
+        tag.toLowerCase().includes(topicParam.toLowerCase())
+      );
+      return categoryMatch || titleMatch || tagMatch;
+    });
+
+    console.log(`Filtered interviews for "${topicParam}": ${filteredInterviews.length}`);
+    console.log("Sample interview:", filteredInterviews[0] ? {
+      title: filteredInterviews[0].title,
+      category: filteredInterviews[0].category,
+      tags: filteredInterviews[0].tags
+    } : "None found");
+
+    res.json(filteredInterviews);
+    
+  } catch (error) {
+    console.error("=== ERROR in topic route ===");
+    console.error("Error details:", error);
+    console.error("Stack:", error.stack);
+    res.status(500).json({ 
+      message: "Error fetching interviews", 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+

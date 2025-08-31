@@ -93,16 +93,72 @@ router.post("/save", authenticateToken, async (req, res) => {
   }
 });
 
-// ✅ Public route - Get interviews by tag
+// ✅ Fixed Public route - Get interviews by tag
 router.get("/by-tag/:tag", async (req, res) => {
   try {
-    const tagParam = decodeURIComponent(req.params.tag).trim();
+    const tagParam = decodeURIComponent(req.params.tag).trim().toLowerCase();
+    console.log("Searching for tag:", tagParam);
+    
+    // Fixed: Use $elemMatch to search within the tags array properly
     const interviews = await Interview.find({
-      tags: { $regex: new RegExp(`^${tagParam}$`, "i") }
-    }).lean().exec();
+      tags: { 
+        $elemMatch: { 
+          $regex: new RegExp(`^${tagParam}$`, "i") 
+        } 
+      }
+    })
+    .populate("user", "name") // Include creator's name
+    .lean()
+    .exec();
+    
+    console.log(`Found ${interviews.length} interviews for tag: ${tagParam}`);
+    
+    // If no exact matches, try partial matching as fallback
+    if (interviews.length === 0) {
+      console.log("No exact matches, trying partial search...");
+      const partialMatches = await Interview.find({
+        $or: [
+          { tags: { $elemMatch: { $regex: new RegExp(tagParam, "i") } } },
+          { category: { $regex: new RegExp(tagParam, "i") } },
+          { title: { $regex: new RegExp(tagParam, "i") } }
+        ]
+      })
+      .populate("user", "name")
+      .lean()
+      .exec();
+      
+      console.log(`Found ${partialMatches.length} partial matches`);
+      return res.json(partialMatches);
+    }
+    
     res.json(interviews);
   } catch (err) {
     console.error("Error fetching interviews by tag:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ✅ Debug route to see what tags exist in the database
+router.get("/debug/tags", async (req, res) => {
+  try {
+    const allInterviews = await Interview.find({}, { tags: 1, title: 1 }).lean().exec();
+    const allTags = [];
+    
+    allInterviews.forEach(interview => {
+      if (interview.tags && Array.isArray(interview.tags)) {
+        allTags.push(...interview.tags);
+      }
+    });
+    
+    const uniqueTags = [...new Set(allTags)];
+    
+    res.json({
+      totalInterviews: allInterviews.length,
+      uniqueTags: uniqueTags.sort(),
+      sampleInterviews: allInterviews.slice(0, 3)
+    });
+  } catch (err) {
+    console.error("Error fetching tags:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
