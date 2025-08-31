@@ -1,6 +1,8 @@
-// HeatMap.jsx
+// src/components/HeatMap.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import './HeatMap.css';
+
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
 
 const toISO = (d) => {
   const dt = new Date(d);
@@ -47,37 +49,50 @@ function generateDemoData() {
   return data;
 }
 
-export default function HeatMap() {
+export default function HeatMap({ userId }) {
   const [heatmapData, setHeatmapData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // fetchContributions now respects userId:
   const fetchContributions = useCallback(async () => {
     setLoading(true);
     try {
+      // If userId provided -> fetch public contributions endpoint for that user
+      if (userId) {
+        const res = await fetch(`${API_BASE}/api/users/${userId}/contributions`);
+        if (!res.ok) throw new Error('Failed to fetch public contributions');
+        const data = await res.json();
+        // normalize
+        const normalized = data.map(d => {
+          const fd = new Date(d.date);
+          return { ...d, fullDate: fd, dayOfWeek: fd.getDay(), month: fd.getMonth(), week: 0 };
+        });
+        // compute week indices
+        let weekIdx = 0;
+        for (let i = 0; i < normalized.length; i++) {
+          normalized[i].week = weekIdx;
+          if (normalized[i].dayOfWeek === 6) weekIdx++;
+        }
+        setHeatmapData(normalized);
+        setLoading(false);
+        return;
+      }
+
+      // else fallback: fetch own authenticated contributions
       const token = localStorage.getItem('token');
       const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
-      const res = await fetch('http://localhost:5000/api/profile/contributions', { headers });
+      const res = await fetch(`${API_BASE}/api/profile/contributions`, { headers });
       if (!res.ok) throw new Error('Failed to fetch contributions');
-      const data = await res.json(); // array of { date, attemptCount, attemptLevel, createdCount, createdLevel, level }
-      // normalize: ensure fullDate and dayOfWeek/month present
+      const data = await res.json();
       const normalized = data.map(d => {
         const fd = new Date(d.date);
-        return {
-          ...d,
-          fullDate: fd,
-          dayOfWeek: fd.getDay(),
-          month: fd.getMonth(),
-          week: 0
-        };
+        return { ...d, fullDate: fd, dayOfWeek: fd.getDay(), month: fd.getMonth(), week: 0 };
       });
-
-      // compute week indices (we will increment week whenever day is Saturday in iteration order)
       let weekIdx = 0;
       for (let i = 0; i < normalized.length; i++) {
         normalized[i].week = weekIdx;
         if (normalized[i].dayOfWeek === 6) weekIdx++;
       }
-
       setHeatmapData(normalized);
     } catch (err) {
       console.warn('Contributions fetch failed — using demo data', err);
@@ -85,7 +100,7 @@ export default function HeatMap() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     fetchContributions();
@@ -112,14 +127,12 @@ export default function HeatMap() {
   });
   const monthGroups = Array.from(monthMap.values()).sort((a,b) => a.year - b.year || a.month - b.month);
 
-  // convert month -> weeks (columns of sunday->saturday)
   const convertToWeeks = (monthData) => {
     const weeks = [];
     let currentWeek = Array(7).fill(null);
     const sorted = monthData.slice().sort((a,b) => a.fullDate - b.fullDate);
     sorted.forEach((day, idx) => {
       currentWeek[day.dayOfWeek] = day;
-      // If Saturday or last element, push and reset
       if (day.dayOfWeek === 6) {
         weeks.push([...currentWeek]);
         currentWeek = Array(7).fill(null);

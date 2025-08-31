@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-const LeetcodeMeter = () => {
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+
+const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
   const [animatedSolved, setAnimatedSolved] = useState(0);
   const [animatedAttempting, setAnimatedAttempting] = useState(0);
   const [stats, setStats] = useState({
@@ -13,103 +15,198 @@ const LeetcodeMeter = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Function to fetch user's LeetCode stats
+  const timersRef = useRef({ intervals: [], timeouts: [] });
+
+  // Helper to clear timers on unmount / re-fetch
+  const clearTimers = () => {
+    timersRef.current.intervals.forEach(i => clearInterval(i));
+    timersRef.current.timeouts.forEach(t => clearTimeout(t));
+    timersRef.current.intervals = [];
+    timersRef.current.timeouts = [];
+  };
+
+  // Fetch stats (public if userId provided, else authed)
   const fetchLeetCodeStats = async () => {
+    setLoading(true);
+    setError(null);
+    clearTimers();
+
     try {
+      if (userId) {
+        // try public endpoint for leetcode stats first
+        let res = await fetch(`${API_BASE}/api/users/${userId}/leetcode-stats`);
+        if (res.ok) {
+          const json = await res.json();
+          const incoming = json?.leetcodeStats ?? json;
+          setStats(normalizeIncoming(incoming));
+          setLoading(false);
+          return;
+        }
+        // fallback: fetch public user object and look for leetcodeStats inside
+        res = await fetch(`${API_BASE}/api/users/${userId}`);
+        if (res.ok) {
+          const json = await res.json();
+          const incoming = json?.leetcodeStats ?? json?.stats?.leetcodeStats ?? json?.stats ?? json;
+          setStats(normalizeIncoming(incoming));
+          setLoading(false);
+          return;
+        }
+
+        // If we get here, public fetch failed — show empty/default but no crash
+        setStats(prev => ({ ...prev, attempting: 0 }));
+        setLoading(false);
+        return;
+      }
+
+      // own profile: authenticated endpoint
       const token = localStorage.getItem('token');
       if (!token) {
         setError('Please log in to view your LeetCode stats');
         setLoading(false);
         return;
       }
-
-      const response = await fetch('http://localhost:5000/api/leetcode/stats', {
+      const res = await fetch(`${API_BASE}/api/leetcode/stats`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data.leetcodeStats);
-      } else if (response.status === 401) {
-        setError('Please log in again');
-        // Optionally redirect to login
-      } else {
-        setError('Failed to fetch LeetCode stats');
+      if (!res.ok) {
+        if (res.status === 401) setError('Please log in again');
+        else setError('Failed to fetch LeetCode stats');
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Error fetching LeetCode stats:', error);
+
+      const data = await res.json();
+      const incoming = data?.leetcodeStats ?? data;
+      setStats(normalizeIncoming(incoming));
+    } catch (err) {
+      console.error('Error fetching LeetCode stats:', err);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Function to update LeetCode stats
+  // Normalize incoming shapes into our expected stats shape
+  const normalizeIncoming = (incoming) => {
+    if (!incoming) return stats;
+    return {
+      total: incoming.total ?? stats.total,
+      attempting: incoming.attempting ?? stats.attempting,
+      easy: {
+        solved: incoming.easy?.solved ?? incoming.easySolved ?? (incoming.easy && incoming.easy[0]) ?? stats.easy.solved,
+        total: incoming.easy?.total ?? stats.easy.total
+      },
+      medium: {
+        solved: incoming.medium?.solved ?? incoming.mediumSolved ?? stats.medium.solved,
+        total: incoming.medium?.total ?? stats.medium.total
+      },
+      hard: {
+        solved: incoming.hard?.solved ?? incoming.hardSolved ?? stats.hard.solved,
+        total: incoming.hard?.total ?? stats.hard.total
+      }
+    };
+  };
+
+  // PUT update (only for own profile)
   const updateLeetCodeStats = async (newStats) => {
+    if (!isOwnProfile) return;
     try {
       const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const response = await fetch('http://localhost:5000/api/leetcode/stats', {
+      if (!token) {
+        setError('Not authenticated');
+        return;
+      }
+      const res = await fetch(`${API_BASE}/api/leetcode/stats`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ leetcodeStats: newStats })
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data.leetcodeStats);
+      if (res.ok) {
+        const data = await res.json();
+        const incoming = data?.leetcodeStats ?? newStats;
+        setStats(normalizeIncoming(incoming));
+      } else {
+        console.warn('Failed to update LeetCode stats', await res.text());
       }
-    } catch (error) {
-      console.error('Error updating LeetCode stats:', error);
+    } catch (err) {
+      console.error('Error updating LeetCode stats:', err);
     }
   };
 
   useEffect(() => {
+    // fetch on mount & whenever userId changes
     fetchLeetCodeStats();
-  }, []);
+    return () => {
+      clearTimers();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
-  const solved = stats.easy.solved + stats.medium.solved + stats.hard.solved;
-  const solvedPercentage = (solved / stats.total) * 100;
+  // compute solved and stroke
+  const solved = (stats.easy.solved || 0) + (stats.medium.solved || 0) + (stats.hard.solved || 0);
+  const solvedPercentage = stats.total ? (solved / stats.total) * 100 : 0;
 
   const radius = 85;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (solvedPercentage / 100) * circumference;
+  // safe offset calculation
+  const strokeDashoffset = circumference - (Math.max(0, Math.min(100, solvedPercentage)) / 100) * circumference;
 
+  // Keep your original animation logic but with proper cleanup & safety
   useEffect(() => {
-    if (!loading) {
-      const timer1 = setTimeout(() => {
-        const interval1 = setInterval(() => {
-          setAnimatedSolved(prev => {
-            if (prev < solved) return prev + Math.ceil(solved / 50);
+    if (loading) return;
+
+    // clear any previous timers
+    clearTimers();
+
+    // animate solved number similar to your original: small increments
+    const timer1 = setTimeout(() => {
+      const interval1 = setInterval(() => {
+        setAnimatedSolved(prev => {
+          const step = Math.ceil(Math.max(1, solved / 50));
+          const next = prev + step;
+          if (next >= solved) {
             clearInterval(interval1);
             return solved;
-          });
-        }, 20);
-      }, 200);
+          }
+          return next;
+        });
+      }, 20);
+      timersRef.current.intervals.push(interval1);
+    }, 200);
+    timersRef.current.timeouts.push(timer1);
 
-      const timer2 = setTimeout(() => {
-        setAnimatedAttempting(stats.attempting);
-      }, 600);
+    // animate attempting
+    const timer2 = setTimeout(() => {
+      setAnimatedAttempting(stats.attempting || 0);
+    }, 600);
+    timersRef.current.timeouts.push(timer2);
 
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-      };
-    }
+    // cleanup on re-run/unmount
+    return () => clearTimers();
   }, [loading, solved, stats.attempting]);
 
-  // Demo function to simulate solving a problem (for testing)
+  // Demo click handler — only active for own profile (keeps your original behaviour)
   const handleSolveProblem = (difficulty) => {
-    const newStats = { ...stats };
-    newStats[difficulty].solved += 1;
+    if (!isOwnProfile) return;
+    const newStats = {
+      ...stats,
+      [difficulty]: {
+        ...stats[difficulty],
+        solved: (stats[difficulty]?.solved || 0) + 1
+      },
+      total: (stats.total || 0) + 1
+    };
+    // local immediate update for snappy UI then persist
+    setStats(newStats);
+    setAnimatedSolved(prev => prev + 1); // quick local bump
     updateLeetCodeStats(newStats);
   };
 
@@ -142,7 +239,7 @@ const LeetcodeMeter = () => {
         margin: '20px 10px'
       }}>
         <div style={{ marginBottom: '1rem' }}>❌ {error}</div>
-        <button 
+        <button
           onClick={fetchLeetCodeStats}
           style={{
             padding: '0.5rem 1rem',
@@ -159,6 +256,7 @@ const LeetcodeMeter = () => {
     );
   }
 
+  // Render — kept exactly like your original styles & layout
   return (
     <div>
       <div style={{
@@ -187,7 +285,7 @@ const LeetcodeMeter = () => {
                 stroke="rgba(55, 65, 81, 0.3)"
                 strokeWidth="8"
               />
-              
+
               {/* Progress circle */}
               <circle
                 cx="100"
@@ -204,7 +302,7 @@ const LeetcodeMeter = () => {
                   filter: 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.4))'
                 }}
               />
-              
+
               {/* Theme gradient */}
               <defs>
                 <linearGradient id="themeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -216,7 +314,7 @@ const LeetcodeMeter = () => {
                 </linearGradient>
               </defs>
             </svg>
-            
+
             {/* Center Text */}
             <div style={{
               position: 'absolute',
@@ -244,7 +342,7 @@ const LeetcodeMeter = () => {
                 fontSize: '0.875rem'
               }}>/{stats.total}</div>
             </div>
-            
+
             {/* Attempting badge */}
             <div style={{
               position: 'absolute',
@@ -275,7 +373,7 @@ const LeetcodeMeter = () => {
             gap: '1rem'
           }}>
             {/* Easy Card */}
-            <div 
+            <div
               style={{
                 backgroundColor: 'rgba(26, 26, 46, 0.6)',
                 backdropFilter: 'blur(10px)',
@@ -285,10 +383,11 @@ const LeetcodeMeter = () => {
                 minWidth: '8rem',
                 transition: 'all 0.3s ease',
                 marginLeft: '-40px',
-                cursor: 'pointer'
+                cursor: isOwnProfile ? 'pointer' : 'default',
+                opacity: isOwnProfile ? 1 : 0.9
               }}
               onClick={() => handleSolveProblem('easy')}
-              title="Click to add a solved easy problem"
+              title={isOwnProfile ? "Click to add a solved easy problem" : ''}
             >
               <div style={{
                 display: 'flex',
@@ -314,9 +413,9 @@ const LeetcodeMeter = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Medium Card */}
-            <div 
+            <div
               style={{
                 backgroundColor: 'rgba(26, 26, 46, 0.6)',
                 backdropFilter: 'blur(10px)',
@@ -326,10 +425,11 @@ const LeetcodeMeter = () => {
                 minWidth: '8rem',
                 transition: 'all 0.3s ease',
                 marginLeft: '-40px',
-                cursor: 'pointer'
+                cursor: isOwnProfile ? 'pointer' : 'default',
+                opacity: isOwnProfile ? 1 : 0.9
               }}
               onClick={() => handleSolveProblem('medium')}
-              title="Click to add a solved medium problem"
+              title={isOwnProfile ? "Click to add a solved medium problem" : ''}
             >
               <div style={{
                 display: 'flex',
@@ -355,9 +455,9 @@ const LeetcodeMeter = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Hard Card */}
-            <div 
+            <div
               style={{
                 backgroundColor: 'rgba(26, 26, 46, 0.6)',
                 backdropFilter: 'blur(10px)',
@@ -367,10 +467,11 @@ const LeetcodeMeter = () => {
                 minWidth: '8rem',
                 transition: 'all 0.3s ease',
                 marginLeft: '-40px',
-                cursor: 'pointer'
+                cursor: isOwnProfile ? 'pointer' : 'default',
+                opacity: isOwnProfile ? 1 : 0.9
               }}
               onClick={() => handleSolveProblem('hard')}
-              title="Click to add a solved hard problem"
+              title={isOwnProfile ? "Click to add a solved hard problem" : ''}
             >
               <div style={{
                 display: 'flex',

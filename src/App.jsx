@@ -21,11 +21,12 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path='/login' element={<Login/>}/>
         <Route path='/preference' element={<Preference/>}/>
-        <Route path='/dashboard' element={<Welcome/>}/>
+        <Route path='/dashboard' element={<Dashboard/>}/>
         <Route path='/interview' element={<InterviewPage/>}/>
         <Route path='/create' element={<CreateInterview/>}/>
         <Route path='/saves' element={<Saves/>}/>
         <Route path='/profile' element={<Profile/>}/>
+        <Route path="/profile/:id" element={<Profile />} />
         <Route path="/interview/:id" element={<InterviewPortal />} />
         <Route path='/viewprofile' element={<ViewProfile/>}/>
         <Route path='/questionfolder' element={<Questionfolder/>}/>

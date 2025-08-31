@@ -1,9 +1,10 @@
-// Interview.cjs
+// interview.cjs
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const { ObjectId } = require("mongodb");
-const { Interview } = require("./db.cjs"); // mongoose model exported from db.cjs
+const { Interview } = require("./db.cjs"); // mongoose model
+const User = require("./User.cjs");
 const SECRET_KEY = "askorishere";
 
 // Middleware to check JWT
@@ -22,9 +23,8 @@ function authenticateToken(req, res, next) {
 // ✅ Public route - Get ALL interview packs (no login needed)
 router.get("/all", async (req, res) => {
   try {
-    // Use the Interview model. Populate creator/user name if available.
     const interviews = await Interview.find()
-      .populate("user", "name")
+      .populate("user", "name") // show creator's name
       .lean()
       .exec();
     res.json(interviews);
@@ -44,8 +44,8 @@ router.post("/save", authenticateToken, async (req, res) => {
       return res.status(400).json({ error: "Invalid questions format" });
     }
 
+    // Build interview doc
     const interview = new Interview({
-      // store the user who created this pack
       user: new ObjectId(userId),
       title: title || "Untitled Interview",
       category,
@@ -58,13 +58,35 @@ router.post("/save", authenticateToken, async (req, res) => {
         difficulty: q.difficulty || difficulty,
         expectedDuration: q.expectedDuration || duration || 5,
       })),
-      // If your Interview schema uses timestamps: true, createdAt will be set automatically.
-      // Setting createdAt explicitly is safe and ensures the field exists for older records.
-      createdAt: new Date()
+      // ensure createdAt exists (some models have timestamps: true, but set just in case)
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
 
     const savedInterview = await interview.save();
-    res.status(201).json({ message: "Interview saved successfully", savedInterview });
+
+    // Increment user's stats.totalInterviews so profile/stats reflect creations
+    try {
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $inc: { "stats.totalInterviews": 1 } },
+        { new: true, runValidators: true }
+      ).select('-password');
+
+      // respond with both saved interview and updated user stats (frontend can use either)
+      return res.status(201).json({
+        message: "Interview saved successfully",
+        savedInterview,
+        user: updatedUser
+      });
+    } catch (uErr) {
+      // if user update fails, still return saved interview but warn in logs
+      console.error("Interview saved but failed to update user stats:", uErr);
+      return res.status(201).json({
+        message: "Interview saved successfully (user stats update failed)",
+        savedInterview
+      });
+    }
   } catch (error) {
     console.error("Error saving interview:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -75,7 +97,6 @@ router.post("/save", authenticateToken, async (req, res) => {
 router.get("/by-tag/:tag", async (req, res) => {
   try {
     const tagParam = decodeURIComponent(req.params.tag).trim();
-    // case-insensitive exact tag match
     const interviews = await Interview.find({
       tags: { $regex: new RegExp(`^${tagParam}$`, "i") }
     }).lean().exec();

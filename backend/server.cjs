@@ -37,7 +37,7 @@ app.use(express.json());
 // ✅ Add AI routes AFTER CORS and body parser
 app.use("/api/ai", aiRoutes);
 
-// ✅ Add other routes
+// ✅ Add other routes (interview router)
 app.use('/api/interviews', interviewRoutes);
 
 // ✅ Root route
@@ -127,8 +127,61 @@ app.post('/signup', async (req, res) => {
   }
 });
 
+// -------------------------------
+// NEW: Public route to list users
+// GET /api/users?q=optionalSearch
+// -------------------------------
+app.get('/api/users', async (req, res) => {
+  try {
+    const q = (req.query.q || '').trim();
+    let filter = {};
+
+    if (q) {
+      // case-insensitive search across several user fields
+      const re = new RegExp(q, 'i');
+      filter = {
+        $or: [
+          { name: re },
+          { username: re },
+          { fullName: re },
+          { company: re },
+          { education: re },
+          { favoriteTopics: re },
+          { interests: re }
+        ]
+      };
+    }
+
+    // select only useful fields for listing; exclude sensitive data
+    const users = await User.find(filter)
+      .select('-password -email -attempts -saves -__v')
+      .lean()
+      .exec();
+
+    // optional: map to ensure consistent frontend shape
+    const mapped = (users || []).map(u => ({
+      _id: u._id,
+      name: u.name || u.fullName || '',
+      username: u.username || u.name || '',
+      fullName: u.fullName || '',
+      profilePicture: u.profilePicture || u.profileImage || '',
+      company: u.company || '',
+      education: u.education || '',
+      favoriteTopics: u.favoriteTopics || [],
+      interests: u.interests || [],
+      stats: u.stats || {},
+      aboutText: u.aboutText || '',
+    }));
+
+    res.status(200).json(mapped);
+  } catch (err) {
+    console.error('Error fetching users list:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 // ✅ Profile routes
-// Get user profile
+// Get user profile (current logged-in user)
 app.get('/api/profile', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -304,7 +357,7 @@ app.get("/api/interviews/by-tag/:tag", async (req, res) => {
 });
 
 /* ------------------------------
-   NEW: Contributions endpoint
+   Contributions endpoint
    Aggregates interview packs created by the logged-in user over the last 365 days
    Returns an array of { date: 'YYYY-MM-DD', createdCount, createdLevel, level }
    ------------------------------ */
@@ -323,54 +376,67 @@ app.get('/api/profile/contributions', authMiddleware, async (req, res) => {
     const lastYear = new Date(today);
     lastYear.setFullYear(today.getFullYear() - 1);
 
-    // helper to produce yyyy-mm-dd keys
     const dayKey = (d) => {
       const dt = new Date(d);
-      const y = dt.getFullYear();
-      const m = String(dt.getMonth() + 1).padStart(2, '0');
-      const day = String(dt.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
+      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
     };
 
-    // 1) load interviews created by user in lastYear
+    // 1) Interviews created by this user
     const interviewsCreated = await Interview.find({
       user: userId,
       createdAt: { $gte: lastYear }
     }).select('createdAt').lean();
 
-    // 2) build createdMap: dateKey -> count
     const createdMap = new Map();
-    (interviewsCreated || []).forEach(iv => {
-      if (!iv?.createdAt) return;
+    interviewsCreated.forEach(iv => {
       const k = dayKey(iv.createdAt);
       createdMap.set(k, (createdMap.get(k) || 0) + 1);
     });
 
-    // 3) Compose final per-day array (lastYear -> today)
+    // 2) Attempts logged by this user
+    const user = await User.findById(userId).select('attempts').lean();
+    const attempts = (user?.attempts || []).filter(a => a.date && new Date(a.date) >= lastYear);
+
+    const attemptMap = new Map();
+    attempts.forEach(at => {
+      const k = dayKey(at.date);
+      attemptMap.set(k, (attemptMap.get(k) || 0) + 1);
+    });
+
+    // 3) Merge into daily records
     const days = [];
     for (let d = new Date(lastYear); d <= today; d.setDate(d.getDate() + 1)) {
       const k = dayKey(d);
       const createdCount = createdMap.get(k) || 0;
-      const createdLevel = mapCreatedCountToLevel(createdCount);
-      const finalLevel = createdLevel; // only using created packs for heatmap
+      const attemptCount = attemptMap.get(k) || 0;
+      const totalCount = createdCount + attemptCount;
+
+      // Map to levels (1–4)
+      const mapToLevel = (count) => count >= 4 ? 4 : count;
+      const createdLevel = mapToLevel(createdCount);
+      const attemptLevel = mapToLevel(attemptCount);
+      const level = mapToLevel(totalCount);
+
       days.push({
         date: k,
         createdCount,
+        attemptCount,
         createdLevel,
-        level: finalLevel
+        attemptLevel,
+        level
       });
     }
 
     res.status(200).json(days);
   } catch (err) {
-    console.error('Error fetching contributions (created packs):', err);
+    console.error('Error fetching contributions (packs+attempts):', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
+
 /* ------------------------------
-  (rest of your routes unchanged...)
-  Keep attempts endpoints etc. unchanged below
+  (rest of your routes unchanged... attempts, saves etc.)
   ------------------------------ */
 
 // Get saved items
@@ -396,7 +462,6 @@ app.post('/api/save', authMiddleware, async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Avoid duplicates: check by interviewId if provided, else by title+imageUrl
     const exists = user.saves.some(s => {
       if (interviewId && s.interviewId) return s.interviewId === interviewId;
       return s.title === title && s.imageUrl === imageUrl;
@@ -436,7 +501,7 @@ app.delete('/api/unsave', authMiddleware, async (req, res) => {
   }
 });
 
-// Attempts (POST/GET/DELETE) - keep as you had previously
+// Attempts (POST/GET/DELETE)
 app.post('/api/profile/attempts', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -482,6 +547,158 @@ app.delete('/api/profile/attempts/:attemptId', authMiddleware, async (req, res) 
     res.status(200).json({ message: 'Attempt removed' });
   } catch (err) {
     console.error('Error deleting attempt:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// GET user by id (public)
+app.get('/api/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: 'Missing id' });
+
+    const user = await User.findById(id).select('-password -email -attempts -saves -__v').lean();
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Map shape (optional)
+    const mapped = {
+      _id: user._id,
+      name: user.name || user.fullName || '',
+      username: user.username || user.name || '',
+      fullName: user.fullName || '',
+      profilePicture: user.profilePicture || user.profileImage || '',
+      company: user.company || '',
+      education: user.education || '',
+      favoriteTopics: user.favoriteTopics || [],
+      interests: user.interests || [],
+      stats: user.stats || {},
+      aboutText: user.aboutText || ''
+    };
+
+    res.status(200).json(mapped);
+  } catch (err) {
+    console.error('Error fetching user by id:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Public contributions for any user (no auth) - Add in server.cjs
+app.get('/api/users/:id/contributions', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: 'Missing id' });
+
+    const today = new Date();
+    const lastYear = new Date(today);
+    lastYear.setFullYear(today.getFullYear() - 1);
+
+    const dayKey = (d) => {
+      const dt = new Date(d);
+      return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+    };
+
+    // Interviews created by this user in last year
+    const interviewsCreated = await Interview.find({
+      user: id,
+      createdAt: { $gte: lastYear }
+    }).select('createdAt').lean();
+
+    const createdMap = new Map();
+    interviewsCreated.forEach(iv => {
+      const k = dayKey(iv.createdAt);
+      createdMap.set(k, (createdMap.get(k) || 0) + 1);
+    });
+
+    // Attempts logged by this user (attempts is stored as part of User)
+    const user = await User.findById(id).select('attempts').lean();
+    const attempts = (user?.attempts || []).filter(a => a.date && new Date(a.date) >= lastYear);
+
+    const attemptMap = new Map();
+    attempts.forEach(at => {
+      const k = dayKey(at.date);
+      attemptMap.set(k, (attemptMap.get(k) || 0) + 1);
+    });
+
+    // Merge into daily records across the year
+    const days = [];
+    for (let d = new Date(lastYear); d <= today; d.setDate(d.getDate() + 1)) {
+      const k = dayKey(d);
+      const createdCount = createdMap.get(k) || 0;
+      const attemptCount = attemptMap.get(k) || 0;
+      const totalCount = createdCount + attemptCount;
+
+      const mapToLevel = (count) => count >= 4 ? 4 : count;
+      const createdLevel = mapToLevel(createdCount);
+      const attemptLevel = mapToLevel(attemptCount);
+      const level = mapToLevel(totalCount);
+
+      days.push({
+        date: k,
+        createdCount,
+        attemptCount,
+        createdLevel,
+        attemptLevel,
+        level
+      });
+    }
+
+    res.status(200).json(days);
+  } catch (err) {
+    console.error('Error fetching public contributions:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// GET own leetcode stats (authenticated)
+app.get('/api/leetcode/stats', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('leetcodeStats').lean();
+    const defaultStats = {
+      total: 0,
+      attempting: 0,
+      easy: { solved: 0, total: 0 },
+      medium: { solved: 0, total: 0 },
+      hard: { solved: 0, total: 0 }
+    };
+    res.status(200).json({ leetcodeStats: user?.leetcodeStats || defaultStats });
+  } catch (err) {
+    console.error('Error fetching leetcode stats:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// PUT update own leetcode stats (authenticated)
+app.put('/api/leetcode/stats', authMiddleware, async (req, res) => {
+  try {
+    const { leetcodeStats } = req.body;
+    if (!leetcodeStats) return res.status(400).json({ message: 'leetcodeStats required' });
+
+    const updated = await User.findByIdAndUpdate(req.user.id, { $set: { leetcodeStats } }, { new: true }).select('leetcodeStats').lean();
+    res.status(200).json({ message: 'LeetCode stats updated', leetcodeStats: updated.leetcodeStats });
+  } catch (err) {
+    console.error('Error updating leetcode stats:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Public: get another user's leetcode stats (no auth)
+app.get('/api/users/:id/leetcode-stats', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: 'Missing id' });
+
+    const user = await User.findById(id).select('leetcodeStats').lean();
+    const defaultStats = {
+      total: 0,
+      attempting: 0,
+      easy: { solved: 0, total: 0 },
+      medium: { solved: 0, total: 0 },
+      hard: { solved: 0, total: 0 }
+    };
+
+    res.status(200).json({ leetcodeStats: user?.leetcodeStats || defaultStats });
+  } catch (err) {
+    console.error('Error fetching public leetcode stats:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });

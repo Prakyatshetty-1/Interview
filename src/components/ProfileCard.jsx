@@ -1,4 +1,4 @@
-// ProfileCard.jsx
+// src/components/ProfileCard.jsx
 import styles from './ProfileCard.module.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,7 +6,13 @@ function ProfileCard(props) {
     const navigate = useNavigate();
 
     function handleClick() {
-        navigate('/Profile');
+        const id = props.profile && (props.profile._id || props.profile.id);
+        if (id) {
+            navigate(`/profile/${id}`);
+        } else {
+            // fallback to generic Profile page
+            navigate('/Profile');
+        }
     }
 
     // Helper function to truncate text with ellipsis
@@ -73,7 +79,7 @@ function ProfileCard(props) {
                        
                         <div className={styles.profileImage}>
                             <img 
-                                src={profile.profileImage || "/profilepic1.png?height=60&width=60"} 
+                                src={profile.profilePicture || profile.profileImage || "/profilepic1.png?height=60&width=60"} 
                                 alt={profile.name || "User"} 
                             />
                         </div>
@@ -83,7 +89,7 @@ function ProfileCard(props) {
                 <div className={styles.userInfo}>
                     <div className={styles.nameSection}>
                         <h2 className={styles.name}>
-                            {truncateText(profile.name || "Anonymous User", 20)}
+                            {truncateText(profile.name || profile.fullName || profile.username || "Anonymous User", 20)}
                         </h2>
                         {profile.verified && (
                             <div className={styles.verifiedBadge}>
@@ -104,7 +110,7 @@ function ProfileCard(props) {
 
                     <div className={styles.workHistory}>
                         <div className={styles.previousWork}>
-                            {getPreviousCompanyDisplay(profile.previousCompany)}
+                            {getPreviousCompanyDisplay(profile.previousCompany || profile.company)}
                         </div>
                         
                         <p className={styles.education}>
@@ -112,34 +118,34 @@ function ProfileCard(props) {
                         </p>
                         
                         <p className={styles.experience}>
-                            {getExperienceDisplay(profile.yearsExperience)}
+                            {getExperienceDisplay(profile.yearsExperience || profile.stats?.totalInterviews || 0)}
                         </p>
                         
                         <p className={styles.skills}>
-                            {displaySkills(profile.skills)}
+                            {displaySkills(profile.favoriteTopics || profile.technicalSkills || profile.skills)}
                         </p>
                     </div>
                 </div>
 
                 {/* Stats section - only show if we have meaningful data */}
-                {(profile.connections || profile.posts || profile.followers) && (
+                {(profile.stats && (profile.stats.followers || profile.stats.problemsSolved || profile.stats.totalInterviews)) && (
                     <div className={styles.stats}>
-                        {profile.connections && (
+                        {profile.stats.followers && (
                             <div className={styles.stat}>
-                                <div className={styles.statValue}>{profile.connections}</div>
-                                <div className={styles.statLabel}>connections</div>
-                            </div>
-                        )}
-                        {profile.posts && (
-                            <div className={styles.stat}>
-                                <div className={styles.statValue}>{profile.posts}</div>
-                                <div className={styles.statLabel}>posts</div>
-                            </div>
-                        )}
-                        {profile.followers && (
-                            <div className={styles.stat}>
-                                <div className={styles.statValue}>{profile.followers}</div>
+                                <div className={styles.statValue}>{profile.stats.followers}</div>
                                 <div className={styles.statLabel}>followers</div>
+                            </div>
+                        )}
+                        {profile.stats.problemsSolved && (
+                            <div className={styles.stat}>
+                                <div className={styles.statValue}>{profile.stats.problemsSolved}</div>
+                                <div className={styles.statLabel}>problems</div>
+                            </div>
+                        )}
+                        {profile.stats.totalInterviews && (
+                            <div className={styles.stat}>
+                                <div className={styles.statValue}>{profile.stats.totalInterviews}</div>
+                                <div className={styles.statLabel}>interviews</div>
                             </div>
                         )}
                     </div>
