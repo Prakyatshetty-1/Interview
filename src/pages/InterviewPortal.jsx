@@ -1,4 +1,3 @@
-
 // src/pages/InterviewPortal.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -19,6 +18,7 @@ export default function InterviewPortal() {
   const [isLoadingLLM, setIsLoadingLLM] = useState(false);
   const [transcript, setTranscript] = useState([]);
   const [error, setError] = useState("");
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
 
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
@@ -362,6 +362,7 @@ export default function InterviewPortal() {
       setTranscript((prev) => [...prev, { type: "feedback", text: completionMessage }]);
       await speakText(completionMessage);
       setInterviewStarted(false);
+      setShowCompletionModal(true);
       return;
     }
 
@@ -396,6 +397,7 @@ export default function InterviewPortal() {
     }
     setInterviewStarted(true);
     currentQuestionIndexRef.current = 0;
+    setShowCompletionModal(false);
 
     setCurrentQuestionIndex(0);
     setTranscript([]);
@@ -770,6 +772,35 @@ export default function InterviewPortal() {
             </div>
           )}
         </div>
+
+        {/* Completion Modal */}
+        {showCompletionModal && (
+          <div className="askora-modal-overlay">
+            <div className="askora-modal">
+              <div className="askora-modal-content">
+                <div className="askora-modal-icon">
+                  <div className="success-checkmark">
+                    <div className="check-icon">
+                      
+                    </div>
+                  </div>
+                </div>
+                <h2 className="askora-modal-title">Interview Completed!</h2>
+                <p className="askora-modal-message">
+                  Thank you for attempting the interview. Your responses have been recorded and will be reviewed.
+                </p>
+                <div className="askora-modal-actions">
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="askora-btn askora-btn-primary askora-btn-large"
+                  >
+                    Back to Dashboard
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
     <style jsx>{`
@@ -1433,6 +1464,210 @@ export default function InterviewPortal() {
           border-left: 4px solid #8b5cf6;
         }
 
+        /* Modal Styles */
+        .askora-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          animation: fadeIn 0.3s ease-out;
+        }
+
+        .askora-modal {
+          background: rgba(33, 36, 68, 0.95);
+          border-radius: 20px;
+          border: 1px solid rgba(79, 70, 229, 0.3);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+          max-width: 500px;
+          width: 90%;
+          max-height: 90vh;
+          overflow-y: auto;
+          animation: slideInUp 0.4s ease-out;
+          backdrop-filter: blur(10px);
+        }
+
+        .askora-modal-content {
+          padding: 3rem 2rem;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1.5rem;
+        }
+
+        .askora-modal-icon {
+          width: 80px;
+          height: 80px;
+          margin-bottom: 1rem;
+        }
+
+        .success-checkmark {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          display: block;
+          stroke-width: 2;
+          stroke: #10b981;
+          stroke-miterlimit: 10;
+          box-shadow: inset 0px 0px 0px #10b981;
+          animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
+          position: relative;
+        }
+
+        .success-checkmark .check-icon {
+          width: 56px;
+          height: 56px;
+          position: absolute;
+          left: 12px;
+          top: 12px;
+          background: transparent;
+        }
+
+        .success-checkmark .icon-line {
+          height: 3px;
+          background-color: #10b981;
+          display: block;
+          border-radius: 2px;
+          position: absolute;
+          z-index: 10;
+        }
+
+        .success-checkmark .icon-line.line-tip {
+          top: 28px;
+          left: 8px;
+          width: 20px;
+          transform: rotate(45deg);
+          animation: icon-line-tip 0.75s;
+        }
+
+        .success-checkmark .icon-line.line-long {
+          top: 21px;
+          right: 6px;
+          width: 35px;
+          transform: rotate(-45deg);
+          animation: icon-line-long 0.75s;
+        }
+
+        .askora-modal-title {
+          font-size: 2rem;
+          font-weight: 600;
+          color: white;
+          margin: 0;
+          background: linear-gradient(135deg, #10b981, #059669);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .askora-modal-message {
+          font-size: 1.1rem;
+          color: #cbd5e1;
+          line-height: 1.6;
+          margin: 0;
+          max-width: 400px;
+        }
+
+        .askora-modal-actions {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+          flex-wrap: wrap;
+          margin-top: 1rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideInUp {
+          from {
+            transform: translateY(30px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes fill {
+          100% {
+            box-shadow: inset 0px 0px 0px 30px #10b981;
+          }
+        }
+
+        @keyframes scale {
+          0%, 100% {
+            transform: none;
+          }
+          50% {
+            transform: scale3d(1.1, 1.1, 1);
+          }
+        }
+
+        @keyframes icon-line-tip {
+          0% {
+            width: 0;
+            left: 1px;
+            top: 31px;
+          }
+          54% {
+            width: 0;
+            left: 1px;
+            top: 31px;
+          }
+          70% {
+            width: 20px;
+            left: -2px;
+            top: 31px;
+          }
+          84% {
+            width: 17px;
+            left: 1px;
+            top: 28px;
+          }
+          100% {
+            width: 20px;
+            left: 8px;
+            top: 28px;
+          }
+        }
+
+        @keyframes icon-line-long {
+          0% {
+            width: 0;
+            right: 26px;
+            top: 24px;
+          }
+          65% {
+            width: 0;
+            right: 26px;
+            top: 24px;
+          }
+          84% {
+            width: 35px;
+            right: 9px;
+            top: 24px;
+          }
+          100% {
+            width: 35px;
+            right: 6px;
+            top: 21px;
+          }
+        }
+
         @media (max-width: 768px) {
           .askora-interview-portal {
             padding: 10px;
@@ -1511,10 +1746,43 @@ export default function InterviewPortal() {
           .wave-2 { width: 140px; height: 140px; }
           .wave-3 { width: 200px; height: 200px; }
           .wave-4 { width: 260px; height: 260px; }
+
+          .askora-modal {
+            width: 95%;
+            margin: 1rem;
+          }
+
+          .askora-modal-content {
+            padding: 2rem 1.5rem;
+          }
+
+          .askora-modal-title {
+            font-size: 1.5rem;
+          }
+
+          .askora-modal-message {
+            font-size: 1rem;
+          }
+
+          .askora-modal-icon {
+            width: 60px;
+            height: 60px;
+          }
+
+          .success-checkmark {
+            width: 60px;
+            height: 60px;
+          }
+
+          .success-checkmark .check-icon {
+            width: 42px;
+            height: 42px;
+            left: 9px;
+            top: 9px;
+          }
         }
       `}</style>
     </div>
   );
 
 }
-
