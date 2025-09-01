@@ -20,6 +20,9 @@ export default function InterviewPortal() {
   const [error, setError] = useState("");
   const [showCompletionModal, setShowCompletionModal] = useState(false);
 
+  const [packMeta, setPackMeta] = useState(null);
+
+
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
 
@@ -115,6 +118,120 @@ export default function InterviewPortal() {
     }
   };
 
+// helper: try to pull user id from a JWT in localStorage (best-effort, non-verified decode)
+const getUserIdFromToken = (token) => {
+  if (!token || typeof token !== "string") return null;
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const json = JSON.parse(decodeURIComponent(escape(atob(payload))));
+    // Try common claim names
+    return json.sub || json.userId || json.id || json._id || null;
+  } catch (e) {
+    return null;
+  }
+};
+
+// Save recently attempted interview to server (if logged in) or fallback to localStorage (namespaced by user)
+const saveRecentInterview = async () => {
+  try {
+  // Build a robust title (avoid ternary/operator precedence issues)
+  const summaryTitle = (packMeta && packMeta.title)
+    ? String(packMeta.title).slice(0, 120)
+    : (Array.isArray(interviewQuestionsRef.current) && interviewQuestionsRef.current[0])
+      ? String(interviewQuestionsRef.current[0]).slice(0, 120)
+      : `Interview ${id || ""}`;
+
+  const summary = {
+    // canonical IDs
+    interviewId: id || null,
+    packId: (packMeta && packMeta.id) || id || null,
+    id: (packMeta && packMeta.id) || id || null,
+
+    // display/meta
+    title: summaryTitle,
+    questionsCount: Array.isArray(interviewQuestionsRef.current)
+      ? interviewQuestionsRef.current.length
+      : (interviewQuestions.length || 0),
+
+    // canonical attempt timestamp used by Profile mapping
+    attemptedAt: new Date().toISOString(),
+
+    // transcript trimmed
+    transcript: transcript.slice(-30).map((t) => ({
+      type: t.type,
+      text: String(t.text).slice(0, 600),
+    })),
+
+    // new fields so Profile can render creator/level/company/duration
+    creator: (packMeta && packMeta.creator) || null,
+    level: (packMeta && packMeta.level) || null,
+    company: (packMeta && packMeta.company) || null,
+    duration: (packMeta && packMeta.duration) || null,
+  };
+
+    const token = localStorage.getItem('token');
+    const userId = getUserIdFromToken(token);
+    // attach userId to the summary as well (harmless and helpful)
+    if (userId) summary.userId = userId;
+
+    if (token) {
+      // try server endpoint first (server should associate with authenticated user)
+      try {
+        const res = await fetch(`${API_BASE}/api/profile/recent-interviews`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(summary),
+        });
+
+        if (res.ok) {
+          console.log('[InterviewPortal] recent interview saved to server');
+          return;
+        } else {
+          const txt = await res.text().catch(() => '');
+          console.warn('[InterviewPortal] server save failed:', res.status, txt);
+          // continue to local fallback instead of returning
+        }
+      } catch (err) {
+        console.warn('[InterviewPortal] server save error - falling back to localStorage', err);
+      }
+    }
+
+  // Fallback: localStorage namespaced by user id
+  try {
+    const token = localStorage.getItem("token");
+    const userId = getUserIdFromToken(token);
+    const baseKey = `recentInterviews_${userId || "anonymous"}`;
+    const raw = localStorage.getItem(baseKey);
+    const arr = raw ? JSON.parse(raw) : [];
+
+    // remove any existing entry for same packId/interviewId so we can put it at front (dedupe)
+    const deduped = (arr || []).filter((item) => {
+      if (item.packId && summary.packId) return item.packId !== summary.packId;
+      if (item.interviewId && summary.interviewId) return item.interviewId !== summary.interviewId;
+      // fallback to title + questionsCount comparison
+      return !(
+        item.title === summary.title &&
+        Number(item.questionsCount) === Number(summary.questionsCount)
+      );
+    });
+
+    deduped.unshift(summary);
+    const sliced = deduped.slice(0, 20);
+    localStorage.setItem(baseKey, JSON.stringify(sliced));
+    console.log(`[InterviewPortal] recent interview saved to localStorage key=${baseKey}`);
+  } catch (err) {
+    console.error("[InterviewPortal] failed to save recent interview to localStorage", err);
+  }
+  } catch (err) {
+    console.error('[InterviewPortal] saveRecentInterview error', err);
+  }
+};
+
   // fetch pack & map questions robustly
   useEffect(() => {
     const fetchPack = async () => {
@@ -162,6 +279,36 @@ export default function InterviewPortal() {
           setInterviewQuestions([]);
           interviewQuestionsRef.current = [];
         } else {
+// store pack meta if available (so we can show a title/creator/level later)
+setPackMeta(
+  pack && typeof pack === "object"
+    ? {
+        id: pack.id || pack._id || id,
+        title: pack.title || pack.name || pack.packName || null,
+        // try several common names for creator/author/uploader
+        creator:
+          pack.creator ||
+          pack.author ||
+          pack.createdBy ||
+          pack.owner ||
+          pack.uploader ||
+          (pack.meta && (pack.meta.creator || pack.meta.author)) ||
+          null,
+        // try several common names for level/difficulty
+        level:
+          pack.level ||
+          pack.difficulty ||
+          pack.levelName ||
+          (pack.meta && (pack.meta.level || pack.meta.difficulty)) ||
+          null,
+        // optional helpful fields
+        company: pack.company || pack.source || pack.provider || null,
+        duration:
+          pack.duration || pack.estimatedDuration || pack.length || null,
+      }
+    : null
+);
+
           setInterviewQuestions(questions);
           interviewQuestionsRef.current = questions; // keep the ref up-to-date
           setError("");
@@ -781,7 +928,9 @@ export default function InterviewPortal() {
                 <div className="askora-modal-icon">
                   <div className="success-checkmark">
                     <div className="check-icon">
+
                       
+
                     </div>
                   </div>
                 </div>
@@ -791,7 +940,18 @@ export default function InterviewPortal() {
                 </p>
                 <div className="askora-modal-actions">
                   <button
-                    onClick={() => navigate('/dashboard')}
+
+                    onClick={async () => {
+                      // Save recent interview, then go back
+                      try {
+                        await saveRecentInterview();
+                      } catch (e) {
+                        console.warn("Failed saving recent interview (non-fatal):", e);
+                      } finally {
+                        navigate('/dashboard');
+                      }
+                    }}
+
                     className="askora-btn askora-btn-primary askora-btn-large"
                   >
                     Back to Dashboard

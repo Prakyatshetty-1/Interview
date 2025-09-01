@@ -1,8 +1,10 @@
+// interview.cjs
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const { ObjectId } = require("mongodb");
 const { Interview } = require("./db.cjs"); // mongoose model
+const User = require("./User.cjs");
 const SECRET_KEY = "askorishere";
 
 // Middleware to check JWT
@@ -42,6 +44,7 @@ router.post("/save", authenticateToken, async (req, res) => {
       return res.status(400).json({ error: "Invalid questions format" });
     }
 
+    // Build interview doc
     const interview = new Interview({
       user: new ObjectId(userId),
       title: title || "Untitled Interview",
@@ -55,26 +58,107 @@ router.post("/save", authenticateToken, async (req, res) => {
         difficulty: q.difficulty || difficulty,
         expectedDuration: q.expectedDuration || duration || 5,
       })),
+      // ensure createdAt exists (some models have timestamps: true, but set just in case)
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
 
     const savedInterview = await interview.save();
-    res.status(201).json({ message: "Interview saved successfully", savedInterview });
+
+    // Increment user's stats.totalInterviews so profile/stats reflect creations
+    try {
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $inc: { "stats.totalInterviews": 1 } },
+        { new: true, runValidators: true }
+      ).select('-password');
+
+      // respond with both saved interview and updated user stats (frontend can use either)
+      return res.status(201).json({
+        message: "Interview saved successfully",
+        savedInterview,
+        user: updatedUser
+      });
+    } catch (uErr) {
+      // if user update fails, still return saved interview but warn in logs
+      console.error("Interview saved but failed to update user stats:", uErr);
+      return res.status(201).json({
+        message: "Interview saved successfully (user stats update failed)",
+        savedInterview
+      });
+    }
   } catch (error) {
     console.error("Error saving interview:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// ✅ Public route - Get interviews by tag
+// ✅ Fixed Public route - Get interviews by tag
 router.get("/by-tag/:tag", async (req, res) => {
   try {
-    const tagParam = decodeURIComponent(req.params.tag).trim();
+    const tagParam = decodeURIComponent(req.params.tag).trim().toLowerCase();
+    console.log("Searching for tag:", tagParam);
+    
+    // Fixed: Use $elemMatch to search within the tags array properly
     const interviews = await Interview.find({
-      tags: { $regex: new RegExp(`^${tagParam}$`, "i") }
-    }).lean().exec();
+      tags: { 
+        $elemMatch: { 
+          $regex: new RegExp(`^${tagParam}$`, "i") 
+        } 
+      }
+    })
+    .populate("user", "name") // Include creator's name
+    .lean()
+    .exec();
+    
+    console.log(`Found ${interviews.length} interviews for tag: ${tagParam}`);
+    
+    // If no exact matches, try partial matching as fallback
+    if (interviews.length === 0) {
+      console.log("No exact matches, trying partial search...");
+      const partialMatches = await Interview.find({
+        $or: [
+          { tags: { $elemMatch: { $regex: new RegExp(tagParam, "i") } } },
+          { category: { $regex: new RegExp(tagParam, "i") } },
+          { title: { $regex: new RegExp(tagParam, "i") } }
+        ]
+      })
+      .populate("user", "name")
+      .lean()
+      .exec();
+      
+      console.log(`Found ${partialMatches.length} partial matches`);
+      return res.json(partialMatches);
+    }
+    
     res.json(interviews);
   } catch (err) {
     console.error("Error fetching interviews by tag:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ✅ Debug route to see what tags exist in the database
+router.get("/debug/tags", async (req, res) => {
+  try {
+    const allInterviews = await Interview.find({}, { tags: 1, title: 1 }).lean().exec();
+    const allTags = [];
+    
+    allInterviews.forEach(interview => {
+      if (interview.tags && Array.isArray(interview.tags)) {
+        allTags.push(...interview.tags);
+      }
+    });
+    
+    const uniqueTags = [...new Set(allTags)];
+    
+    res.json({
+      totalInterviews: allInterviews.length,
+      uniqueTags: uniqueTags.sort(),
+      sampleInterviews: allInterviews.slice(0, 3)
+    });
+  } catch (err) {
+    console.error("Error fetching tags:", err);
     res.status(500).json({ error: "Server error" });
   }
 });

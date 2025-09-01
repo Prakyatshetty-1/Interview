@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -89,11 +88,20 @@ const Topics = () => {
   const toggleExpanded = () => setIsExpanded(!isExpanded);
 
   const handleTopicClick = (topicName) => {
-    // Normalize topic name for URL
-    const urlSafeTag = encodeURIComponent(topicName.trim().toLowerCase());
-    navigate(`/interviews/tag/${urlSafeTag}`);
-
-  };
+  try {
+    console.log("Clicking topic:", topicName);
+    
+    // Navigate to questionfolder with topic data
+    navigate('/questionfolder', { 
+      state: { 
+        topic: topicName,
+        count: allTopics.find(t => t.name === topicName)?.count || 0
+      }
+    });
+  } catch (error) {
+    console.error("Navigation error:", error);
+  }
+};
 
   return (
     <div className="topics-filter1">
@@ -107,26 +115,21 @@ const Topics = () => {
             aria-label={`View ${topic.name} interviews`}
           >
             <span className="topic-name1">{topic.name}</span>
-
             <span className="topic-count1">{topic.count}</span>
           </button>
         ))}
-
 
         <button 
           className="expand-button1" 
           onClick={toggleExpanded}
           aria-expanded={isExpanded}
         >
-
           {isExpanded ? "Collapse" : "Expand"}
           <span className="expand-icon1">{isExpanded ? "↑" : "↓"}</span>
         </button>
       </div>
     </div>
-
   );
 };
 
 export default Topics;
-

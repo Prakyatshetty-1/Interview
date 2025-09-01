@@ -1,21 +1,27 @@
-
 import { useState, useEffect } from "react";
-import { LuHeart, LuSave } from "react-icons/lu";
+import { LuHeart } from "react-icons/lu";
 import "./Card.css";
 
 const Card = ({
+  id = null, // interview id
   difficulty = "Med.",
   title = "Full Stack Challenge",
   creator = "bhavith",
   tags = ["Web Dev", "Full Stack"],
   path = "/FullStackWebDev.png",
-  onClick = () => {}
+  onClick = () => {},
+  onSaveToggle = () => {} // NEW: callback (id, isSaved)
 }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [isClicked, setIsClicked] = useState(false);
 
-  // Check difficulty styling
+  const getAuthHeader = () => {
+    const token = localStorage.getItem('token'); // make sure token is stored on login
+    if (!token) return {};
+    return { Authorization: `Bearer ${token}` };
+  };
+
   const getDifficultyClass = (difficulty) => {
     switch (difficulty.toLowerCase()) {
       case "easy":
@@ -30,22 +36,25 @@ const Card = ({
     }
   };
 
-  // Popup utility
   const showPopup = (message) => {
     setPopupMessage(message);
     setTimeout(() => setPopupMessage(""), 2000);
   };
 
-  // Check if card is already saved on mount
   useEffect(() => {
     const checkIfSaved = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/saved");
-        if (!res.ok) return;
-
+        const headers = { "Content-Type": "application/json", ...getAuthHeader() };
+        const res = await fetch("http://localhost:5000/api/saved", { headers });
+        if (!res.ok) {
+          // If unauthorized or other error, assume not saved
+          return;
+        }
         const savedCards = await res.json();
         const found = savedCards.some(
-          (card) => card.title === title && card.imageUrl === path
+          (card) =>
+            (id && card.interviewId && card.interviewId === id) ||
+            (card.title === title && card.imageUrl === path)
         );
         setIsSaved(found);
       } catch (error) {
@@ -54,26 +63,25 @@ const Card = ({
     };
 
     checkIfSaved();
-  }, [title, path]);
+  }, [title, path, id]);
 
-  // Save handler with animation
   const handleSave = async (e) => {
-    e.stopPropagation(); // Prevent card click when saving
-    
-    // Trigger click animation
+    e.stopPropagation();
     setIsClicked(true);
     setTimeout(() => setIsClicked(false), 600);
 
     try {
+      const headers = { "Content-Type": "application/json", ...getAuthHeader() };
       const response = await fetch("http://localhost:5000/api/save", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, imageUrl: path }),
+        headers,
+        body: JSON.stringify({ interviewId: id, title, imageUrl: path }),
       });
 
       if (response.ok) {
         setIsSaved(true);
         showPopup("✅ Saved successfully!");
+        try { onSaveToggle(id, true); } catch(e){/* ignore */} // notify parent
       } else {
         const data = await response.json();
         console.error("Save failed:", data);
@@ -85,24 +93,23 @@ const Card = ({
     }
   };
 
-  // Unsave handler with animation
   const handleUnsave = async (e) => {
-    e.stopPropagation(); // Prevent card click when unsaving
-    
-    // Trigger click animation
+    e.stopPropagation();
     setIsClicked(true);
     setTimeout(() => setIsClicked(false), 600);
 
     try {
+      const headers = { "Content-Type": "application/json", ...getAuthHeader() };
       const response = await fetch("http://localhost:5000/api/unsave", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, imageUrl: path }),
+        headers,
+        body: JSON.stringify({ interviewId: id, title, imageUrl: path }),
       });
 
       if (response.ok) {
         setIsSaved(false);
         showPopup("🗑️ Unsaved successfully!");
+        try { onSaveToggle(id, false); } catch(e){/* ignore */} // notify parent
       } else {
         const data = await response.json();
         console.error("Unsave failed:", data);
@@ -111,13 +118,11 @@ const Card = ({
     } catch (error) {
       console.error("Network error:", error);
       showPopup("⚠️ Error unsaving card.");
-
     }
   };
 
   return (
     <>
-
       <div
         className="challenge-card"
         style={{ backgroundImage: `url(${path})` }}
@@ -126,7 +131,6 @@ const Card = ({
         <div className="gradient-overlay"></div>
         <div className="bottom-blur"></div>
 
-        {/* Hover Save Button */}
         <div className="hover-save-container">
           <button
             className={`hover-save-button ${isSaved ? 'saved' : ''} ${isClicked ? 'clicked' : ''}`}
@@ -140,39 +144,28 @@ const Card = ({
         </div>
 
         <div className="card-content1">
-          {/* Top section with difficulty */}
           <div className="top-section1">
-            <div
-              className={`difficulty-badge ${getDifficultyClass(difficulty)}`}
-            >
-
+            <div className={`difficulty-badge ${getDifficultyClass(difficulty)}`}>
               {difficulty}
             </div>
           </div>
 
-          {/* Bottom section */}
           <div className="bottom-section1">
             <div>
               <h2 className="title134">{title}</h2>
               <p className="creator">Created by {creator}</p>
             </div>
 
-
-            {/* Tags */}
             <div className="tags-container">
               {tags.map((tag, index) => (
-                <span key={index} className="tag">
-                  {tag}
-                </span>
+                <span key={index} className="tag">{tag}</span>
               ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Popup message */}
       {popupMessage && <div className="popup-message">{popupMessage}</div>}
-
     </>
   );
 };
