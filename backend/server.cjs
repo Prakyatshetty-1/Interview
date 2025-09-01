@@ -1074,6 +1074,149 @@ app.get('/api/users/:id/leetcode-stats', async (req, res) => {
   }
 });
 
+// Add this route to your server.cjs after the existing LeetCode stats routes
+
+// Add this route to your server.cjs after the existing LeetCode routes
+
+// POST route to update LeetCode stats after interview completion
+app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { difficulty, questionsCompleted = 1 } = req.body;
+
+    console.log(`Updating LeetCode stats for user ${userId}: ${difficulty} difficulty, ${questionsCompleted} questions`);
+
+    // Validate difficulty
+    const validDifficulties = ['easy', 'medium', 'hard'];
+    if (!validDifficulties.includes(difficulty)) {
+      return res.status(400).json({ 
+        message: 'Invalid difficulty. Must be easy, medium, or hard' 
+      });
+    }
+
+    // Get current user with leetcode stats
+    const user = await User.findById(userId).select('leetcodeStats').lean();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Initialize default stats if they don't exist
+    const currentStats = user.leetcodeStats || {
+      total: 0,
+      attempting: 0,
+      easy: { solved: 0, total: 3000 }, // Approximate total problems
+      medium: { solved: 0, total: 1889 },
+      hard: { solved: 0, total: 3632 }
+    };
+
+    // Update the stats based on difficulty
+    const updatedStats = { ...currentStats };
+    
+    // Increment solved count for the specific difficulty
+    updatedStats[difficulty].solved += questionsCompleted;
+    
+    // Update total solved count
+    updatedStats.total = updatedStats.easy.solved + updatedStats.medium.solved + updatedStats.hard.solved;
+    
+    // Reset attempting to 0 since interview is completed
+    updatedStats.attempting = 0;
+
+    // Save updated stats to database
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: { leetcodeStats: updatedStats } },
+      { new: true, runValidators: true }
+    ).select('leetcodeStats').lean();
+
+    console.log('Updated LeetCode stats:', updatedStats);
+
+    res.status(200).json({
+      message: 'LeetCode stats updated successfully',
+      leetcodeStats: updatedUser.leetcodeStats,
+      difficulty,
+      questionsAdded: questionsCompleted
+    });
+
+  } catch (error) {
+    console.error('Error updating LeetCode stats after interview:', error);
+    res.status(500).json({ 
+      message: 'Server error updating LeetCode stats', 
+      error: error.message 
+    });
+  }
+});
+
+// Also add a route to increment "attempting" when user starts an interview
+app.post('/api/leetcode/start-interview', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { difficulty } = req.body;
+
+    const user = await User.findById(userId).select('leetcodeStats').lean();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const currentStats = user.leetcodeStats || {
+      total: 0,
+      attempting: 0,
+      easy: { solved: 0, total: 3000 },
+      medium: { solved: 0, total: 1889 },
+      hard: { solved: 0, total: 3632 }
+    };
+
+    // Increment attempting count
+    const updatedStats = { ...currentStats };
+    updatedStats.attempting += 1;
+
+    await User.findByIdAndUpdate(
+      userId,
+      { $set: { leetcodeStats: updatedStats } },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: 'Started attempting interview',
+      leetcodeStats: updatedStats
+    });
+
+  } catch (error) {
+    console.error('Error updating attempting count:', error);
+    res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+});
+// Optional: Add a route to check if an interview has been completed before
+app.get('/api/interviews/:id/completion-status', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    const user = await User.findById(userId).select('completedInterviews').lean();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const hasCompleted = (user.completedInterviews || []).some(completed => 
+      completed.interviewId === id || completed.packId === id
+    );
+
+    res.status(200).json({
+      interviewId: id,
+      hasCompleted,
+      completionCount: (user.completedInterviews || []).filter(completed => 
+        completed.interviewId === id || completed.packId === id
+      ).length
+    });
+
+  } catch (error) {
+    console.error('Error checking completion status:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // Add these routes to your server.cjs file after the existing Google authentication routes
 
 // GitHub Sign Up Route (for new users)

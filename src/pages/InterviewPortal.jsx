@@ -26,7 +26,6 @@ export default function InterviewPortal() {
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
 
-
   // stable refs to avoid state/closure races
   const currentQuestionIndexRef = useRef(0);
   const inFlightRef = useRef(false);
@@ -132,7 +131,189 @@ const getUserIdFromToken = (token) => {
     return null;
   }
 };
+// Updated functions for InterviewPortal.jsx
 
+// Add this near the beginning of your startInterview function
+const startInterview = () => {
+  if (!interviewQuestionsRef.current || interviewQuestionsRef.current.length === 0) {
+    setError("No questions available for this pack.");
+    return;
+  }
+  
+  setInterviewStarted(true);
+  currentQuestionIndexRef.current = 0;
+  setShowCompletionModal(false);
+
+  setCurrentQuestionIndex(0);
+  setTranscript([]);
+  setFeedback("");
+  setUserAnswerText("");
+
+  inFlightRef.current = false;
+  
+  // Update "attempting" count when starting interview
+  updateLeetCodeAttempting();
+  
+  askQuestion(0);
+};
+
+// New function to update attempting count
+const updateLeetCodeAttempting = async () => {
+  try {
+    // Determine difficulty from pack metadata
+    let difficulty = 'medium'; // default
+    
+    if (packMeta && packMeta.level) {
+      const level = packMeta.level.toLowerCase();
+      if (level.includes('easy') || level.includes('beginner')) {
+        difficulty = 'easy';
+      } else if (level.includes('hard') || level.includes('expert') || level.includes('senior')) {
+        difficulty = 'hard';
+      } else {
+        difficulty = 'medium';
+      }
+    } else {
+      // Fallback: determine difficulty based on number of questions
+      const questionCount = interviewQuestionsRef.current?.length || 0;
+      if (questionCount <= 3) {
+        difficulty = 'easy';
+      } else if (questionCount >= 7) {
+        difficulty = 'hard';
+      } else {
+        difficulty = 'medium';
+      }
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No auth token found, skipping attempting count update');
+      return;
+    }
+
+    const response = await fetch(`${API_BASE}/api/leetcode/start-interview`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ difficulty }),
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log('Attempting count updated:', result);
+    } else {
+      console.warn('Failed to update attempting count:', response.status);
+    }
+  } catch (error) {
+    console.error('Error updating attempting count:', error);
+  }
+};
+
+// Updated updateLeetCodeStats function
+const updateLeetCodeStats = async () => {
+  try {
+    // Extract difficulty from pack metadata or interview questions
+    let difficulty = 'medium'; // default
+    
+    // Try to determine difficulty from pack metadata
+    if (packMeta && packMeta.level) {
+      const level = packMeta.level.toLowerCase();
+      if (level.includes('easy') || level.includes('beginner')) {
+        difficulty = 'easy';
+      } else if (level.includes('hard') || level.includes('expert') || level.includes('senior')) {
+        difficulty = 'hard';
+      } else {
+        difficulty = 'medium';
+      }
+    } else {
+      // Fallback: determine difficulty based on number of questions or other criteria
+      const questionCount = interviewQuestionsRef.current?.length || 0;
+      if (questionCount <= 3) {
+        difficulty = 'easy';
+      } else if (questionCount >= 7) {
+        difficulty = 'hard';
+      } else {
+        difficulty = 'medium';
+      }
+    }
+
+    // Calculate questions completed (could be 1 per question or treat whole interview as 1)
+    const questionsCompleted = 1; // Treat each completed interview as 1 solved problem
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No auth token found, skipping LeetCode stats update');
+      return;
+    }
+
+    console.log(`Updating LeetCode stats: ${difficulty} difficulty, ${questionsCompleted} questions`);
+
+    const response = await fetch(`${API_BASE}/api/leetcode/update-after-interview`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        difficulty: difficulty,
+        questionsCompleted: questionsCompleted
+      }),
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log('LeetCode stats updated successfully:', result);
+      
+      // Show success message to user (optional)
+      setFeedback(prev => prev + `\n\n🎉 Great job! Your ${difficulty} LeetCode progress has been updated (+${questionsCompleted} solved).`);
+    } else {
+      const errorText = await response.text();
+      console.warn('Failed to update LeetCode stats:', response.status, errorText);
+    }
+  } catch (error) {
+    console.error('Error updating LeetCode stats:', error);
+  }
+};
+
+// Make sure your askQuestion function calls updateLeetCodeStats when interview completes
+const askQuestion = async (index) => {
+  if (!interviewQuestionsRef.current || index >= interviewQuestionsRef.current.length) {
+    const completionMessage = "Interview completed! Thank you for your time.";
+    setTranscript((prev) => [...prev, { type: "feedback", text: completionMessage }]);
+    await speakText(completionMessage);
+    setInterviewStarted(false);
+    
+    // Update LeetCode stats after interview completion
+    await updateLeetCodeStats();
+    
+    setShowCompletionModal(true);
+    return;
+  }
+
+  currentQuestionIndexRef.current = index;
+  setCurrentQuestionIndex(index);
+
+  const question = interviewQuestionsRef.current[index];
+  setTranscript((prev) => [...prev, { type: "question", text: question }]);
+
+  // Stop any ongoing recognition before speaking
+  if (isListening) {
+    stopListening();
+    // Wait for recognition to fully stop
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  await speakText(question);
+
+  // Ensure recognizer is ready
+  if (!recognitionRef.current) {
+    initRecognition();
+  }
+
+  // Longer delay to ensure speech synthesis is completely finished
+  setTimeout(() => startListening(), 300);
+};
 // Save recently attempted interview to server (if logged in) or fallback to localStorage (namespaced by user)
 const saveRecentInterview = async () => {
   try {
@@ -502,58 +683,9 @@ setPackMeta(
     }
   };
 
-  // ask question: put in transcript, speak it, then start listening - IMPROVED
-  const askQuestion = async (index) => {
-    if (!interviewQuestionsRef.current || index >= interviewQuestionsRef.current.length) {
-      const completionMessage = "Interview completed! Thank you for your time.";
-      setTranscript((prev) => [...prev, { type: "feedback", text: completionMessage }]);
-      await speakText(completionMessage);
-      setInterviewStarted(false);
-      setShowCompletionModal(true);
-      return;
-    }
+  
 
-    currentQuestionIndexRef.current = index;
-    setCurrentQuestionIndex(index);
 
-    const question = interviewQuestionsRef.current[index];
-    setTranscript((prev) => [...prev, { type: "question", text: question }]);
-
-    // Stop any ongoing recognition before speaking
-    if (isListening) {
-      stopListening();
-      // Wait for recognition to fully stop
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-
-    await speakText(question);
-
-    // Ensure recognizer is ready
-    if (!recognitionRef.current) {
-      initRecognition();
-    }
-
-    // Longer delay to ensure speech synthesis is completely finished
-    setTimeout(() => startListening(), 300);
-  };
-
-  const startInterview = () => {
-    if (!interviewQuestionsRef.current || interviewQuestionsRef.current.length === 0) {
-      setError("No questions available for this pack.");
-      return;
-    }
-    setInterviewStarted(true);
-    currentQuestionIndexRef.current = 0;
-    setShowCompletionModal(false);
-
-    setCurrentQuestionIndex(0);
-    setTranscript([]);
-    setFeedback("");
-    setUserAnswerText("");
-
-    inFlightRef.current = false;
-    askQuestion(0);
-  };
 
   // Helper function for actually starting recognition
   const actuallyStartListening = async () => {
