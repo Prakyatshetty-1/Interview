@@ -15,13 +15,44 @@ const ViewProfile = () => {
 
   useEffect(() => {
     let mounted = true;
-    const fetchUsers = async () => {
+
+    const fetchData = async () => {
       setLoading(true);
       try {
+        // Try to get current user id if token exists
+        let ownId = null;
+        const token = localStorage.getItem('token');
+
+        if (token) {
+          try {
+            const pRes = await fetch(`${API_BASE}/api/profile`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            if (pRes.ok) {
+              const pData = await pRes.json();
+              // server returns user doc; ensure _id present
+              ownId = pData?._id || pData?.id || null;
+            } else {
+              // If token invalid/expired, ignore and proceed without excluding anyone
+              console.warn('Could not fetch profile to determine own id (status)', pRes.status);
+            }
+          } catch (err) {
+            console.warn('Error fetching own profile (will not exclude):', err);
+          }
+        }
+
+        // Fetch users list
         const res = await fetch(`${API_BASE}/api/users`);
-        if (!res.ok) throw new Error('Failed to fetch users');
+        if (!res.ok) {
+          throw new Error('Failed to fetch users');
+        }
         const data = await res.json();
-        if (mounted) setUsers(Array.isArray(data) ? data : []);
+        const arr = Array.isArray(data) ? data : [];
+
+        // If ownId found, filter it out
+        const filtered = ownId ? arr.filter(u => String(u._id) !== String(ownId)) : arr;
+
+        if (mounted) setUsers(filtered);
       } catch (err) {
         console.error('Error fetching users list:', err);
         if (mounted) setUsers([]);
@@ -29,7 +60,9 @@ const ViewProfile = () => {
         if (mounted) setLoading(false);
       }
     };
-    fetchUsers();
+
+    fetchData();
+
     return () => { mounted = false; };
   }, []);
 
@@ -58,11 +91,7 @@ const ViewProfile = () => {
     { icon: <img src="/createicon.png" alt="Create" style={{ width: '48px', height: '48px' }} />, label: "Create", onClick: () => navigate('/Create') },
     { icon: <img src="/favicon.png" alt="Saves" style={{ width: '48px', height: '48px' }} />, label: "Saves", onClick: () => navigate('/Saves') },
     { icon: <img src="/profileicon.png" alt="Profile" style={{ width: '48px', height: '48px' }} />, label: "Profile", onClick: () => navigate('/Profile') },
-     {
-      icon: <img src="/ViewProfile.png" alt="Explore" style={{ width: '48px', height: '48px' }} />,
-      label: "Explore",
-      onClick: () => navigate('/ViewProfile'),
-    },
+    { icon: <img src="/ViewProfile.png" alt="Explore" style={{ width: '48px', height: '48px' }} />, label: "Explore", onClick: () => navigate('/ViewProfile') }
   ];
 
   return (

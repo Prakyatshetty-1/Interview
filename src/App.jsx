@@ -30,6 +30,7 @@ function App() {
         <Route path='/saves' element={<Saves/>}/>
         <Route path='/profile' element={<Profile/>}/>
         <Route path="/profile/:id" element={<Profile />} />
+        <Route path="/profile/:id" element={<Profile/>} />
         <Route path="/interview/:id" element={<InterviewPortal />} />
         <Route path='/viewprofile' element={<ViewProfile/>}/>
         <Route path='/questionfolder' element={<Questionfolder/>}/>

@@ -1,3 +1,4 @@
+// User.cjs
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
@@ -80,6 +81,10 @@ const userSchema = new mongoose.Schema({
       return this.photoURL || '';
     }
   },
+
+  // *** NEW: persistent follower/following arrays (store relations) ***
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
   
   // Stats and achievements
   stats: {
@@ -91,8 +96,8 @@ const userSchema = new mongoose.Schema({
     problemsSolved: { type: Number, default: 0 },
     mockInterviews: { type: Number, default: 0 },
     globalRank: { type: Number, default: 0 },
-    followers: { type: Number, default: 0 },
-    following: { type: Number, default: 0 }
+    followers: { type: Number, default: 0 }, // numeric snapshot
+    following: { type: Number, default: 0 }  // numeric snapshot
   },
 
   // LeetCode specific stats

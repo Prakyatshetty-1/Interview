@@ -1,5 +1,5 @@
 // src/pages/Profile.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   FiEdit2,
@@ -24,6 +24,11 @@ import CountUp from "../react-bits/CountUp";
 import "./Profile.css";
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+const DEFAULT_ABOUT = "This user hasn't added an about yet.";
+
+
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 const Card = ({ title = "System Design Interview", company = "Google", difficulty = "Hard", duration = "45 min" }) => (
   <div className="interview-card">
@@ -47,6 +52,12 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // follow states
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
 
   const [isEditingAbout, setIsEditingAbout] = useState(false);
   const [tempAboutText, setTempAboutText] = useState("");
@@ -88,12 +99,187 @@ export default function Profile() {
     favTopics: user?.interests || user?.favoriteTopics || ["System Design", "Data Structures", "Algorithms"],
   };
 
+// Profile.jsx - replace existing Card component with this
+const Card = ({
+  title = "System Design Interview",
+  company = "Google",
+  difficulty = "Hard",
+  duration = "45 min",
+  creator = "",
+  level = "",
+  attemptedAt = null,
+  onClick = () => {},
+}) => {
+  const attemptedLabel = attemptedAt ? new Date(attemptedAt).toLocaleString() : null;
+  return (
+    <div className="interview-card" onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
+      <h4 className="card-title">{title}</h4>
+
+      {/* creator line */}
+      {creator ? <p className="card-creator" style={{ margin: '6px 0 0 0', color: '#cbd5e1', fontSize: '13px' }}>By {creator}</p> : null}
+
+      {/* company or source */}
+      {company ? <p className="card-company">{company}</p> : null}
+
+      <div className="card-meta" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '10px' }}>
+        <div className="card-footer" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <span style={{ fontSize: '12px', color: '#9ca3af' }}>{difficulty}</span>
+          <span style={{ fontSize: '12px', color: '#9ca3af' }}>{duration}</span>
+        </div>
+
+        {/* level badge (if provided) */}
+        {level ? (
+          <div style={{
+            marginLeft: 'auto',
+            padding: '4px 8px',
+            borderRadius: 8,
+            background: 'rgba(147,51,234,0.12)',
+            color: '#e9d5ff',
+            fontSize: '12px',
+            fontWeight: 600
+          }}>
+            {level}
+          </div>
+        ) : null}
+      </div>
+
+      {/* attempted time */}
+      {attemptedLabel ? (
+        <div style={{ marginTop: '8px', fontSize: '12px', color: '#9ca3af' }}>
+          Attempted: {attemptedLabel}
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
   useEffect(() => {
     fetchUserProfile();
-    // re-run when identifier changes (navigating between profiles)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [identifier]);
+  
+const fileInputRef = useRef(null);
+const [uploading, setUploading] = useState(false);
+const [uploadProgress, setUploadProgress] = useState(0);
+const [recentInterviews, setRecentInterviews] = useState([]);
 
+const triggerProfilePicSelect = () => {
+  if (fileInputRef.current) fileInputRef.current.click();
+};
+
+const uploadFileToCloudinary = (file, onProgress) => {
+  return new Promise((resolve, reject) => {
+    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+      reject(new Error("Cloudinary config missing. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET in .env"));
+      return;
+    }
+
+    const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+
+    xhr.upload.addEventListener("progress", (e) => {
+      if (e.lengthComputable) {
+        const pct = Math.round((e.loaded / e.total) * 100);
+        if (onProgress) onProgress(pct);
+      }
+    });
+
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4) {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const resp = JSON.parse(xhr.responseText);
+            resolve(resp);
+          } catch (err) {
+            reject(err);
+          }
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.responseText}`));
+        }
+      }
+    };
+
+    xhr.onerror = () => {
+      reject(new Error("Network error during upload"));
+    };
+
+    xhr.send(formData);
+  });
+};
+
+const handleFileInputChange = async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  // Basic client-side validations
+  if (!file.type.startsWith("image/")) {
+    alert("Please select an image file.");
+    return;
+  }
+  const MAX_MB = 5;
+  if (file.size > MAX_MB * 1024 * 1024) {
+    alert(`Please pick an image smaller than ${MAX_MB}MB`);
+    return;
+  }
+
+  try {
+    setUploading(true);
+    setUploadProgress(0);
+
+    const cloudResp = await uploadFileToCloudinary(file, (pct) => setUploadProgress(pct));
+    const imageUrl = cloudResp.secure_url || cloudResp.url;
+    if (!imageUrl) throw new Error("No secure_url returned by Cloudinary");
+
+    // Save to your server via existing updateProfile function
+    await updateProfile({ profilePicture: imageUrl });
+
+    // update local UI immediately
+    setUser(prev => ({ ...prev, profilePicture: imageUrl }));
+
+    alert("Profile picture updated!");
+  } catch (err) {
+    console.error("Profile pic upload error:", err);
+    alert("Failed to upload profile picture: " + (err.message || err));
+  } finally {
+    setUploading(false);
+    setUploadProgress(0);
+    if (fileInputRef.current) fileInputRef.current.value = ""; // reset
+  }
+};
+
+const mergeAndSortRecents = (serverArray = [], localArray = [], limit = 12) => {
+  // normalize arrays to objects with id
+  const items = [...(serverArray || []), ...(localArray || [])].filter(Boolean);
+  // remove duplicates (by id or title+attemptedAt fallback)
+  const seen = new Map();
+  items.forEach(item => {
+    const key = item.id || item.packId || (item.title && item.title + (item.attemptedAt || ""));
+    if (!seen.has(key)) {
+      seen.set(key, item);
+    } else {
+      // keep the newest attemptedAt if duplicate
+      const existing = seen.get(key);
+      if (item.attemptedAt && (!existing.attemptedAt || new Date(item.attemptedAt) > new Date(existing.attemptedAt))) {
+        seen.set(key, item);
+      }
+    }
+  });
+  const merged = Array.from(seen.values());
+  merged.sort((a, b) => {
+    const ta = a.attemptedAt ? new Date(a.attemptedAt).getTime() : 0;
+    const tb = b.attemptedAt ? new Date(b.attemptedAt).getTime() : 0;
+    return tb - ta;
+  });
+  return merged.slice(0, limit);
+};
+
+
+  // Fetch profile (public or own)
   const fetchUserProfile = async () => {
     setLoading(true);
     setError(null);
@@ -106,6 +292,8 @@ export default function Profile() {
           throw new Error('Failed to fetch user profile');
         }
         const data = await res.json();
+
+        // core state updates
         setUser(data);
         setTempAboutText(data.aboutText || "");
         setTempProfileData({
@@ -115,6 +303,17 @@ export default function Profile() {
           education: data.education || "",
           interests: data.interests || data.favoriteTopics || [],
         });
+
+        // initialize follower/following values if present in returned data
+        setFollowersCount((data.stats && typeof data.stats.followers === 'number') ? data.stats.followers : 0);
+        setFollowingCount((data.stats && typeof data.stats.following === 'number') ? data.stats.following : 0);
+
+        // --- HERE: populate recentInterviews from server only (privacy)
+        const serverRecents = data.recentInterviews || data.recentlyAttempted || data.recentlyViewed || [];
+        setRecentInterviews(mergeAndSortRecents(serverRecents, [], 12));
+
+        // try to fetch follow-status (if endpoint exists)
+        fetchFollowStatus(identifier).catch(() => {});
         return;
       }
 
@@ -135,6 +334,8 @@ export default function Profile() {
       }
       if (!response.ok) throw new Error('Failed to fetch profile');
       const userData = await response.json();
+
+      // core state updates
       setUser(userData);
       setTempAboutText(userData.aboutText || "");
       setTempProfileData({
@@ -144,6 +345,39 @@ export default function Profile() {
         education: userData.education || "",
         interests: userData.interests || [],
       });
+
+      // initialize followers/following counts
+      setFollowersCount((userData.stats && typeof userData.stats.followers === 'number') ? userData.stats.followers : 0);
+      setFollowingCount((userData.stats && typeof userData.stats.following === 'number') ? userData.stats.following : 0);
+      setIsFollowing(false); // can't follow yourself
+
+      // --- HERE: merge server recents with any localStorage fallback (only for own profile)
+      const serverRecents = userData.recentInterviews || userData.recentlyAttempted || userData.recentlyViewed || [];
+
+let localRecents = [];
+try {
+  const token = localStorage.getItem('token');
+  const getUserIdFromToken = (token) => {
+    if (!token || typeof token !== "string") return null;
+    try {
+      const parts = token.split(".");
+      if (parts.length !== 3) return null;
+      const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const json = JSON.parse(decodeURIComponent(escape(atob(payload))));
+      return json.sub || json.userId || json.id || json._id || null;
+    } catch (e) {
+      return null;
+    }
+  };
+  const userId = getUserIdFromToken(token);
+  const baseKey = `recentInterviews_${userId || 'anonymous'}`;
+  const parsed = JSON.parse(localStorage.getItem(baseKey) || '[]');
+  if (Array.isArray(parsed)) localRecents = parsed;
+} catch (e) {
+  localRecents = [];
+}
+
+setRecentInterviews(mergeAndSortRecents(serverRecents, localRecents, 12));
     } catch (err) {
       console.error('Error fetching profile:', err);
       setError(err.message || 'Failed to load profile');
@@ -153,28 +387,184 @@ export default function Profile() {
     }
   };
 
+
+  // fetch follow-status helper (optional endpoint on server)
+  const fetchFollowStatus = async (targetUserId) => {
+    try {
+      if (!targetUserId) return;
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${API_BASE}/api/users/${encodeURIComponent(targetUserId)}/follow-status`, { headers });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        console.warn('fetchFollowStatus non-OK response', res.status, text);
+        return;
+      }
+
+      const body = await res.json().catch(() => null);
+      if (!body) return;
+
+      if (typeof body.isFollowing === 'boolean') setIsFollowing(body.isFollowing);
+      if (typeof body.followersCount === 'number') setFollowersCount(body.followersCount);
+      if (typeof body.followingCount === 'number') setFollowingCount(body.followingCount);
+
+      return body;
+    } catch (err) {
+      console.warn('fetchFollowStatus failed', err);
+    }
+  };
+
+  // follow / unfollow helpers (POST endpoints)
+const followUser = async (targetUserId) => {
+  try {
+    if (!targetUserId) return;
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in to follow users');
+      return;
+    }
+
+    setFollowLoading(true);
+
+    // optimistic UI so it feels instant
+    setIsFollowing(true);
+    setFollowersCount(prev => prev + 1);
+
+    const res = await fetch(`${API_BASE}/api/users/${encodeURIComponent(targetUserId)}/follow`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+    });
+
+    // if server returns non-JSON (error), grab text for meaningful logs
+    const textOrJson = await res.text().catch(() => '');
+    let body = {};
+    try { body = textOrJson ? JSON.parse(textOrJson) : {}; } catch (parseErr) { body = { text: textOrJson }; }
+
+    if (!res.ok) {
+      // revert optimistic change
+      setIsFollowing(false);
+      setFollowersCount(prev => Math.max(0, prev - 1));
+      console.error('Follow failed', res.status, body);
+      // show server message if provided
+      const serverMsg = body?.message || body?.error || body?.text || `Server returned ${res.status}`;
+      throw new Error(serverMsg);
+    }
+
+    // success: prefer authoritative server counts
+    if (typeof body.followersCount === 'number') setFollowersCount(body.followersCount);
+    if (typeof body.followingCount === 'number') setFollowingCount(body.followingCount);
+    setIsFollowing(true);
+
+    // Re-sync: fetch follow-status and profile from server so ui exactly matches DB
+    // Use identifier (username/id) if available; else use returned targetId
+    const idToRefetch = identifier || body.targetId || targetUserId;
+    await fetchFollowStatus(idToRefetch).catch(() => {});
+    // refresh profile data so left-side user.stats (if used) updates on refresh
+    await fetchUserProfile();
+  } catch (err) {
+    console.error('Error following user:', err);
+    alert(err.message || 'Failed to follow');
+  } finally {
+    setFollowLoading(false);
+  }
+};
+
+const unfollowUser = async (targetUserId) => {
+  try {
+    if (!targetUserId) return;
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in to unfollow users');
+      return;
+    }
+
+    setFollowLoading(true);
+
+    // optimistic
+    setIsFollowing(false);
+    setFollowersCount(prev => Math.max(0, prev - 1));
+
+    const res = await fetch(`${API_BASE}/api/users/${encodeURIComponent(targetUserId)}/unfollow`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+    });
+
+    const textOrJson = await res.text().catch(() => '');
+    let body = {};
+    try { body = textOrJson ? JSON.parse(textOrJson) : {}; } catch (parseErr) { body = { text: textOrJson }; }
+
+    if (!res.ok) {
+      // revert optimistic
+      setIsFollowing(true);
+      setFollowersCount(prev => prev + 1);
+      console.error('Unfollow failed', res.status, body);
+      const serverMsg = body?.message || body?.error || body?.text || `Server returned ${res.status}`;
+      throw new Error(serverMsg);
+    }
+
+    if (typeof body.followersCount === 'number') setFollowersCount(body.followersCount);
+    if (typeof body.followingCount === 'number') setFollowingCount(body.followingCount);
+    setIsFollowing(false);
+
+    const idToRefetch = identifier || body.targetId || targetUserId;
+    await fetchFollowStatus(idToRefetch).catch(() => {});
+    await fetchUserProfile();
+  } catch (err) {
+    console.error('Error unfollowing user:', err);
+    alert(err.message || 'Failed to unfollow');
+  } finally {
+    setFollowLoading(false);
+  }
+};
+
   // update about (only allowed for own profile; server will enforce auth)
+  // replace your updateAboutText function with this
   const updateAboutText = async (newAboutText) => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error('No authentication token found');
+      if (!token) throw new Error('No authentication token found (localStorage.token is missing)');
+
+      // quick guard
+      if (typeof newAboutText !== 'string') newAboutText = String(newAboutText || '');
+
       const response = await fetch(`${API_BASE}/api/profile/about`, {
         method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ aboutText: newAboutText }),
       });
+
+      // parse body safely
+      const payload = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update about');
+        console.error('[Profile] PATCH /api/profile/about failed:', response.status, payload);
+        throw new Error(payload?.message || `Server returned ${response.status}`);
       }
-      const result = await response.json();
-      setUser(prev => ({ ...prev, aboutText: newAboutText }));
-      return result;
+
+      // Prefer authoritative user returned by server. If not present, fallback to newAboutText.
+      const updatedUser = payload?.user || {};
+      const storedAbout = updatedUser?.aboutText ?? payload?.aboutText ?? newAboutText;
+
+      // update local state so UI immediately reflects the stored aboutText
+      setUser(prev => ({ ...prev, aboutText: storedAbout }));
+      setTempAboutText(storedAbout);
+
+      // Re-fetch profile to re-sync other fields if you rely on them (optional)
+      // Await ensures subsequent UI uses latest fetch result
+      await fetchUserProfile();
+
+      console.log('[Profile] aboutText updated successfully on server');
+      return payload;
     } catch (err) {
-      console.error('Error updating about:', err);
+      console.error('[Profile] updateAboutText error:', err);
       throw err;
     }
   };
+
 
   // update profile (PUT) - only for own profile
   const updateProfile = async (profileData) => {
@@ -196,7 +586,7 @@ export default function Profile() {
   };
 
   const handleProfileEditClick = () => {
-    if (!isOwnProfile) return; // guard (shouldn't be reachable via UI)
+    if (!isOwnProfile) return;
     setIsEditingProfile(true);
     setTempProfileData({
       username: user?.username || user?.name || "",
@@ -288,7 +678,7 @@ export default function Profile() {
     );
   }
 
-  // MAIN RENDER (unchanged layout except edit gates)
+  // MAIN RENDER
   return (
     <>
       <div className="profile-container">
@@ -311,10 +701,13 @@ export default function Profile() {
             <div style={{ display: "flex", marginTop: "24px", marginLeft: "24px", gap: "20px" }}>
               <div className="rightprofpic">
                 {user?.profilePicture ? (
-                  <img src={user.profilePicture} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: '24px', fontWeight: 'bold', color: 'white' }} />
-                )}
+  <img
+    src={user.profilePicture}
+    alt="Profile"
+    style={{ width: '100%', height: '100%', borderRadius: '8px', objectFit: 'cover' }}
+  />
+) : null}
+
               </div>
               <div style={{ color: "white", marginTop: "30px" }}>
                 <h1 style={{ fontSize: "17px", fontWeight: "500", margin: "0 0 10px 0" }}>
@@ -322,29 +715,61 @@ export default function Profile() {
                 </h1>
                 <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
                   <p style={{ fontSize: "13px", fontWeight: "400", color: "#8f8f8f", margin: 0 }}>
-                    <span style={{ color: "white", fontSize: "14px", fontWeight: "600" }}>{user?.stats?.followers || 0}</span> Followers
+                    <span style={{ color: "white", fontSize: "14px", fontWeight: "600" }}>{followersCount || user?.stats?.followers || 0}</span> Followers
                   </p>
                   <p style={{ fontSize: "13px", fontWeight: "400", color: "#8f8f8f", margin: 0 }}>
-                    <span style={{ color: "white", fontSize: "14px", fontWeight: "600" }}>{user?.stats?.following || 0}</span> Following
+                    <span style={{ color: "white", fontSize: "14px", fontWeight: "600" }}>{followingCount || user?.stats?.following || 0}</span> Following
                   </p>
                 </div>
-                <h2 style={{ color: "#8f8f8f", fontSize: "17px", fontWeight: "400", marginTop: "30px", margin: "30px 0 0 0" }}>
-                  Rank <span style={{ color: "white", fontSize: "17px", fontWeight: "600", marginLeft: "5px" }}>{user?.stats?.globalRank || "N/A"}</span>
-                </h2>
+
+                {/* Replace: Edit Profile (own) vs Follow (other) */}
+                <div style={{ marginTop: "20px" }}>
+                  {isOwnProfile ? (
+                    <button
+                      style={{ backgroundColor: "#6b21a8", color: "white", border: "1px solid #9333ea", borderRadius: "6px", padding: "10px 50px", fontSize: "14px", fontWeight: "500", cursor: "pointer", transition: "all 0.2s ease", outline: "none", lineHeight: "20px", whiteSpace: "nowrap", display: "inline-block", textAlign: "center" }}
+                      onMouseEnter={(e) => { e.target.style.backgroundColor = "#9333ea"; e.target.style.color = "#ffffff"; }}
+                      onMouseLeave={(e) => { e.target.style.backgroundColor = "#6b21a8"; e.target.style.color = "white"; }}
+                      onClick={handleProfileEditClick}
+                    >
+                      Edit Profile
+                    </button>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (followLoading) return;
+                          if (isFollowing) {
+                            unfollowUser(identifier || user?._id);
+                          } else {
+                            followUser(identifier || user?._id);
+                          }
+                        }}
+                        style={{
+                          padding: '8px 14px',
+                          borderRadius: '8px',
+                          border: isFollowing ? '1px solid rgba(147,51,234,0.6)' : '1px solid rgba(255,255,255,0.06)',
+                          backgroundColor: isFollowing ? 'rgba(147,51,234,0.12)' : 'transparent',
+                          color: isFollowing ? '#e9d5ff' : '#ffffff',
+                          cursor: followLoading ? 'not-allowed' : 'pointer',
+                          fontSize: '14px',
+                          fontWeight: 600,
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={e => { if (!isFollowing) e.currentTarget.style.backgroundColor = 'rgba(147,51,234,0.08)'; }}
+                        onMouseLeave={e => { if (!isFollowing) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                        title={isFollowing ? 'Unfollow' : 'Follow'}
+                      >
+                        {followLoading ? (isFollowing ? 'Unfollowing…' : 'Following…') : (isFollowing ? 'Following' : 'Follow')}
+                      </button>
+
+                      
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-
-            {/* Only show "Edit Profile" for your own profile */}
-            {isOwnProfile && (
-              <button
-                style={{ backgroundColor: "#6b21a8", color: "white", border: "1px solid #9333ea", borderRadius: "6px", padding: "8px 16px", fontSize: "14px", fontWeight: "400", cursor: "pointer", transition: "all 0.2s ease", outline: "none", lineHeight: "20px", width: "calc(100% - 48px)", marginLeft: "24px", marginTop: "20px" }}
-                onMouseEnter={(e) => { e.target.style.backgroundColor = "#9333ea"; e.target.style.color = "#ffffff"; }}
-                onMouseLeave={(e) => { e.target.style.backgroundColor = "#6b21a8"; e.target.style.color = "white"; }}
-                onClick={handleProfileEditClick}
-              >
-                Edit Profile
-              </button>
-            )}
 
             <div className="divider"></div>
 
@@ -405,8 +830,70 @@ export default function Profile() {
                 ))}
               </div>
             </div>
-
-            {/* Progress analytics, rest of left panel unchanged */}
+{/* Progress Analytics */}
+            <div className="progress-analytics">
+              <h2 className="section-title">
+                <FiTrendingUp /> Progress Analytics
+              </h2>
+              <div className="analytics-grid">
+                <div className="analytics-card analytics-card-purple">
+                  <div className="analytics-value analytics-value-purple">
+                    <CountUp
+                      from={0}
+                      to={user?.stats?.totalPracticeHours || 0}
+                      separator=","
+                      direction="up"
+                      duration={1}
+                      className="count-up4"
+                    />
+                  </div>
+                  <div className="analytics-label">Practice Hours</div>
+                  <div className="analytics-change">+12 this week</div>
+                </div>
+                <div className="analytics-card analytics-card-green">
+                  <div className="analytics-value analytics-value-green">
+                    <CountUp
+                      from={0}
+                      to={user?.stats?.problemsSolved || 0}
+                      separator=","
+                      direction="up"
+                      duration={1}
+                      className="count-up4"
+                    />
+                  </div>
+                  <div className="analytics-label">Problems Solved</div>
+                  <div className="analytics-change">+15 this week</div>
+                </div>
+                <div className="analytics-card analytics-card-yellow">
+                  <div className="analytics-value analytics-value-yellow">
+                    <CountUp
+                      from={0}
+                      to={user?.stats?.mockInterviews || 0}
+                      separator=","
+                      direction="up"
+                      duration={1}
+                      className="count-up4"
+                    />
+                  </div>
+                  <div className="analytics-label">Mock Interviews</div>
+                  <div className="analytics-change">+3 this week</div>
+                </div>
+                <div className="analytics-card analytics-card-red">
+                  <div className="analytics-value analytics-value-red">
+                    <CountUp
+                      from={2000}
+                      to={user?.stats?.globalRank || 2000}
+                      separator=","
+                      direction="up"
+                      duration={1}
+                      className="count-up4"
+                    />
+                  </div>
+                  <div className="analytics-label">Global Rank</div>
+                  <div className="analytics-change">↗ 156 this month</div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Right Panel */}
@@ -414,18 +901,28 @@ export default function Profile() {
             <div className="upperrightprof">
               <div className="profpicss">
                 {user?.profilePicture ? (
-                  <img src={user.profilePicture} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: '48px', fontWeight: 'bold', color: 'white' }} />
-                )}
+  <img
+    src={user.profilePicture}
+    alt="Profile"
+    style={{ width: '100%', height: '100%', borderRadius: '8px', objectFit: 'cover' }}
+  />
+) : null}
+
               </div>
 
               {/* ABOUT SECTION */}
               <div className="aboutprof">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "10px",
+                  }}
+                >
                   <h1>About me</h1>
 
-                  {/* Only show the edit button if you're viewing your own profile */}
+                  {/* Show Edit button only if it's your own profile and not currently editing */}
                   {isOwnProfile && !isEditingAbout && (
                     <button
                       onClick={(e) => {
@@ -449,10 +946,8 @@ export default function Profile() {
                         alignItems: "center",
                         gap: "6px",
                       }}
-                      onMouseEnter={(e) => { e.target.style.backgroundColor = "#9333ea"; e.target.style.color = "#ffffff"; }}
-                      onMouseLeave={(e) => { e.target.style.backgroundColor = "transparent"; e.target.style.color = "#9333ea"; }}
                     >
-                      <FiEdit2 size={14} /> Edit
+                      Edit
                     </button>
                   )}
                 </div>
@@ -479,30 +974,81 @@ export default function Profile() {
                       placeholder="Tell us about yourself..."
                       autoFocus
                     />
-                    <div style={{ display: "flex", gap: "10px", marginTop: "12px", justifyContent: "flex-end" }}>
-                      <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setTempAboutText(user?.aboutText || ""); setIsEditingAbout(false); }} style={{ backgroundColor: "transparent", color: "#9333ea", border: "1px solid #9333ea", borderRadius: "6px", padding: "8px 16px", fontSize: "14px", cursor: "pointer", transition: "all 0.2s ease" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        marginTop: "12px",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      {/* Cancel */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setTempAboutText(user?.aboutText || "");
+                          setIsEditingAbout(false);
+                        }}
+                        style={{
+                          backgroundColor: "transparent",
+                          color: "#9333ea",
+                          border: "1px solid #9333ea",
+                          borderRadius: "6px",
+                          padding: "8px 16px",
+                          fontSize: "14px",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                        }}
+                      >
                         Cancel
                       </button>
-                      <button onClick={async (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (!tempAboutText.trim()) { alert("Please enter some text before saving."); return; }
-                        try {
-                          setIsEditingAbout(false);
-                          await updateAboutText(tempAboutText.trim());
-                        } catch (error) {
-                          console.error("Error saving about text:", error);
-                          setIsEditingAbout(true);
-                          alert("Failed to save. Please try again.");
-                        }
-                      }} disabled={!tempAboutText.trim()} style={{ backgroundColor: tempAboutText.trim() ? "#9333ea" : "#666", color: "#ffffff", border: "none", borderRadius: "6px", padding: "8px 16px", fontSize: "14px", cursor: tempAboutText.trim() ? "pointer" : "not-allowed", transition: "all 0.2s ease" }}>
+
+                      {/* Save */}
+                      <button
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (!tempAboutText.trim()) {
+                            alert("Please enter some text before saving.");
+                            return;
+                          }
+                          try {
+                            await updateAboutText(tempAboutText.trim());
+                            setIsEditingAbout(false);
+                          } catch (error) {
+                            console.error("Error saving about text:", error);
+                            alert("Failed to save. Please try again.");
+                          }
+                        }}
+                        disabled={!tempAboutText.trim()}
+                        style={{
+                          backgroundColor: tempAboutText.trim() ? "#9333ea" : "#666",
+                          color: "#ffffff",
+                          border: "none",
+                          borderRadius: "6px",
+                          padding: "8px 16px",
+                          fontSize: "14px",
+                          cursor: tempAboutText.trim() ? "pointer" : "not-allowed",
+                          transition: "all 0.2s ease",
+                        }}
+                      >
                         Save Changes
                       </button>
                     </div>
                   </div>
                 ) : (
-                  // make about TEXT clickable only for own profile
-                  <div style={{ cursor: isOwnProfile ? "pointer" : "default", padding: "12px", borderRadius: "8px", transition: "all 0.2s ease", border: "1px solid transparent", minHeight: "60px", backgroundColor: "rgba(255, 255, 255, 0.02)" }}
+                  // About text (clickable only for own profile)
+                  <div
+                    style={{
+                      cursor: isOwnProfile ? "pointer" : "default",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      transition: "all 0.2s ease",
+                      border: "1px solid transparent",
+                      minHeight: "60px",
+                      backgroundColor: "rgba(255, 255, 255, 0.02)",
+                    }}
                     onClick={(e) => {
                       if (!isOwnProfile) return;
                       e.preventDefault();
@@ -511,25 +1057,35 @@ export default function Profile() {
                       setTempAboutText(user?.aboutText || "");
                     }}
                     onMouseEnter={(e) => {
-                      if (isOwnProfile) { e.target.style.backgroundColor = "rgba(147, 51, 234, 0.1)"; e.target.style.border = "1px solid rgba(147, 51, 234, 0.3)"; }
+                      if (isOwnProfile) {
+                        e.target.style.backgroundColor = "rgba(147, 51, 234, 0.1)";
+                        e.target.style.border =
+                          "1px solid rgba(147, 51, 234, 0.3)";
+                      }
                     }}
                     onMouseLeave={(e) => {
-                      if (isOwnProfile) { e.target.style.backgroundColor = "rgba(255, 255, 255, 0.02)"; e.target.style.border = "1px solid transparent"; }
+                      if (isOwnProfile) {
+                        e.target.style.backgroundColor = "rgba(255, 255, 255, 0.02)";
+                        e.target.style.border = "1px solid transparent";
+                      }
                     }}
                   >
                     <p style={{ margin: 0, color: user?.aboutText ? "#ffffff" : "#8f8f8f", lineHeight: "1.5", fontSize: "14px" }}>
-                      {user?.aboutText || (isOwnProfile ? "Click here to add information about yourself..." : "No information provided.")}
+                      {user?.aboutText && user.aboutText.trim() !== "" 
+                        ? user.aboutText 
+                        : (isOwnProfile ? "Click here to add information about yourself..." : DEFAULT_ABOUT)}
                     </p>
+
                   </div>
                 )}
               </div>
+
             </div>
 
             <HeatMap
               userId={identifier || user?._id}
               key={identifier || user?._id || 'own'}
             />
-
 
             {/* Skills section and rest unchanged... */}
             <div className="skills-section">
@@ -569,7 +1125,79 @@ export default function Profile() {
                 </div>
               </div>
             </div>
+            {/* Interview Topics & Schedule Section */}
+            <div className="topics-schedule-section">
+              {/* Favorite Topics */}
+              <div className="topics-panel">
+                <h2 className="skills-title">
+                  <FiBookOpen /> Favorite Topics
+                </h2>
+                <div className="topics-tags">
+                  {interviewStats.favTopics.map((topic, index) => (
+                    <span key={index} className="topic-tag">
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
+              {/* Upcoming Schedule */}
+              <div className="schedule-panel">
+                <h2 className="skills-title">
+                  <FiCalendar /> Upcoming Events
+                </h2>
+                <div className="schedule-list">
+                  <div className="schedule-item schedule-item-purple">
+                    <FiClock className="schedule-icon schedule-icon-purple" />
+                    <div>
+                      <div className="schedule-title">System Design Mock</div>
+                      <div className="schedule-time">Tomorrow, 2:00 PM</div>
+                    </div>
+                  </div>
+                  <div className="schedule-item schedule-item-green">
+                    <FiClock className="schedule-icon schedule-icon-green" />
+                    <div>
+                      <div className="schedule-title">Behavioral Interview</div>
+                      <div className="schedule-time">Aug 12, 10:00 AM</div>
+                    </div>
+                  </div>
+                  <div className="schedule-item schedule-item-yellow">
+                    <FiClock className="schedule-icon schedule-icon-yellow" />
+                    <div>
+                      <div className="schedule-title">Coding Challenge</div>
+                      <div className="schedule-time">Aug 15, 4:00 PM</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+{/* Recently Attempted Interviews */}
+<div className="recent-interviews-section">
+  <h1 className="recent-interviews-title">{isOwnProfile ? "Recently Attempted Interviews" : "Recently Viewed Interviews"}</h1>
+  <div className="interviews-grid">
+    {recentInterviews && recentInterviews.length > 0 ? (
+        recentInterviews.map((it, idx) => (
+      <Card
+        key={it.id || it.packId || idx}
+        title={it.title || it.packName || it.name || "Untitled Interview"}
+        company={it.company || it.source || it.provider || ""}
+        difficulty={it.difficulty || it.level || "—"}
+        level={it.level || it.difficulty || it.levelName || ""}
+        creator={it.creator || it.author || it.createdBy || it.packCreator || ""}
+        duration={it.duration || it.estimatedDuration || it.length || "—"}
+        attemptedAt={it.attemptedAt || it.attempted_on || it.attemptedAtISO || it.completedAt || it.createdAt || null}
+        onClick={() => { if (it.packId || it.id) navigate(`/interview/${it.packId || it.id}`); }}
+      />
+        ))
+    ) : (
+      <div style={{ color: "#9ca3af", padding: "12px 0" }}>
+        No recently attempted interviews yet.
+      </div>
+    )}
+  </div>
+</div>
+    
             {/* rest of the right panel (topics, schedule, recent interviews) remains unchanged */}
           </div>
         </div>
@@ -587,11 +1215,59 @@ export default function Profile() {
             </div>
 
             <div className="profile-pic-edit">
-              <div className="profile-pic-large" onClick={handleProfilePicChange}>BS
-                <button className="camera-btn"><FiCamera size={12} /></button>
-              </div>
-              <p className="profile-pic-hint">Click to change profile picture</p>
-            </div>
+  {/* hidden file input */}
+  <input
+    type="file"
+    accept="image/*"
+    ref={fileInputRef}
+    style={{ display: 'none' }}
+    onChange={handleFileInputChange}
+  />
+
+  {/* clickable profile picture area */}
+  <div
+    className="profile-pic-large"
+    onClick={() => {
+      if (!isOwnProfile) return;
+      triggerProfilePicSelect();
+    }}
+    style={{ cursor: isOwnProfile ? 'pointer' : 'default' }}
+  >
+    {user?.profilePicture ? ( 
+      <img
+        src={user.profilePicture}
+        alt="Profile large"
+        style={{ width: '100%', height: '100%', borderRadius: '8px', objectFit: 'cover' }}
+      />
+    ) : null}
+
+
+
+    <button
+      type="button"
+      className="camera-btn"
+      onClick={(e) => {
+        e.stopPropagation();
+        if (!isOwnProfile) return;
+        triggerProfilePicSelect();
+      }}
+      title="Change profile picture"
+    >
+      <FiCamera size={12} />
+    </button>
+  </div>
+
+  <p className="profile-pic-hint">Click to change profile picture</p>
+
+  {uploading && (
+    <div style={{ marginTop: '8px' }}>
+      <div style={{ fontSize: '12px', color: '#ddd' }}>Uploading: {uploadProgress}%</div>
+      <div style={{ width: '100%', height: '6px', background: '#2a2a2a', borderRadius: 4, marginTop: 6 }}>
+        <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#9333ea', borderRadius: 4 }} />
+      </div>
+    </div>
+  )}
+</div>
 
             <div className="form-field">
               <label className="form-label">Username</label>

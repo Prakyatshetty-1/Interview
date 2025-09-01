@@ -178,28 +178,30 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   try {
-    const token = localStorage.getItem("token"); // ✅ retrieve token
-
+    const token = localStorage.getItem("token");
     if (!token) {
       alert("You are not logged in.");
       return;
     }
 
+    // Extract common fields from answers structure
+    const company = (answers[0] && answers[0].experience) ? answers[0].experience.trim() : "";
+    const education = (answers[1] && answers[1].college) ? answers[1].college.trim() : "";
+
     const response = await fetch("http://localhost:5000/api/preference", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // ✅ correct token usage
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ answers }),
+      body: JSON.stringify({ answers, company, education }),
     });
 
     const data = await response.json();
 
     if (response.ok) {
       alert("Preferences submitted successfully!");
-      console.log("Saved preferences:", data);
-      navigate("/dashboard"); // redirect to Dashboard
+      navigate("/dashboard");
     } else {
       console.error("Preference error:", data);
       alert(data.message || "Failed to submit preferences");
@@ -209,6 +211,7 @@ const handleSubmit = async (e) => {
     alert("Something went wrong while submitting preferences.");
   }
 };
+
 
 
   const handleAnswerChange = (value, subQuestionId = null) => {

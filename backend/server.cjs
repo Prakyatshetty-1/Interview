@@ -23,13 +23,31 @@ app.use(cors({
     'http://127.0.0.1:5173',  // Alternative localhost
   ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  // include PATCH here (and any other methods you expect)
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   optionsSuccessStatus: 200 // For legacy browser support
 }));
 
-// ✅ Handle preflight requests explicitly
-app.options('*', cors());
+// Handle preflight requests explicitly with same options to ensure PATCH is allowed
+app.options('*', cors({
+  origin: [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
+}));
+
+// Optional fallback — this makes sure the header is present if some middleware later overrides it
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  next();
+});
+
 
 // ✅ Body parser middleware
 app.use(express.json());
@@ -446,6 +464,38 @@ app.patch('/api/profile/stats', authMiddleware, async (req, res) => {
   }
 });
 
+// PATCH /api/profile/about
+app.patch('/api/profile/about', authMiddleware, async (req, res) => {
+  try {
+    const aboutText =
+      req.body?.aboutText ?? req.body?.about ?? req.body?.description;
+
+    if (aboutText == null) {
+      return res.status(400).json({ message: 'aboutText is required' });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: { aboutText: String(aboutText) } },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({
+      message: 'About section updated successfully',
+      aboutText: updatedUser.aboutText,
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('PATCH /api/profile/about error:', error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+
 // Get user by username (for viewing other profiles)
 app.get('/api/profile/user/:username', async (req, res) => {
   try {
@@ -463,22 +513,123 @@ app.get('/api/profile/user/:username', async (req, res) => {
   }
 });
 
+// GET public user by id (public)
+app.get('/api/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: 'Missing id' });
+
+    // find by _id
+    const user = await User.findById(id)
+      .select('-password -email -attempts -saves -__v')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const mapped = {
+      _id: user._id,
+      name: user.name || user.fullName || '',
+      username: user.username || user.name || '',
+      fullName: user.fullName || '',
+      profilePicture: user.profilePicture || user.profileImage || '',
+      company: user.company || '',
+      education: user.education || '',
+      favoriteTopics: user.favoriteTopics || [],
+      interests: user.interests || [],
+      stats: user.stats || {},
+      aboutText: user.aboutText || ''
+    };
+
+    return res.status(200).json(mapped);
+  } catch (err) {
+    console.error('Error fetching user by id:', err);
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+
 // ✅ Preference routes
 const Preference = require('./Preference.cjs');
 
+// Replace the existing app.post('/api/preference', ...) handler with this:
 app.post('/api/preference', authMiddleware, async (req, res) => {
   const userId = req.user.id;
   const { answers } = req.body;
 
   try {
+    console.log('Saving preferences for user:', userId);
+    console.log('Answers received:', JSON.stringify(answers).slice(0, 1000)); // truncated log
+
+    // Save the Preference doc
     const newPref = new Preference({ userId, answers });
     await newPref.save();
+
+    // Helper to retrieve step answers whether key is numeric or string
+    const getStep = (k) => {
+      if (!answers) return undefined;
+      return answers[k] ?? answers[String(k)] ?? undefined;
+    };
+
+    // Try to extract company and education from known step structure
+    let companyVal = '';
+    let educationVal = '';
+
+    // Step 0 in your UI contains 'experience' (companies / years)
+    const step0 = getStep(0);
+    if (step0 && typeof step0 === 'object') {
+      companyVal = (step0.experience || step0.company || '').trim();
+    }
+
+    // Step 1 contains 'college' and 'field' (college -> education)
+    const step1 = getStep(1);
+    if (step1 && typeof step1 === 'object') {
+      educationVal = (step1.college || step1.field || '').trim();
+    }
+
+    // Fallback: scan all answers for keys that look like company/experience/college
+    if (!companyVal || !educationVal) {
+      for (const k of Object.keys(answers || {})) {
+        const v = answers[k];
+        if (!v) continue;
+        if (typeof v === 'object') {
+          if (!companyVal && (v.experience || v.company)) {
+            companyVal = (v.experience || v.company || '').trim();
+          }
+          if (!educationVal && (v.college || v.education || v.field)) {
+            educationVal = (v.college || v.education || v.field || '').trim();
+          }
+        } else if (!educationVal && typeof v === 'string' && /college|university|institute/i.test(v)) {
+          educationVal = v.trim();
+        }
+        if (companyVal && educationVal) break;
+      }
+    }
+
+    // Update the User document if we found values (otherwise leave as-is)
+    const update = {};
+    if (companyVal) update.company = companyVal;
+    if (educationVal) update.education = educationVal;
+
+    if (Object.keys(update).length > 0) {
+      const updatedUser = await User.findByIdAndUpdate(userId, { $set: update }, { new: true }).select('-password').lean();
+      console.log('Updated user with preference-derived fields:', {
+        id: userId,
+        company: updatedUser?.company,
+        education: updatedUser?.education
+      });
+    } else {
+      console.log('No company/education found in answers — user doc unchanged.');
+    }
+
     res.status(201).json({ message: 'Preferences saved successfully' });
   } catch (error) {
-    console.error('Error saving preferences:', error.message);
+    console.error('Error saving preferences:', error);
     res.status(500).json({ message: 'Error saving preferences', error: error.message });
   }
 });
+
 
 app.get('/api/preference/check', authMiddleware, async (req, res) => {
   const userId = req.user.id;
@@ -754,36 +905,53 @@ app.delete('/api/profile/attempts/:attemptId', authMiddleware, async (req, res) 
   }
 });
 
-// GET user by id (public)
-app.get('/api/users/:id', async (req, res) => {
+// Add this to server.cjs (for example, before your profile routes)
+app.get('/api/users', async (req, res) => {
   try {
-    const { id } = req.params;
-    if (!id) return res.status(400).json({ message: 'Missing id' });
+    const q = (req.query.q || '').trim();
+    let filter = {};
 
-    const user = await User.findById(id).select('-password -email -attempts -saves -__v').lean();
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (q) {
+      const re = new RegExp(q, 'i');
+      filter = {
+        $or: [
+          { name: re },
+          { username: re },
+          { fullName: re },
+          { company: re },
+          { education: re },
+          { favoriteTopics: re },
+          { interests: re }
+        ]
+      };
+    }
 
-    // Map shape (optional)
-    const mapped = {
-      _id: user._id,
-      name: user.name || user.fullName || '',
-      username: user.username || user.name || '',
-      fullName: user.fullName || '',
-      profilePicture: user.profilePicture || user.profileImage || '',
-      company: user.company || '',
-      education: user.education || '',
-      favoriteTopics: user.favoriteTopics || [],
-      interests: user.interests || [],
-      stats: user.stats || {},
-      aboutText: user.aboutText || ''
-    };
+    const users = await User.find(filter)
+      .select('-password -email -attempts -saves -__v')
+      .lean()
+      .exec();
+
+    const mapped = (users || []).map(u => ({
+      _id: u._id,
+      name: u.name || u.fullName || '',
+      username: u.username || u.name || '',
+      fullName: u.fullName || '',
+      profilePicture: u.profilePicture || u.profileImage || '',
+      company: u.company || '',
+      education: u.education || '',
+      favoriteTopics: u.favoriteTopics || [],
+      interests: u.interests || [],
+      stats: u.stats || {},
+      aboutText: u.aboutText || '',
+    }));
 
     res.status(200).json(mapped);
   } catch (err) {
-    console.error('Error fetching user by id:', err);
+    console.error('Error fetching users list:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
+
 
 // Public contributions for any user (no auth) - Add in server.cjs
 app.get('/api/users/:id/contributions', async (req, res) => {
@@ -1113,3 +1281,268 @@ app.get('/api/interviews/topic/:topic', async (req, res) => {
   }
 });
 
+// server.cjs - replace existing /api/profile/about handlers with this single, robust one
+// server.cjs - single robust about handler
+app.patch('/api/profile/about', authMiddleware, async (req, res) => {
+  try {
+    const aboutText = req.body?.aboutText ?? req.body?.about ?? req.body?.description;
+
+    if (aboutText == null) {
+      return res.status(400).json({ message: 'aboutText is required' });
+    }
+
+    const aboutString = String(aboutText);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: { aboutText: aboutString } },
+      { new: true, runValidators: true }
+    ).select('-password').lean();
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({
+      message: 'About section updated successfully',
+      aboutText: updatedUser.aboutText,
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('PATCH /api/profile/about error:', error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// GET follow status and count (public; uses Authorization if present)
+app.get('/api/users/:id/follow-status', async (req, res) => {
+  try {
+    const targetParam = req.params.id;
+    if (!targetParam) return res.status(400).json({ message: 'Missing id' });
+
+    // Resolve target user by _id OR username
+    let targetUser = null;
+    if (mongoose.Types.ObjectId.isValid(targetParam)) {
+      targetUser = await User.findById(targetParam).select('followers following').lean();
+    }
+    if (!targetUser) {
+      targetUser = await User.findOne({ username: targetParam }).select('followers following').lean();
+    }
+    if (!targetUser) return res.status(404).json({ message: 'User not found' });
+
+    const followersCount = Array.isArray(targetUser.followers) ? targetUser.followers.length : 0;
+    const followingCount = Array.isArray(targetUser.following) ? targetUser.following.length : 0;
+
+    let isFollowing = false;
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      try {
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, SECRET_KEY);
+        if (decoded && decoded.id) {
+          isFollowing = (targetUser.followers || []).some(f => String(f) === String(decoded.id));
+        }
+      } catch (err) {
+        // invalid token -> treat as unauthenticated
+      }
+    }
+
+    return res.json({ isFollowing, followersCount, followingCount, targetId: targetUser._id });
+  } catch (err) {
+    console.error('Error in follow-status:', err);
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// --- SAFE follow route ---
+app.post('/api/users/:id/follow', authMiddleware, async (req, res) => {
+  try {
+    const targetParam = req.params.id;
+    const userId = req.user && req.user.id;
+
+    if (!targetParam) return res.status(400).json({ message: 'Missing target id' });
+    if (!userId) return res.status(401).json({ message: 'Not authenticated (req.user.id missing)' });
+
+    // resolve target by id or username
+    let target = null;
+    if (mongoose.Types.ObjectId.isValid(targetParam)) {
+      target = await User.findById(targetParam);
+    }
+    if (!target) {
+      target = await User.findOne({ username: targetParam });
+    }
+    if (!target) return res.status(404).json({ message: 'Target user not found' });
+
+    if (String(userId) === String(target._id)) return res.status(400).json({ message: "You can't follow yourself" });
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.error('Invalid userId from token:', userId);
+      return res.status(400).json({ message: 'Invalid authenticated user id' });
+    }
+
+    const userObjectId = new mongoose.Types.ObjectId(String(userId));
+    const targetObjectId = new mongoose.Types.ObjectId(String(target._id));
+
+    // Perform the updates and return the updated docs (after update)
+    const updatedTarget = await User.findByIdAndUpdate(
+      targetObjectId,
+      { $addToSet: { followers: userObjectId } },
+      { new: true, runValidators: true }
+    ).select('followers following').lean();
+
+    const updatedCurrent = await User.findByIdAndUpdate(
+      userObjectId,
+      { $addToSet: { following: targetObjectId } },
+      { new: true, runValidators: true }
+    ).select('followers following').lean();
+
+    if (!updatedTarget || !updatedCurrent) {
+      console.error('Follow update did not return docs', { updatedTarget, updatedCurrent });
+      return res.status(500).json({ message: 'Follow update failed' });
+    }
+
+    const followersCount = Array.isArray(updatedTarget.followers) ? updatedTarget.followers.length : 0;
+    const followingCount = Array.isArray(updatedTarget.following) ? updatedTarget.following.length : 0;
+    const yourFollowingCount = Array.isArray(updatedCurrent.following) ? updatedCurrent.following.length : 0;
+
+    // persist stats numbers so snapshot fields remain consistent
+    try {
+      await User.findByIdAndUpdate(targetObjectId, {
+        $set: {
+          'stats.followers': followersCount,
+          'stats.following': followingCount
+        }
+      }).exec();
+      await User.findByIdAndUpdate(userObjectId, {
+        $set: {
+          'stats.following': yourFollowingCount
+        }
+      }).exec();
+    } catch (errPersist) {
+      console.error('Failed to persist stats counts after follow:', errPersist);
+      // non-fatal: continue and return computed counts
+    }
+
+    // safe logging
+    const followersSample = Array.isArray(updatedTarget.followers) ? updatedTarget.followers.slice(0, 10) : [];
+    const followingSample = Array.isArray(updatedCurrent.following) ? updatedCurrent.following.slice(0, 10) : [];
+
+    console.log(`User ${userId} followed ${String(target._id)}. followersCount=${followersCount}, yourFollowing=${yourFollowingCount}`);
+    console.log('updatedTarget.followers sample:', followersSample);
+    console.log('updatedCurrent.following sample:', followingSample);
+
+    return res.json({
+      message: 'Followed',
+      isFollowing: true,
+      followersCount,
+      followingCount,
+      yourFollowingCount,
+      targetId: String(target._id)
+    });
+  } catch (err) {
+    console.error('Error following user:', err.stack || err);
+    return res.status(500).json({ message: 'Server error', error: err.message, stack: err.stack });
+  }
+});
+
+// --- SAFE unfollow route ---
+app.post('/api/users/:id/unfollow', authMiddleware, async (req, res) => {
+  try {
+    const targetParam = req.params.id;
+    const userId = req.user && req.user.id;
+
+    if (!targetParam) return res.status(400).json({ message: 'Missing target id' });
+    if (!userId) return res.status(401).json({ message: 'Not authenticated (req.user.id missing)' });
+
+    let target = null;
+    if (mongoose.Types.ObjectId.isValid(targetParam)) target = await User.findById(targetParam);
+    if (!target) target = await User.findOne({ username: targetParam });
+    if (!target) return res.status(404).json({ message: 'Target user not found' });
+
+    if (String(userId) === String(target._id)) return res.status(400).json({ message: "You can't unfollow yourself" });
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.error('Invalid userId from token:', userId);
+      return res.status(400).json({ message: 'Invalid authenticated user id' });
+    }
+
+    const userObjectId = new mongoose.Types.ObjectId(String(userId));
+    const targetObjectId = new mongoose.Types.ObjectId(String(target._id));
+
+    const updatedTarget = await User.findByIdAndUpdate(
+      targetObjectId,
+      { $pull: { followers: userObjectId } },
+      { new: true, runValidators: true }
+    ).select('followers following').lean();
+
+    const updatedCurrent = await User.findByIdAndUpdate(
+      userObjectId,
+      { $pull: { following: targetObjectId } },
+      { new: true, runValidators: true }
+    ).select('followers following').lean();
+
+    if (!updatedTarget || !updatedCurrent) {
+      console.error('Unfollow update did not return docs', { updatedTarget, updatedCurrent });
+      return res.status(500).json({ message: 'Unfollow update failed' });
+    }
+
+    const followersCount = Array.isArray(updatedTarget.followers) ? updatedTarget.followers.length : 0;
+    const followingCount = Array.isArray(updatedTarget.following) ? updatedTarget.following.length : 0;
+    const yourFollowingCount = Array.isArray(updatedCurrent.following) ? updatedCurrent.following.length : 0;
+
+    // persist stats numbers
+    try {
+      await User.findByIdAndUpdate(targetObjectId, {
+        $set: {
+          'stats.followers': followersCount,
+          'stats.following': followingCount
+        }
+      }).exec();
+      await User.findByIdAndUpdate(userObjectId, {
+        $set: {
+          'stats.following': yourFollowingCount
+        }
+      }).exec();
+    } catch (errPersist) {
+      console.error('Failed to persist stats counts after unfollow:', errPersist);
+    }
+
+    const followersSample = Array.isArray(updatedTarget.followers) ? updatedTarget.followers.slice(0, 10) : [];
+    const followingSample = Array.isArray(updatedCurrent.following) ? updatedCurrent.following.slice(0, 10) : [];
+
+    console.log(`User ${userId} unfollowed ${String(target._id)}. followersCount=${followersCount}, yourFollowing=${yourFollowingCount}`);
+    console.log('updatedTarget.followers sample:', followersSample);
+    console.log('updatedCurrent.following sample:', followingSample);
+
+    return res.json({
+      message: 'Unfollowed',
+      isFollowing: false,
+      followersCount,
+      followingCount,
+      yourFollowingCount,
+      targetId: String(target._id)
+    });
+  } catch (err) {
+    console.error('Error unfollowing user:', err.stack || err);
+    return res.status(500).json({ message: 'Server error', error: err.message, stack: err.stack });
+  }
+});
+
+// server.cjs (requires auth to prevent abuse)
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+app.get('/api/cloudinary/sign', authMiddleware, (req, res) => {
+  try {
+    const timestamp = Math.round((Date.now() / 1000));
+    const signature = cloudinary.utils.api_sign_request({ timestamp }, process.env.CLOUDINARY_API_SECRET);
+    res.json({ signature, timestamp, apiKey: process.env.CLOUDINARY_API_KEY, cloudName: process.env.CLOUDINARY_CLOUD_NAME });
+  } catch (err) {
+    console.error('Error signing Cloudinary request:', err);
+    res.status(500).json({ message: 'Error signing request' });
+  }
+});

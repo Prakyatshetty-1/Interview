@@ -1,4 +1,3 @@
-
 // src/pages/InterviewPortal.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -19,6 +18,8 @@ export default function InterviewPortal() {
   const [isLoadingLLM, setIsLoadingLLM] = useState(false);
   const [transcript, setTranscript] = useState([]);
   const [error, setError] = useState("");
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [packMeta, setPackMeta] = useState(null);
 
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
@@ -115,6 +116,120 @@ export default function InterviewPortal() {
     }
   };
 
+// helper: try to pull user id from a JWT in localStorage (best-effort, non-verified decode)
+const getUserIdFromToken = (token) => {
+  if (!token || typeof token !== "string") return null;
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const json = JSON.parse(decodeURIComponent(escape(atob(payload))));
+    // Try common claim names
+    return json.sub || json.userId || json.id || json._id || null;
+  } catch (e) {
+    return null;
+  }
+};
+
+// Save recently attempted interview to server (if logged in) or fallback to localStorage (namespaced by user)
+const saveRecentInterview = async () => {
+  try {
+  // Build a robust title (avoid ternary/operator precedence issues)
+  const summaryTitle = (packMeta && packMeta.title)
+    ? String(packMeta.title).slice(0, 120)
+    : (Array.isArray(interviewQuestionsRef.current) && interviewQuestionsRef.current[0])
+      ? String(interviewQuestionsRef.current[0]).slice(0, 120)
+      : `Interview ${id || ""}`;
+
+  const summary = {
+    // canonical IDs
+    interviewId: id || null,
+    packId: (packMeta && packMeta.id) || id || null,
+    id: (packMeta && packMeta.id) || id || null,
+
+    // display/meta
+    title: summaryTitle,
+    questionsCount: Array.isArray(interviewQuestionsRef.current)
+      ? interviewQuestionsRef.current.length
+      : (interviewQuestions.length || 0),
+
+    // canonical attempt timestamp used by Profile mapping
+    attemptedAt: new Date().toISOString(),
+
+    // transcript trimmed
+    transcript: transcript.slice(-30).map((t) => ({
+      type: t.type,
+      text: String(t.text).slice(0, 600),
+    })),
+
+    // new fields so Profile can render creator/level/company/duration
+    creator: (packMeta && packMeta.creator) || null,
+    level: (packMeta && packMeta.level) || null,
+    company: (packMeta && packMeta.company) || null,
+    duration: (packMeta && packMeta.duration) || null,
+  };
+
+    const token = localStorage.getItem('token');
+    const userId = getUserIdFromToken(token);
+    // attach userId to the summary as well (harmless and helpful)
+    if (userId) summary.userId = userId;
+
+    if (token) {
+      // try server endpoint first (server should associate with authenticated user)
+      try {
+        const res = await fetch(`${API_BASE}/api/profile/recent-interviews`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(summary),
+        });
+
+        if (res.ok) {
+          console.log('[InterviewPortal] recent interview saved to server');
+          return;
+        } else {
+          const txt = await res.text().catch(() => '');
+          console.warn('[InterviewPortal] server save failed:', res.status, txt);
+          // continue to local fallback instead of returning
+        }
+      } catch (err) {
+        console.warn('[InterviewPortal] server save error - falling back to localStorage', err);
+      }
+    }
+
+  // Fallback: localStorage namespaced by user id
+  try {
+    const token = localStorage.getItem("token");
+    const userId = getUserIdFromToken(token);
+    const baseKey = `recentInterviews_${userId || "anonymous"}`;
+    const raw = localStorage.getItem(baseKey);
+    const arr = raw ? JSON.parse(raw) : [];
+
+    // remove any existing entry for same packId/interviewId so we can put it at front (dedupe)
+    const deduped = (arr || []).filter((item) => {
+      if (item.packId && summary.packId) return item.packId !== summary.packId;
+      if (item.interviewId && summary.interviewId) return item.interviewId !== summary.interviewId;
+      // fallback to title + questionsCount comparison
+      return !(
+        item.title === summary.title &&
+        Number(item.questionsCount) === Number(summary.questionsCount)
+      );
+    });
+
+    deduped.unshift(summary);
+    const sliced = deduped.slice(0, 20);
+    localStorage.setItem(baseKey, JSON.stringify(sliced));
+    console.log(`[InterviewPortal] recent interview saved to localStorage key=${baseKey}`);
+  } catch (err) {
+    console.error("[InterviewPortal] failed to save recent interview to localStorage", err);
+  }
+  } catch (err) {
+    console.error('[InterviewPortal] saveRecentInterview error', err);
+  }
+};
+
   // fetch pack & map questions robustly
   useEffect(() => {
     const fetchPack = async () => {
@@ -162,6 +277,36 @@ export default function InterviewPortal() {
           setInterviewQuestions([]);
           interviewQuestionsRef.current = [];
         } else {
+// store pack meta if available (so we can show a title/creator/level later)
+setPackMeta(
+  pack && typeof pack === "object"
+    ? {
+        id: pack.id || pack._id || id,
+        title: pack.title || pack.name || pack.packName || null,
+        // try several common names for creator/author/uploader
+        creator:
+          pack.creator ||
+          pack.author ||
+          pack.createdBy ||
+          pack.owner ||
+          pack.uploader ||
+          (pack.meta && (pack.meta.creator || pack.meta.author)) ||
+          null,
+        // try several common names for level/difficulty
+        level:
+          pack.level ||
+          pack.difficulty ||
+          pack.levelName ||
+          (pack.meta && (pack.meta.level || pack.meta.difficulty)) ||
+          null,
+        // optional helpful fields
+        company: pack.company || pack.source || pack.provider || null,
+        duration:
+          pack.duration || pack.estimatedDuration || pack.length || null,
+      }
+    : null
+);
+
           setInterviewQuestions(questions);
           interviewQuestionsRef.current = questions; // keep the ref up-to-date
           setError("");
@@ -362,6 +507,7 @@ export default function InterviewPortal() {
       setTranscript((prev) => [...prev, { type: "feedback", text: completionMessage }]);
       await speakText(completionMessage);
       setInterviewStarted(false);
+      setShowCompletionModal(true);
       return;
     }
 
@@ -396,6 +542,7 @@ export default function InterviewPortal() {
     }
     setInterviewStarted(true);
     currentQuestionIndexRef.current = 0;
+    setShowCompletionModal(false);
 
     setCurrentQuestionIndex(0);
     setTranscript([]);
@@ -770,6 +917,45 @@ export default function InterviewPortal() {
             </div>
           )}
         </div>
+
+        {/* Completion Modal */}
+        {showCompletionModal && (
+          <div className="askora-modal-overlay">
+            <div className="askora-modal">
+              <div className="askora-modal-content">
+                <div className="askora-modal-icon">
+                  <div className="success-checkmark">
+                    <div className="check-icon">
+                      <span className="icon-line line-tip"></span>
+                      <span className="icon-line line-long"></span>
+                    </div>
+                  </div>
+                </div>
+                <h2 className="askora-modal-title">Interview Completed!</h2>
+                <p className="askora-modal-message">
+                  Thank you for attempting the interview. Your responses have been recorded and will be reviewed.
+                </p>
+                <div className="askora-modal-actions">
+                  <button
+                    onClick={async () => {
+                      // Save recent interview, then go back
+                      try {
+                        await saveRecentInterview();
+                      } catch (e) {
+                        console.warn("Failed saving recent interview (non-fatal):", e);
+                      } finally {
+                        navigate('/dashboard');
+                      }
+                    }}
+                    className="askora-btn askora-btn-primary askora-btn-large"
+                  >
+                    Back to Dashboard
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
     <style jsx>{`
@@ -1433,6 +1619,210 @@ export default function InterviewPortal() {
           border-left: 4px solid #8b5cf6;
         }
 
+        /* Modal Styles */
+        .askora-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          animation: fadeIn 0.3s ease-out;
+        }
+
+        .askora-modal {
+          background: rgba(33, 36, 68, 0.95);
+          border-radius: 20px;
+          border: 1px solid rgba(79, 70, 229, 0.3);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+          max-width: 500px;
+          width: 90%;
+          max-height: 90vh;
+          overflow-y: auto;
+          animation: slideInUp 0.4s ease-out;
+          backdrop-filter: blur(10px);
+        }
+
+        .askora-modal-content {
+          padding: 3rem 2rem;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1.5rem;
+        }
+
+        .askora-modal-icon {
+          width: 80px;
+          height: 80px;
+          margin-bottom: 1rem;
+        }
+
+        .success-checkmark {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          display: block;
+          stroke-width: 2;
+          stroke: #10b981;
+          stroke-miterlimit: 10;
+          box-shadow: inset 0px 0px 0px #10b981;
+          animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
+          position: relative;
+        }
+
+        .success-checkmark .check-icon {
+          width: 56px;
+          height: 56px;
+          position: absolute;
+          left: 12px;
+          top: 12px;
+          background: transparent;
+        }
+
+        .success-checkmark .icon-line {
+          height: 3px;
+          background-color: #10b981;
+          display: block;
+          border-radius: 2px;
+          position: absolute;
+          z-index: 10;
+        }
+
+        .success-checkmark .icon-line.line-tip {
+          top: 28px;
+          left: 8px;
+          width: 20px;
+          transform: rotate(45deg);
+          animation: icon-line-tip 0.75s;
+        }
+
+        .success-checkmark .icon-line.line-long {
+          top: 21px;
+          right: 6px;
+          width: 35px;
+          transform: rotate(-45deg);
+          animation: icon-line-long 0.75s;
+        }
+
+        .askora-modal-title {
+          font-size: 2rem;
+          font-weight: 600;
+          color: white;
+          margin: 0;
+          background: linear-gradient(135deg, #10b981, #059669);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .askora-modal-message {
+          font-size: 1.1rem;
+          color: #cbd5e1;
+          line-height: 1.6;
+          margin: 0;
+          max-width: 400px;
+        }
+
+        .askora-modal-actions {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+          flex-wrap: wrap;
+          margin-top: 1rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideInUp {
+          from {
+            transform: translateY(30px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes fill {
+          100% {
+            box-shadow: inset 0px 0px 0px 30px #10b981;
+          }
+        }
+
+        @keyframes scale {
+          0%, 100% {
+            transform: none;
+          }
+          50% {
+            transform: scale3d(1.1, 1.1, 1);
+          }
+        }
+
+        @keyframes icon-line-tip {
+          0% {
+            width: 0;
+            left: 1px;
+            top: 31px;
+          }
+          54% {
+            width: 0;
+            left: 1px;
+            top: 31px;
+          }
+          70% {
+            width: 20px;
+            left: -2px;
+            top: 31px;
+          }
+          84% {
+            width: 17px;
+            left: 1px;
+            top: 28px;
+          }
+          100% {
+            width: 20px;
+            left: 8px;
+            top: 28px;
+          }
+        }
+
+        @keyframes icon-line-long {
+          0% {
+            width: 0;
+            right: 26px;
+            top: 24px;
+          }
+          65% {
+            width: 0;
+            right: 26px;
+            top: 24px;
+          }
+          84% {
+            width: 35px;
+            right: 9px;
+            top: 24px;
+          }
+          100% {
+            width: 35px;
+            right: 6px;
+            top: 21px;
+          }
+        }
+
         @media (max-width: 768px) {
           .askora-interview-portal {
             padding: 10px;
@@ -1511,10 +1901,43 @@ export default function InterviewPortal() {
           .wave-2 { width: 140px; height: 140px; }
           .wave-3 { width: 200px; height: 200px; }
           .wave-4 { width: 260px; height: 260px; }
+
+          .askora-modal {
+            width: 95%;
+            margin: 1rem;
+          }
+
+          .askora-modal-content {
+            padding: 2rem 1.5rem;
+          }
+
+          .askora-modal-title {
+            font-size: 1.5rem;
+          }
+
+          .askora-modal-message {
+            font-size: 1rem;
+          }
+
+          .askora-modal-icon {
+            width: 60px;
+            height: 60px;
+          }
+
+          .success-checkmark {
+            width: 60px;
+            height: 60px;
+          }
+
+          .success-checkmark .check-icon {
+            width: 42px;
+            height: 42px;
+            left: 9px;
+            top: 9px;
+          }
         }
       `}</style>
     </div>
   );
 
 }
-

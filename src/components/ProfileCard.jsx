@@ -3,160 +3,134 @@ import styles from './ProfileCard.module.css';
 import { useNavigate } from 'react-router-dom';
 
 function ProfileCard(props) {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const profile = props.profile || {};
 
-    function handleClick() {
-        const id = props.profile && (props.profile._id || props.profile.id);
-        if (id) {
-            navigate(`/profile/${id}`);
-        } else {
-            // fallback to generic Profile page
-            navigate('/Profile');
-        }
+  // Navigation behavior
+  function handleClick() {
+    const id = profile._id || profile.id;
+    if (id) {
+      navigate(`/profile/${id}`);
+    } else {
+      navigate('/Profile');
     }
+  }
 
-    // Helper function to truncate text with ellipsis
-    const truncateText = (text, maxLength) => {
-        if (!text) return "";
-        if (text.length <= maxLength) return text;
-        return text.substring(0, maxLength).trim() + "...";
-    };
+  // Utility: truncate text
+  const truncateText = (text, maxLength) => {
+    if (!text && text !== 0) return "";
+    const s = String(text);
+    if (s.length <= maxLength) return s;
+    return s.substring(0, maxLength).trim() + "...";
+  };
 
-    // Helper function to display skills (limit to 3 visible with character limit)
-    const displaySkills = (skills) => {
-        if (!skills || skills.length === 0) return "Skills to be added";
-        
-        let skillsText;
-        if (skills.length <= 3) {
-            skillsText = skills.join(", ");
-        } else {
-            skillsText = skills.slice(0, 3).join(", ") + ` +${skills.length - 3} more`;
-        }
-        
-        // Limit skills text to 45 characters
-        return truncateText(skillsText, 30);
-    };
+  // Determine company & role display using common field names
+  const companyField = profile.company || profile.currentCompany || profile.previousCompany || "";
+  const roleField = profile.currentRole || profile.role || profile.field || ""; // 'field' may come from preferences
 
-    // Helper function to get current role display with character limit
-    const getCurrentRoleDisplay = (profile) => {
-        let roleText;
-        if (profile.currentRole && profile.currentCompany) {
-            roleText = `${profile.currentRole} at ${profile.currentCompany}`;
-        } else if (profile.currentRole && !profile.currentCompany) {
-            roleText = profile.currentRole;
-        } else if (!profile.currentRole && profile.currentCompany) {
-            roleText = `Working at ${profile.currentCompany}`;
-        } else {
-            roleText = "Open to opportunities";
-        }
-        
-        // Limit role text to 40 characters
-        return truncateText(roleText, 30);
-    };
+  const getCurrentRoleDisplay = () => {
+    if (roleField && companyField) return `${roleField} at ${companyField}`;
+    if (roleField) return roleField;
+    if (companyField) return `Working at ${companyField}`;
+    // fallback to a short aboutText summary if available
+    if (profile.aboutText) return truncateText(profile.aboutText, 30);
+    return "Open to opportunities";
+  };
 
-    // Helper function to get experience display
-    const getExperienceDisplay = (yearsExperience) => {
-        if (!yearsExperience || yearsExperience === 0) {
-            return "Entry level";
-        }
-        return `${yearsExperience} years experience`;
-    };
+  // Experience display: try explicit yearsExperience, otherwise derive from stats (interviews/practice hours)
+  const getExperienceDisplay = () => {
+    if (profile.yearsExperience && Number(profile.yearsExperience) > 0) {
+      return `${profile.yearsExperience} years experience`;
+    }
+    const interviews = profile.stats?.totalInterviews ?? profile.stats?.mockInterviews ?? 0;
+    const practiceHours = profile.stats?.totalPracticeHours ?? 0;
+    if (practiceHours && practiceHours > 0) {
+      return `${practiceHours} hrs practice`;
+    }
+    if (interviews && interviews > 0) {
+      return `${interviews} interviews`;
+    }
+    return "Entry level";
+  };
 
-    // Helper function to get previous company display with character limit
-    const getPreviousCompanyDisplay = (previousCompany) => {
-        if (!previousCompany) return '\u00A0'; // Non-breaking space to maintain height
-        const text = `Previously: ${previousCompany}`;
-        return truncateText(text, 30);
-    };
+  // Skills / topics to display (limit to 3 items and short length)
+  const displaySkills = () => {
+    const arr = profile.favoriteTopics || profile.technicalSkills || profile.skills || profile.interests || [];
+    if (!Array.isArray(arr) || arr.length === 0) return "Skills to be added";
+    const visible = arr.slice(0, 3).join(", ");
+    const extra = arr.length > 3 ? ` +${arr.length - 3} more` : "";
+    return truncateText(visible + extra, 40);
+  };
 
-    const profile = props.profile || {};
+  // Education display
+  const educationDisplay = () => {
+    const ed = profile.education || profile.college || profile.school || "";
+    if (ed && ed.trim().length > 0) return truncateText(ed, 40);
+    return "Education details to be added";
+  };
 
-    return (
-        <div className={styles.profileCard}>
-            <div className={styles.cardContent}>
-                <div className={styles.cardHeader}>
-                    <div className={styles.gradientBars}>
-                       
-                        <div className={styles.profileImage}>
-                            <img 
-                                src={profile.profilePicture || profile.profileImage || "/profilepic1.png?height=60&width=60"} 
-                                alt={profile.name || "User"} 
-                            />
-                        </div>
-                    </div>
-                </div>
+  // Previous / current company short
+  const getPreviousCompanyDisplay = () => {
+    const prev = profile.previousCompany || profile.company || "";
+    if (!prev) return "\u00A0";
+    return truncateText(`Previously: ${prev}`, 30);
+  };
 
-                <div className={styles.userInfo}>
-                    <div className={styles.nameSection}>
-                        <h2 className={styles.name}>
-                            {truncateText(profile.name || profile.fullName || profile.username || "Anonymous User", 20)}
-                        </h2>
-                        {profile.verified && (
-                            <div className={styles.verifiedBadge}>
-                                ✓
-                            </div>
-                        )}
-                        {profile.isOnline && (
-                            <div className={styles.status}>
-                                <div className={styles.statusDot}></div>
-                                <span>online</span>
-                            </div>
-                        )}
-                    </div>
-                    
-                    <p className={styles.title}>
-                        {getCurrentRoleDisplay(profile)}
-                    </p>
+  const nameDisplay = () => {
+    return truncateText(profile.name || profile.fullName || profile.username || "Anonymous User", 22);
+  };
 
-                    <div className={styles.workHistory}>
-                        <div className={styles.previousWork}>
-                            {getPreviousCompanyDisplay(profile.previousCompany || profile.company)}
-                        </div>
-                        
-                        <p className={styles.education}>
-                            {truncateText(profile.education || "Education details to be added", 35)}
-                        </p>
-                        
-                        <p className={styles.experience}>
-                            {getExperienceDisplay(profile.yearsExperience || profile.stats?.totalInterviews || 0)}
-                        </p>
-                        
-                        <p className={styles.skills}>
-                            {displaySkills(profile.favoriteTopics || profile.technicalSkills || profile.skills)}
-                        </p>
-                    </div>
-                </div>
+  // Profile picture fallback
+  const avatar = profile.profilePicture || profile.profileImage || "/profilepic1.png?height=60&width=60";
 
-                {/* Stats section - only show if we have meaningful data */}
-                {(profile.stats && (profile.stats.followers || profile.stats.problemsSolved || profile.stats.totalInterviews)) && (
-                    <div className={styles.stats}>
-                        {profile.stats.followers && (
-                            <div className={styles.stat}>
-                                <div className={styles.statValue}>{profile.stats.followers}</div>
-                                <div className={styles.statLabel}>followers</div>
-                            </div>
-                        )}
-                        {profile.stats.problemsSolved && (
-                            <div className={styles.stat}>
-                                <div className={styles.statValue}>{profile.stats.problemsSolved}</div>
-                                <div className={styles.statLabel}>problems</div>
-                            </div>
-                        )}
-                        {profile.stats.totalInterviews && (
-                            <div className={styles.stat}>
-                                <div className={styles.statValue}>{profile.stats.totalInterviews}</div>
-                                <div className={styles.statLabel}>interviews</div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                <button className={styles.contactButton} onClick={handleClick}>
-                    View Profile
-                </button>
+  return (
+    <div className={styles.profileCard}>
+      <div className={styles.cardContent}>
+        <div className={styles.cardHeader}>
+          <div className={styles.gradientBars}>
+            <div className={styles.profileImage}>
+              <img src={avatar} alt={profile.name || "User"} />
             </div>
+          </div>
         </div>
-    );
+
+        <div className={styles.userInfo}>
+          <div className={styles.nameSection}>
+            <h2 className={styles.name}>{nameDisplay()}</h2>
+
+            {profile.verified && (
+              <div className={styles.verifiedBadge}>✓</div>
+            )}
+
+            {profile.isOnline && (
+              <div className={styles.status}>
+                <div className={styles.statusDot}></div>
+                <span>online</span>
+              </div>
+            )}
+          </div>
+
+          <p className={styles.title}>{truncateText(getCurrentRoleDisplay(), 36)}</p>
+
+          <div className={styles.workHistory}>
+            <div className={styles.previousWork}>
+              {getPreviousCompanyDisplay()}
+            </div>
+
+            <p className={styles.education}>{educationDisplay()}</p>
+
+            <p className={styles.experience}>{getExperienceDisplay()}</p>
+
+            <p className={styles.skills}>{displaySkills()}</p>
+          </div>
+        </div>
+
+        <button className={styles.contactButton} onClick={handleClick}>
+          View Profile
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default ProfileCard;

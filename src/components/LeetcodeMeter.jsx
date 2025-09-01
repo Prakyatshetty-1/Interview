@@ -386,8 +386,8 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
                 cursor: isOwnProfile ? 'pointer' : 'default',
                 opacity: isOwnProfile ? 1 : 0.9
               }}
-              onClick={() => handleSolveProblem('easy')}
-              title={isOwnProfile ? "Click to add a solved easy problem" : ''}
+              // onClick={() => handleSolveProblem('easy')}
+              // title={isOwnProfile ? "Click to add a solved easy problem" : ''}
             >
               <div style={{
                 display: 'flex',
@@ -428,8 +428,8 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
                 cursor: isOwnProfile ? 'pointer' : 'default',
                 opacity: isOwnProfile ? 1 : 0.9
               }}
-              onClick={() => handleSolveProblem('medium')}
-              title={isOwnProfile ? "Click to add a solved medium problem" : ''}
+              // onClick={() => handleSolveProblem('medium')}
+              // title={isOwnProfile ? "Click to add a solved medium problem" : ''}
             >
               <div style={{
                 display: 'flex',
@@ -470,8 +470,8 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
                 cursor: isOwnProfile ? 'pointer' : 'default',
                 opacity: isOwnProfile ? 1 : 0.9
               }}
-              onClick={() => handleSolveProblem('hard')}
-              title={isOwnProfile ? "Click to add a solved hard problem" : ''}
+              // onClick={() => handleSolveProblem('hard')}
+              // title={isOwnProfile ? "Click to add a solved hard problem" : ''}
             >
               <div style={{
                 display: 'flex',
