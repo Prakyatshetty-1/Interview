@@ -1021,111 +1021,225 @@ app.get('/api/users/:id/contributions', async (req, res) => {
 });
 
 // GET own leetcode stats (authenticated)
+// server.cjs (patch for leetcode stats + update-after-interview)
+// --- require models at top of file ---
+// --- helper: compute totals for all questions in interviews collection ---
+async function computeGlobalQuestionTotals() {
+  // Aggregate questions across interviews by question.difficulty.
+  // Assumes each interview document has a 'questions' array, where each question may have a 'difficulty' field.
+  // If difficulty missing, treat as 'medium' fallback.
+  const agg = await Interview.aggregate([
+    { $project: { questions: 1 } },
+    { $unwind: { path: "$questions", preserveNullAndEmptyArrays: false } },
+    {
+      $group: {
+        _id: { $toLower: { $ifNull: ["$questions.difficulty", "medium"] } },
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+
+  const totals = { easy: 0, medium: 0, hard: 0, total: 0 };
+  for (const row of agg) {
+    const key = (row._id || "").toString().toLowerCase();
+    if (key.includes("easy")) totals.easy += row.count;
+    else if (key.includes("hard")) totals.hard += row.count;
+    else totals.medium += row.count;
+  }
+  totals.total = totals.easy + totals.medium + totals.hard;
+  return totals;
+}
+
+// --- helper: recompute user leetcodeStats from user.attempts array and global totals ---
+function recomputeUserLeetCodeStatsFromAttempts(user, globalTotals = null) {
+  // user.attempts expected to be array of { questionId:String, difficulty: "easy"|"medium"|"hard", status: "solved"|"attempting" | ... , solvedAt: Date }
+  const solvedQuestionIdsByDifficulty = { easy: new Set(), medium: new Set(), hard: new Set() };
+  let attempting = 0;
+
+  if (Array.isArray(user.attempts)) {
+    for (const a of user.attempts) {
+      const status = (a.status || "").toString().toLowerCase();
+      const difficulty = (a.difficulty || "medium").toString().toLowerCase();
+      const qid = String(a.questionId || a.qid || a.question || "").trim();
+      if (!qid) continue;
+
+      if (status === "solved" || status === "completed") {
+        if (difficulty.includes("easy")) solvedQuestionIdsByDifficulty.easy.add(qid);
+        else if (difficulty.includes("hard")) solvedQuestionIdsByDifficulty.hard.add(qid);
+        else solvedQuestionIdsByDifficulty.medium.add(qid);
+      } else if (status === "attempting" || status === "inprogress" || a.attempting) {
+        attempting += 1;
+      }
+    }
+  }
+
+  const easySolved = solvedQuestionIdsByDifficulty.easy.size;
+  const mediumSolved = solvedQuestionIdsByDifficulty.medium.size;
+  const hardSolved = solvedQuestionIdsByDifficulty.hard.size;
+  const totalSolved = easySolved + mediumSolved + hardSolved;
+
+  const leetcodeStats = {
+    total: (globalTotals && typeof globalTotals.total === 'number') ? globalTotals.total : (user.leetcodeStats?.total || 0),
+    attempting: typeof user.leetcodeStats?.attempting === 'number' ? user.leetcodeStats.attempting : attempting,
+    easy: {
+      solved: easySolved,
+      total: (globalTotals && typeof globalTotals.easy === 'number') ? globalTotals.easy : (user.leetcodeStats?.easy?.total || 0)
+    },
+    medium: {
+      solved: mediumSolved,
+      total: (globalTotals && typeof globalTotals.medium === 'number') ? globalTotals.medium : (user.leetcodeStats?.medium?.total || 0)
+    },
+    hard: {
+      solved: hardSolved,
+      total: (globalTotals && typeof globalTotals.hard === 'number') ? globalTotals.hard : (user.leetcodeStats?.hard?.total || 0)
+    },
+    lastUpdated: new Date()
+  };
+
+  return leetcodeStats;
+}
+
+// --- GET own leetcode stats (authenticated) ---
 app.get('/api/leetcode/stats', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('leetcodeStats').lean();
-    const defaultStats = {
-      total: 0,
-      attempting: 0,
-      easy: { solved: 0, total: 0 },
-      medium: { solved: 0, total: 0 },
-      hard: { solved: 0, total: 0 }
-    };
-    res.status(200).json({ leetcodeStats: user?.leetcodeStats || defaultStats });
+    const user = await User.findById(req.user.id).lean();
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // compute global totals from interviews collection
+    const globalTotals = await computeGlobalQuestionTotals();
+
+    // recompute authoritative stats based on saved attempts
+    const leetcodeStats = recomputeUserLeetCodeStatsFromAttempts(user, globalTotals);
+
+    // save leetcodeStats back to user if you want them persisted (optional)
+    await User.findByIdAndUpdate(user._id, { leetcodeStats }, { new: true }).catch(() => { /* ignore */ });
+
+    res.status(200).json({ leetcodeStats });
   } catch (err) {
     console.error('Error fetching leetcode stats:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
-// PUT update own leetcode stats (authenticated)
-
-
-// Public: get another user's leetcode stats (no auth)
+// --- Public: get another user's leetcode stats (no auth) ---
 app.get('/api/users/:id/leetcode-stats', async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) return res.status(400).json({ message: 'Missing id' });
 
-    const user = await User.findById(id).select('leetcodeStats').lean();
-    const defaultStats = {
-      total: 0,
-      attempting: 0,
-      easy: { solved: 0, total: 0 },
-      medium: { solved: 0, total: 0 },
-      hard: { solved: 0, total: 0 }
-    };
+    const user = await User.findById(id).lean();
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    res.status(200).json({ leetcodeStats: user?.leetcodeStats || defaultStats });
+    // compute global totals
+    const globalTotals = await computeGlobalQuestionTotals();
+
+    // recompute authoritative stats from attempts
+    const leetcodeStats = recomputeUserLeetCodeStatsFromAttempts(user, globalTotals);
+
+    res.status(200).json({ leetcodeStats });
   } catch (err) {
     console.error('Error fetching public leetcode stats:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
+// --- POST /api/leetcode/update-after-interview ---
+// Body expected: { interviewId: "689b5...", questionIds: ["q1","q2"] }
+// If questionIds omitted, assume whole pack -> treat each question in pack as completed.
+// POST /api/leetcode/update-after-interview
 app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    let { difficulty, questionsCompleted = 1 } = req.body;
+    const { interviewId, questionIds = [] } = req.body || {};
 
-    if (!difficulty) {
-      return res.status(400).json({ message: 'Difficulty is required' });
+    // Validate interviewId early and return 400 for bad requests
+    if (!interviewId || !mongoose.Types.ObjectId.isValid(String(interviewId))) {
+      return res.status(400).json({ message: 'Invalid or missing interviewId' });
     }
 
-    // Normalize difficulty to match our schema (easy, medium, hard)
-    const normalizedDifficulty = difficulty.toLowerCase().trim();
-    
-    if (!['easy', 'medium', 'hard'].includes(normalizedDifficulty)) {
-      return res.status(400).json({ message: 'Invalid difficulty. Must be easy, medium, or hard' });
-    }
-
-    // Get current user
+    // Ensure user exists
     const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Fetch pack to map questionIds -> difficulty when needed
+    const pack = await Interview.findById(interviewId).lean();
+    if (!pack) return res.status(404).json({ message: 'Interview/pack not found' });
+
+    // Build a map of questionId -> difficulty from the pack (if pack has question objects)
+    const qDifficultyMap = new Map();
+    if (Array.isArray(pack.questions)) {
+      for (const q of pack.questions) {
+        const qid = String(q._id ?? q.id ?? q.questionId ?? q.slug ?? "").trim();
+        if (!qid) continue;
+        const diff = (q.difficulty || q.level || q.levelName || "medium").toString().toLowerCase();
+        qDifficultyMap.set(qid, diff);
+      }
     }
 
-    // Initialize leetcodeStats if not exists
-    if (!user.leetcodeStats) {
-      user.leetcodeStats = {
-        total: 3632,
-        attempting: 0,
-        easy: { solved: 0, total: 886 },
-        medium: { solved: 0, total: 1889 },
-        hard: { solved: 0, total: 857 }
-      };
+    // If questionIds empty -> treat as entire pack completed (use pack.questions)
+    let toMark = Array.isArray(questionIds) && questionIds.length ? questionIds.map(String) : [];
+    if (toMark.length === 0 && Array.isArray(pack.questions) && pack.questions.length) {
+      toMark = pack.questions.map(q => String(q._id ?? q.id ?? q.questionId ?? q.slug ?? "")).filter(Boolean);
     }
 
-    // Update the solved count for the specific difficulty
-    const currentSolved = user.leetcodeStats[normalizedDifficulty].solved || 0;
-    const newSolved = currentSolved+1
-    // Update the stats
-    user.leetcodeStats[normalizedDifficulty].solved = newSolved;
-    user.leetcodeStats.lastUpdated = new Date();
+    if (!Array.isArray(user.attempts)) user.attempts = [];
 
-    // Also update attempting count (optional - you can adjust this logic)
-    if (user.leetcodeStats.attempting > 0) {
-      user.leetcodeStats.attempting = Math.max(0, user.leetcodeStats.attempting - questionsCompleted);
+    // Build a Set of already-solved questionIds to avoid duplicates
+    const alreadySolved = new Set(user.attempts
+      .filter(a => String(a.status || "").toLowerCase() === "solved")
+      .map(a => String(a.questionId)));
+
+    const newlySolved = [];
+    for (const qidRaw of toMark) {
+      const qid = String(qidRaw).trim();
+      if (!qid) continue;
+      if (alreadySolved.has(qid)) continue; // dedupe: do not count again
+
+      // determine difficulty (prefer map, else fallback to request data or "medium")
+      const difficulty = (qDifficultyMap.get(qid) || "medium").toString().toLowerCase();
+
+      // push attempt record (include `date` to satisfy schema validation)
+      user.attempts.push({
+        questionId: qid,
+        interviewId: String(interviewId),
+        difficulty,
+        status: "solved",
+        solvedAt: new Date(),
+        createdAt: new Date(),
+        date: new Date()
+      });
+
+      alreadySolved.add(qid);
+      newlySolved.push({ questionId: qid, difficulty });
     }
-    questionsCompleted=1
-    // Save the updated user
+
+    // defensive: ensure every attempt has date (fixes old/dirty data)
+    if (Array.isArray(user.attempts)) {
+      for (const a of user.attempts) {
+        if (!a.date) a.date = a.solvedAt || a.createdAt || new Date();
+      }
+    }
+
+    // Recompute global totals
+    const globalTotals = await computeGlobalQuestionTotals();
+
+    // Recompute user's leetcodeStats from their attempts
+    const leetcodeStats = recomputeUserLeetCodeStatsFromAttempts(user, globalTotals);
+
+    // Persist user.attempts and leetcodeStats
+    user.leetcodeStats = leetcodeStats;
     await user.save();
 
-    console.log(`Updated LeetCode stats for user ${userId}: ${normalizedDifficulty} +${questionsCompleted}`);
-
-    res.status(200).json({
+    // Return the authoritative stats and what changed
+    return res.status(200).json({
       message: 'LeetCode stats updated successfully',
-      leetcodeStats: user.leetcodeStats,
-      updated: {
-        difficulty: normalizedDifficulty,
-        questionsCompleted,
-        newSolved
-      }
+      leetcodeStats,
+      newlySolvedCount: newlySolved.length,
+      newlySolved
     });
-
   } catch (error) {
     console.error('Error updating LeetCode stats after interview:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
