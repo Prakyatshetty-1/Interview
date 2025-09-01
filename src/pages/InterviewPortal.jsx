@@ -27,42 +27,90 @@ export default function InterviewPortal() {
   const interviewQuestionsRef = useRef([]);
   const isSpeakingRef = useRef(false);
 
+  // near top of InterviewPortal component
+  const interviewQuestionIdsRef = useRef([]); // stores question ids (if available)
+
+
   const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
   // Add function to update LeetCode stats
-  const updateLeetCodeStats = async (difficulty, questionsCompleted = 1) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.log('No token found, skipping LeetCode stats update');
-        return;
-      }
-
-      console.log(`Updating LeetCode stats: ${difficulty} difficulty, ${questionsCompleted} questions`);
-
-      const response = await fetch(`${API_BASE}/api/leetcode/update-after-interview`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          difficulty: difficulty.toLowerCase(),
-          questionsCompleted: questionsCompleted
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log('LeetCode stats updated successfully:', data);
-      } else {
-        console.warn('Failed to update LeetCode stats:', data.message);
-      }
-    } catch (error) {
-      console.error('Error updating LeetCode stats:', error);
+// InterviewPortal.jsx — replace existing updateLeetCodeStats implementation with this
+const updateLeetCodeStats = async (payload = {}) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('[updateLeetCodeStats] no token, skipping');
+      return null;
     }
-  };
+
+    // Build body: prefer interviewId + questionIds, fallback to difficulty/count
+    const body = {};
+    if (payload && typeof payload === 'object') {
+      if (payload.interviewId) body.interviewId = payload.interviewId;
+      if (Array.isArray(payload.questionIds) && payload.questionIds.length) body.questionIds = payload.questionIds;
+      if (!body.interviewId && payload.difficulty) {
+        body.difficulty = String(payload.difficulty).toLowerCase();
+        body.questionsCompleted = Number(payload.questionsCompleted || 1);
+      }
+    }
+
+    if (!body.interviewId && (!Array.isArray(body.questionIds) || body.questionIds.length === 0) && !body.difficulty) {
+      console.warn('[updateLeetCodeStats] nothing to send (no interviewId, no questionIds, no difficulty)');
+      return null;
+    }
+
+    console.log('[updateLeetCodeStats] sending body:', body);
+    const res = await fetch(`${API_BASE}/api/leetcode/update-after-interview`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(body)
+    });
+
+    // robust parse
+    let data = {};
+    try {
+      const txt = await res.text();
+      data = txt ? JSON.parse(txt) : {};
+    } catch (err) {
+      try {
+        data = await res.json();
+      } catch (e) {
+        data = {};
+      }
+    }
+
+    if (!res.ok) {
+      console.warn('[updateLeetCodeStats] server returned error', res.status, data);
+      return data;
+    }
+
+    const leetcodeStats = data?.leetcodeStats ?? null;
+    console.log('[updateLeetCodeStats] server response leetcodeStats:', leetcodeStats, 'newlySolvedCount:', data?.newlySolvedCount);
+
+    // same-tab event (fast)
+    try {
+      window.dispatchEvent(new CustomEvent('leetcodeStatsUpdated', { detail: { leetcodeStats } }));
+    } catch (e) {
+      console.warn('dispatchEvent failed', e);
+    }
+
+    // cross-tab: set a storage key so other tabs' storage listeners fire
+    try {
+      localStorage.setItem('leetcodeStatsLastUpdated', String(Date.now()));
+    } catch (e) {
+      /* ignore */
+    }
+
+    return data;
+  } catch (err) {
+    console.error('[updateLeetCodeStats] error', err);
+    return null;
+  }
+};
+
 
   // Function to determine difficulty from pack metadata
   const getDifficultyFromPack = () => {
@@ -215,14 +263,23 @@ export default function InterviewPortal() {
       if (userId) summary.userId = userId;
 
       // Update LeetCode stats based on difficulty and number of questions
-      const difficulty = getDifficultyFromPack();
-      if (difficulty) {
-        const questionsCount = summary.questionsCount || 1;
-        console.log(`Interview completed with ${questionsCount} questions at ${difficulty} difficulty`);
-        await updateLeetCodeStats(difficulty, questionsCount);
-      } else {
-        console.log('No difficulty found in pack metadata, skipping LeetCode stats update');
-      }
+// inside saveRecentInterview()
+const payload = {
+  interviewId: id, // pack id from useParams
+  // prefer real question ids if you extracted them during pack fetch:
+  questionIds: Array.isArray(interviewQuestionIdsRef.current) && interviewQuestionIdsRef.current.length
+    ? interviewQuestionIdsRef.current
+    : undefined,
+  // keep fallback for backward compatibility:
+  difficulty: getDifficultyFromPack() || undefined,
+  questionsCompleted: summary.questionsCount || 1
+};
+
+try {
+  await updateLeetCodeStats(payload);
+} catch (err) {
+  console.warn('[InterviewPortal] updateLeetCodeStats failed', err);
+}
 
       // Save recent interview to server
       if (token) {
@@ -305,18 +362,44 @@ export default function InterviewPortal() {
           return;
         }
 
-        let questions = [];
-        if (Array.isArray(pack.questions)) {
-          if (pack.questions.length > 0) {
-            if (typeof pack.questions[0] === "string") {
-              questions = pack.questions;
-            } else if (typeof pack.questions[0] === "object") {
-              questions = pack.questions.map((q) => q.question || q.text || q.prompt || "").filter(Boolean);
-            }
-          }
-        } else if (Array.isArray(pack.items)) {
-          questions = pack.items.map((i) => (typeof i === "string" ? i : i.question || i.text || "")).filter(Boolean);
-        }
+// inside fetchPack, replace current question extraction with this block
+let questions = [];
+let questionIds = [];
+
+if (Array.isArray(pack.questions) && pack.questions.length > 0) {
+  // pack.questions may be strings or objects
+  for (const q of pack.questions) {
+    if (typeof q === "string") {
+      questions.push(q);
+      questionIds.push(""); // unknown id
+    } else if (typeof q === "object") {
+      const text = q.question || q.text || q.prompt || q.title || "";
+      const qid = String(q._id ?? q.id ?? q.questionId ?? q.slug ?? "").trim();
+      questions.push(text || qid || "");
+      questionIds.push(qid || "");
+    }
+  }
+} else if (Array.isArray(pack.items)) {
+  for (const it of pack.items) {
+    if (typeof it === "string") {
+      questions.push(it);
+      questionIds.push("");
+    } else {
+      const text = it.question || it.text || "";
+      const qid = String(it._id ?? it.id ?? it.questionId ?? "").trim();
+      questions.push(text || qid || "");
+      questionIds.push(qid || "");
+    }
+  }
+}
+
+// set UI-friendly array of question texts:
+setInterviewQuestions(questions);
+interviewQuestionsRef.current = questions;
+
+// set ids separately for server updates:
+interviewQuestionIdsRef.current = questionIds.filter(Boolean); // keep only truthy ids
+
 
         if (!questions || questions.length === 0) {
           console.warn("Pack loaded but no questions found. Pack:", pack);
