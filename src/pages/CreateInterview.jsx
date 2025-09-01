@@ -799,7 +799,7 @@ const handleDetailsSubmit = async () => {
 
     // IMPORTANT: post to backend server (port 5000) route registered in server.cjs:
     // app.use('/api/interviews', interviewRoutes)
-    const res = await fetch("http://localhost:5000/api/interviews/save", {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/interviews/save`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

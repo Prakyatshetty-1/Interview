@@ -45,7 +45,7 @@ const Card = ({
     const checkIfSaved = async () => {
       try {
         const headers = { "Content-Type": "application/json", ...getAuthHeader() };
-        const res = await fetch("http://localhost:5000/api/saved", { headers });
+        const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/saved`, { headers });
         if (!res.ok) {
           // If unauthorized or other error, assume not saved
           return;
@@ -72,7 +72,7 @@ const Card = ({
 
     try {
       const headers = { "Content-Type": "application/json", ...getAuthHeader() };
-      const response = await fetch("http://localhost:5000/api/save", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/save`, {
         method: "POST",
         headers,
         body: JSON.stringify({ interviewId: id, title, imageUrl: path }),
@@ -100,7 +100,7 @@ const Card = ({
 
     try {
       const headers = { "Content-Type": "application/json", ...getAuthHeader() };
-      const response = await fetch("http://localhost:5000/api/unsave", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/unsave`, {
         method: "DELETE",
         headers,
         body: JSON.stringify({ interviewId: id, title, imageUrl: path }),

@@ -127,7 +127,7 @@ const [isLoading, setIsLoading] = useState(false);
     e.preventDefault();
     
     try {
-      const response = await fetch('http://localhost:5000/login', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ const [isLoading, setIsLoading] = useState(false);
         
         // Check if user has filled preferences
         try {
-          const prefResponse = await fetch("http://localhost:5000/api/preference/check", {
+          const prefResponse = await fetch(`${import.meta.env.VITE_API_BASE}/api/preference/check`, {
             headers: {
               Authorization: `Bearer ${data.token}`,
             },
@@ -199,7 +199,7 @@ const [isLoading, setIsLoading] = useState(false);
     console.log("Sending user data to backend for login:", userData);
     
     // Send Google user data to your backend for LOGIN (not signup)
-    const response = await fetch('http://localhost:5000/google-login', {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE}/google-login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -221,7 +221,7 @@ const [isLoading, setIsLoading] = useState(false);
       
       // Check if user has filled preferences
       try {
-        const prefResponse = await fetch("http://localhost:5000/api/preference/check", {
+        const prefResponse = await fetch(`${import.meta.env.VITE_API_BASE}/api/preference/check`, {
           headers: {
             Authorization: `Bearer ${data.token}`,
           },
@@ -322,7 +322,7 @@ const [isLoading, setIsLoading] = useState(false);
       console.log("Sending user data to backend for GitHub login:", userData);
       
       // Send GitHub user data to your backend for LOGIN (not signup)
-      const response = await fetch('http://localhost:5000/github-login', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/github-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -344,7 +344,7 @@ const [isLoading, setIsLoading] = useState(false);
         
         // Check if user has filled preferences
         try {
-          const prefResponse = await fetch("http://localhost:5000/api/preference/check", {
+          const prefResponse = await fetch(`${import.meta.env.VITE_API_BASE}/api/preference/check`, {
             headers: {
               Authorization: `Bearer ${data.token}`,
             },

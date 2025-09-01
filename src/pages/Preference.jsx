@@ -121,7 +121,7 @@ useEffect(() => {
       }
 
       try {
-        const response = await fetch("/api/preference/check", {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/preference/check`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -188,7 +188,7 @@ const handleSubmit = async (e) => {
     const company = (answers[0] && answers[0].experience) ? answers[0].experience.trim() : "";
     const education = (answers[1] && answers[1].college) ? answers[1].college.trim() : "";
 
-    const response = await fetch("http://localhost:5000/api/preference", {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/preference`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

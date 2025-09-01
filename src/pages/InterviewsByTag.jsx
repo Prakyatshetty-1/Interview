@@ -26,7 +26,7 @@ export default function InterviewsByTag() {
         // Send lowercased tag to backend for consistent matching
         const normalizedTag = decodeURIComponent(tag).trim().toLowerCase();
 
-        const url = `http://localhost:5000/api/interviews/by-tag/${encodeURIComponent(normalizedTag)}`;
+        const url = `${import.meta.env.VITE_API_BASE}/api/interviews/by-tag/${encodeURIComponent(normalizedTag)}`;
         console.log("Fetching:", url);
 
         const res = await fetch(url, {
