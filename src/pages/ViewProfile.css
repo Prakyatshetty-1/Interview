@@ -1,11 +1,17 @@
 /* ViewProfile.css - All styles scoped under wrapper class */
 
-.view-profile-page-wrapper .search-page {
-
+.view-profile-page-wrapper{
   background-color: rgba(15, 16, 31, 0.6);
   display: flex;
   justify-content: center;
-}
+z-index: -1;
+
+ 
+    width: 100%;
+    min-height: 100vh;
+
+} 
+
 
 .view-profile-page-wrapper .page-header {
   display: flex;

@@ -109,8 +109,9 @@ background-size:cover;
     background: rgba(15, 16, 31, 0.6);
     border-radius: 24px;
     display: flex;
-    justify-content: center;
+  
     flex-direction:column ;
+  
     
     text-align: left;
 }

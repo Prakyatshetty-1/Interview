@@ -1,5 +1,5 @@
 import LeetcodeMeter from '../components/LeetcodeMeter'
-import './QuestionFolder.css'
+import styles from './QuestionFolder.module.css' // Import CSS module
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Dock from "../react-bits/Dock";
@@ -53,23 +53,6 @@ export default function QuestionFolder() {
         fetchInterviews();
     }, [topic]);
 
-    // Static questions for the LeetCode meter (keep existing logic)
-    const questions = [
-        { number: 17, title: "Letter Combinations of a Phone Number", acceptance: 64.2, difficulty: "Med.", solved: true },
-        { number: 22, title: "Generate Parentheses", acceptance: 77.4, difficulty: "Med.", solved: true },
-        { number: 37, title: "Sudoku Solver", acceptance: 64.1, difficulty: "Hard", solved: true },
-        { number: 39, title: "Combination Sum", acceptance: 75.1, difficulty: "Med.", solved: true },
-        { number: 40, title: "Combination Sum II", acceptance: 58.0, difficulty: "Med.", solved: true },
-        { number: 46, title: "Permutations", acceptance: 80.9, difficulty: "Med.", solved: true },
-        { number: 47, title: "Permutations II", acceptance: 61.9, difficulty: "Med.", solved: true },
-        { number: 51, title: "N-Queens", acceptance: 73.5, difficulty: "Hard", solved: true },
-        { number: 52, title: "N-Queens II", acceptance: 77.1, difficulty: "Hard", solved: true },
-        { number: 77, title: "Combinations", acceptance: 73.2, difficulty: "Med.", solved: true },
-        { number: 78, title: "Subsets", acceptance: 81.2, difficulty: "Med.", solved: true },
-        { number: 79, title: "Word Search", acceptance: 45.7, difficulty: "Med.", solved: true },
-        { number: 89, title: "Gray Code", acceptance: 62.3, difficulty: "Med.", solved: true },
-    ];
-
     // Filter interviews based on search term
     const filteredInterviews = interviews.filter(interview =>
         interview.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -89,6 +72,19 @@ export default function QuestionFolder() {
 
     const handleInterviewClick = (interviewId) => {
         navigate(`/interview/${interviewId}`);
+    };
+    
+    const getDifficultyClass = (difficulty) => {
+        switch (difficulty?.toLowerCase()) {
+            case 'easy':
+                return styles.difficultyEasy1;
+            case 'medium':
+                return styles.difficultyMedium1;  
+            case 'hard':
+                return styles.difficultyHard1;
+            default:
+                return styles.difficultyDefault1;
+        }
     };
 
     const items = [
@@ -125,7 +121,7 @@ export default function QuestionFolder() {
     ];
 
     return (
-        <main className="page">
+        <main className={styles.page}>
             <div className="dashboard-bg-orbs">
                 <div className="dashboard-orb dashboard-orb1"></div>
                 <div className="dashboard-orb dashboard-orb2"></div>
@@ -133,39 +129,30 @@ export default function QuestionFolder() {
                 <div className="dashboard-orb dashboard-orb4"></div>
                 <div className="dashboard-orb dashboard-orb5"></div>
             </div>
-            <div className="containerques">
+            <div className={styles.containerques}>
                 <div className="logo-containernew">
                     <span className="logonew">Askora</span>
                 </div>
 
-                <section className="grid">
-                    <div className="cardques">
-                        <div className="topicIcon1">🎓</div>
-                        <div className="header-content1">
-                            <h2 className="topic-title1">{topic}</h2>
-                            <p className="topic-subtitle1">Askora · {interviews.length} interviews · {count} questions</p>
+                <section className={styles.grid}>
+                    <div className={styles.cardques}>
+                        <div className={styles.topicIcon1}>🎓</div>
+                        <div className={styles.headerContent1}>
+                            <h2 className={styles.topicTitle1}>{topic}</h2>
+                            <p className={styles.topicSubtitle1}>Askora  ------------ {interviews.length} interviews</p>
                         </div>
-                        <button className="bookmarkBtn">
-                            <span className="IconContainer">
-                                <svg viewBox="0 0 384 512" height="0.9em" className="icon">
-                                    <path
-                                        d="M0 48V487.7C0 501.1 10.9 512 24.3 512c5 0 9.9-1.5 14-4.4L192 400 345.7 507.6c4.1 2.9 9 4.4 14 4.4c13.4 0 24.3-10.9 24.3-24.3V48c0-26.5-21.5-48-48-48H48C21.5 0 0 21.5 0 48z"
-                                    ></path>
-                                </svg>
-                            </span>
-                            <p className="text">Save</p>
-                        </button>
-                        <div className="neon-line-basic"></div>
+                        
+                        <div className={styles.neonLineBasic}></div>
 
-                        <h1 className='progsss'>Progress</h1>
+                        <h1 className={styles.progsss}>Progress</h1>
                         <LeetcodeMeter />
                     </div>
 
-                    <div className="questions-section">
-                        <div className="questions-header">
-                            <div className="search-container">
-                                <div className="search-wrapper">
-                                    <div className="search-icon">
+                    <div className={styles.questionsSection}>
+                        <div className={styles.questionsHeader}>
+                            <div className={styles.searchContainer}>
+                                <div className={styles.searchWrapper}>
+                                    <div className={styles.searchIcon}>
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                         </svg>
@@ -175,60 +162,59 @@ export default function QuestionFolder() {
                                         placeholder="Search interviews by title, category, or difficulty"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="search-input"
+                                        className={styles.searchInput}
                                     />
                                 </div>
                             </div>
-                            <div className="questions-stats">
-                                <span className="solved-count">{filteredInterviews.length} Interviews Found</span>
+                            <div className={styles.questionsStats}>
+                                <span className={styles.solvedCount}>{filteredInterviews.length} Interviews Found</span>
                                 {searchTerm && (
-                                    <span className="search-results-count">
+                                    <span className={styles.searchResultsCount}>
                                         {filteredInterviews.length} of {interviews.length} interviews
                                     </span>
                                 )}
                             </div>
                         </div>
 
-                        <div className="questions-list">
+                        <div className={styles.questionsList}>
                             {loading ? (
-                                <div className="loading-state">
+                                <div className={styles.loadingState}>
                                     <p>Loading interviews...</p>
                                 </div>
                             ) : error ? (
-                                <div className="error-state">
+                                <div className={styles.errorState}>
                                     <p>{error}</p>
                                 </div>
                             ) : filteredInterviews.length > 0 ? (
                                 filteredInterviews.map((interview) => (
                                     <div 
-                                        className="question-item interview-card" 
+                                        className={`${styles.interviewCard}`}
                                         key={interview._id}
                                         onClick={() => handleInterviewClick(interview._id)}
                                         style={{ cursor: 'pointer' }}
                                     >
-                                        <div className="question-left">
-                                            <span className="interview-title">{interview.title}</span>
-                                            <span className="interview-category">{interview.category}</span>
-                                            <div className="interview-tags">
+                                        <div className={styles.questionLeft}>
+                                            <div className={styles.theinterviewtitlebox}>
+                                            <span className={styles.interviewTitle}>{interview.title}</span>
+                                            <span className={styles.interviewCategory}>{interview.category}</span>
+                                            </div>
+                                            <div className={styles.interviewTags}>
                                                 {interview.tags.slice(0, 3).map((tag, index) => (
-                                                    <span key={index} className="tag-badge">{tag}</span>
+                                                    <span key={index} className={styles.tagBadge}>{tag}</span>
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="question-right">
-                                            <span className="question-count">{interview.questions.length} questions</span>
-                                            <span
-                                                className="difficulty-badge"
-                                                style={{ color: getDifficultyColor(interview.difficulty) }}
-                                            >
+                                        <div className={styles.questionRight}>
+                                            
+                                            <span className={`${styles.difficultyBadge1} ${getDifficultyClass(interview.difficulty)}`}>
                                                 {interview.difficulty}
                                             </span>
-                                            <span className="interview-duration">{interview.duration || 30}min</span>
+                                           
                                         </div>
                                     </div>
                                 ))
                             ) : (
-                                <div className="no-results">
+                                <div className={styles.noResults}>
                                     <p>No interviews found for "{topic}" {searchTerm && `matching "${searchTerm}"`}</p>
                                     <p>Try a different search term or check back later for new interviews.</p>
                                 </div>

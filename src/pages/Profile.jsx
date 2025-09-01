@@ -916,8 +916,9 @@ const unfollowUser = async (targetUserId) => {
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "10px",
+                    alignItems: "flex-start",
+                    marginTop:"50px"
+
                   }}
                 >
                   <h1>About me</h1>
@@ -945,6 +946,7 @@ const unfollowUser = async (targetUserId) => {
                         display: "flex",
                         alignItems: "center",
                         gap: "6px",
+                        marginTop:"5px"
                       }}
                     >
                       Edit

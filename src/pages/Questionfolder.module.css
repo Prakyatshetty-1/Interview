@@ -1,7 +1,9 @@
+/* QuestionFolder.module.css */
+
 /* Page background */
 .page {
   min-height: 100dvh;
-   background-color: rgba(15, 16, 31, 0.6);
+  background-color: rgba(15, 16, 31, 0.6);
   color: #e5e7eb;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   padding-top: 80px;
@@ -34,12 +36,10 @@
   transition: all 0.2s ease;
 }
 
-
 .topicIcon:hover {
   background: rgba(99, 102, 241, 0.2);
   border-color: rgba(99, 102, 241, 0.35);
 }
-
 
 /* Main grid: meter + questions */
 .grid {
@@ -52,17 +52,17 @@
 .cardques {
   border-radius: 1rem;
   background: rgba(17, 17, 25, 0.65);
-  border: 1px solid #8b5cf6 ;
+  border: 1px solid #8b5cf6;
   box-shadow: 0 0 4px #8b5cf6,
-                0 0 8px #8b5cf6,
-                0 0 10px #8b5cf6;;
-  padding:20px;
+              0 0 8px #8b5cf6,
+              0 0 10px #8b5cf6;
+  padding: 20px;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
   overflow: hidden;
-
 }
-.progsss{
+
+.progsss {
   font-size: 16px;
   margin-left: 20px;
   margin-top: 30px;
@@ -77,7 +77,7 @@
 }
 
 /* Questions Section */
-.questions-section {
+.questionsSection {
   border-radius: 1rem;
   background: rgba(17, 17, 25, 0.45);
   border: 1px solid rgba(63, 63, 77, 0.35);
@@ -85,7 +85,7 @@
   overflow: hidden;
 }
 
-.questions-header {
+.questionsHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -94,75 +94,56 @@
   background: rgba(17, 17, 25, 0.3);
 }
 
-.questions-title {
+.questionsTitle {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
   color: #f9fafb;
 }
 
-.questions-stats {
+.questionsStats {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.solved-count {
+.solvedCount {
   font-size: 0.875rem;
   color: #10b981;
   font-weight: 500;
 }
 
 /* Questions List */
-.questions-list {
+.questionsList {
   max-height: 600px;
   overflow-y: auto;
 }
 
-.questions-list::-webkit-scrollbar {
+.questionsList::-webkit-scrollbar {
   width: 6px;
 }
 
-.questions-list::-webkit-scrollbar-track {
+.questionsList::-webkit-scrollbar-track {
   background: rgba(31, 41, 55, 0.3);
 }
 
-.questions-list::-webkit-scrollbar-thumb {
+.questionsList::-webkit-scrollbar-thumb {
   background: rgba(99, 102, 241, 0.4);
   border-radius: 3px;
 }
 
-.questions-list::-webkit-scrollbar-thumb:hover {
+.questionsList::-webkit-scrollbar-thumb:hover {
   background: rgba(99, 102, 241, 0.6);
 }
 
-.question-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid rgba(63, 63, 77, 0.2);
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.question-item:hover {
-  background: rgba(99, 102, 241, 0.08);
-  border-left: 3px solid rgba(99, 102, 241, 0.5);
-}
-
-.question-item:last-child {
-  border-bottom: none;
-}
-
-.question-left {
+.questionLeft {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex: 1;
 }
 
-.question-number {
+.questionNumber {
   font-weight: 600;
   color: #6366f1;
   font-size: 0.875rem;
@@ -170,20 +151,20 @@
   text-align: center;
 }
 
-.question-title {
+.questionTitle {
   color: #e5e7eb;
   font-size: 0.95rem;
   font-weight: 500;
   line-height: 1.4;
 }
 
-.question-right {
+.questionRight {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.acceptance-rate {
+.acceptanceRate {
   font-size: 0.875rem;
   color: #94a3b8;
   font-weight: 500;
@@ -191,189 +172,64 @@
   text-align: right;
 }
 
-.difficulty-badge {
+.difficultyBadge {
   padding: 0.25rem 0.5rem;
-
   font-size: 0.75rem;
   font-weight: 600;
-
- 
   letter-spacing: 0.025em;
   min-width: 50px;
   text-align: center;
 }
 
-.solved-check {
+.solvedCheck {
   color: #10b981;
   font-weight: bold;
   font-size: 1rem;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .grid {
-    grid-template-columns: 380px 1fr;
-    gap: 1.25rem;
-  }
-}
-
-@media (max-width: 940px) {
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .card {
-    max-width: 520px;
-    margin: 0 auto;
-  }
-  
-  .container {
-    padding: 1.5rem 1rem 2rem;
-  }
-  
-  .title {
-    font-size: 1.5rem;
-  }
-  
-  .header {
-    margin-bottom: 1rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 1.5rem 1rem 2rem;
-  }
-  
-  .questions-header {
-    padding: 1rem 1.25rem;
-  }
-  
-  .question-item {
-    padding: 0.875rem 1.25rem;
-  }
-  
-  .question-left {
-    gap: 0.75rem;
-  }
-  
-  .question-right {
-    gap: 0.5rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .page {
-    padding-top: 70px;
-  }
-  
-  .container {
-    padding: 1rem 0.75rem 1.5rem;
-  }
-  
-  .header {
-    gap: 0.75rem;
-  }
-  
-  .topicIcon {
-    width: 40px;
-    height: 40px;
-    font-size: 1.25rem;
-  }
-  
-  .title {
-    font-size: 1.25rem;
-  }
-  
-  .subtitle {
-    font-size: 0.875rem;
-  }
-  
-  .questions-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-    padding: 1rem;
-  }
-  
-  .question-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-    padding: 1rem;
-  }
-  
-  .question-left {
-    width: 100%;
-  }
-  
-  .question-right {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .questions-list {
-    max-height: 500px;
-  }
-}
-
-@media (max-width: 480px) {
-  .page {
-    padding-top: 60px;
-  }
-  
-  .question-number {
-    min-width: 25px;
-  }
-  
-  .difficulty-badge {
-    min-width: 45px;
-    padding: 0.2rem 0.4rem;
-  }
-}
 .topicIcon1 {
-  display: block; /* makes it a block element */
-  font-size: 48px; /* adjust size to match your screenshot */
+  display: block;
+  font-size: 48px;
   margin-left: 20px;
   margin-top: 20px;
   margin-bottom: 20px;
   width: 80px;
   height: 80px;
-  line-height: 60px; /* vertically center the emoji */
+  line-height: 60px;
   text-align: center;
-  background-color: #2c2c2c; /* optional: match screenshot bg */
-  border-radius: 12px; /* optional: smooth corners like icons */
+  background-color: #2c2c2c;
+  border-radius: 12px;
 }
 
-.card-header1 {
+.cardHeader1 {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.header-content1 {
+.headerContent1 {
   display: flex;
   flex-direction: column;
 }
 
-.topic-title1 {
+.topicTitle1 {
   font-size: 35px;
-  font-weight:500;
+  font-weight: 500;
   margin: 0;
 }
 
-.topic-subtitle1 {
+.topicSubtitle1 {
   font-size: 14px;
   color: #aaa;
   margin: 2px 0 0 0;
 }
+
 /* Search Container Styles */
-.search-container {
-  margin-bottom:0px;
+.searchContainer {
+  margin-bottom: 0px;
 }
 
-.search-wrapper {
+.searchWrapper {
   position: relative;
   display: flex;
   align-items: center;
@@ -381,7 +237,7 @@
   width: 100%;
 }
 
-.search-icon {
+.searchIcon {
   position: absolute;
   left: 12px;
   z-index: 1;
@@ -392,7 +248,7 @@
   transition: color 0.2s ease;
 }
 
-.search-input {
+.searchInput {
   width: 100%;
   padding: 6px 26px 6px 44px;
   border: 2px solid #e5e7eb;
@@ -406,50 +262,23 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.search-input::placeholder {
+.searchInput::placeholder {
   color: #9ca3af;
   font-weight: 400;
 }
 
-.search-input:focus {
+.searchInput:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   background-color: #ffffff;
 }
 
-.search-input:focus + .search-icon,
-.search-wrapper:hover .search-icon {
+.searchInput:focus + .searchIcon,
+.searchWrapper:hover .searchIcon {
   color: #3b82f6;
 }
 
-/* Questions Header Styles */
-.questions-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.questions-stats {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.solved-count {
-  font-size: 14px;
-  font-weight: 600;
-  color: #059669;
-  
-  padding: 6px 12px;
-  border-radius: 20px;
-
-}
-
-.search-results-count {
+.searchResultsCount {
   font-size: 14px;
   font-weight: 500;
   color: #6b7280;
@@ -460,13 +289,13 @@
 }
 
 /* No Results Message */
-.no-results {
+.noResults {
   text-align: center;
   padding: 3rem 1rem;
   color: #6b7280;
 }
 
-.no-results p {
+.noResults p {
   font-size: 16px;
   font-weight: 500;
   margin: 0;
@@ -474,93 +303,47 @@
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .search-input {
+  .searchInput {
     background-color: #1f2937;
     border-color: #374151;
     color: #f9fafb;
   }
   
-  .search-input::placeholder {
+  .searchInput::placeholder {
     color: #6b7280;
   }
   
-  .search-input:focus {
+  .searchInput:focus {
     background-color: #1f2937;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
   }
   
-  .search-icon {
+  .searchIcon {
     color: #9ca3af;
   }
   
-  .search-input:focus + .search-icon,
-  .search-wrapper:hover .search-icon {
+  .searchInput:focus + .searchIcon,
+  .searchWrapper:hover .searchIcon {
     color: #60a5fa;
   }
   
-  .solved-count {
-  
+  .solvedCount {
     color: #076e32;
- 
   }
   
-  .search-results-count {
+  .searchResultsCount {
     background-color: #111827;
     color: #d1d5db;
     border-color: #374151;
   }
   
-  .no-results {
+  .noResults {
     color: #9ca3af;
   }
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .questions-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .search-wrapper {
-    max-width: 100%;
-  }
-  
-  .questions-stats {
-    justify-content: center;
-  }
-  
-  .search-input {
-    padding: 14px 16px 14px 44px;
-    font-size: 16px; /* Prevents zoom on iOS */
-  }
-}
-
-/* Enhanced hover and active states */
-.search-wrapper:hover .search-input {
-  border-color: #d1d5db;
-}
-
-.search-input:active {
-  transform: translateY(1px);
-}
-
-/* Smooth animations */
-.search-wrapper,
-.search-input,
-.search-icon,
-.solved-count,
-.search-results-count {
-  transition: all 0.2s ease;
-}
-
-/* Focus visible for accessibility */
-.search-input:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-/* From Uiverse.io by vinodjangid07 */ 
+/* Bookmark Button */
 .bookmarkBtn {
   width: 100px;
   height: 40px;
@@ -576,7 +359,7 @@
   margin-top: 10px;
 }
 
-.IconContainer {
+.iconContainer {
   width: 30px;
   height: 30px;
   background: rgb(255, 136, 255);
@@ -605,7 +388,7 @@
   font-size: 1.04em;
 }
 
-.bookmarkBtn:hover .IconContainer {
+.bookmarkBtn:hover .iconContainer {
   width: 90px;
   transition-duration: 0.3s;
 }
@@ -621,15 +404,216 @@
   transform: scale(0.95);
   transition-duration: 0.3s;
 }
-.neon-line-basic {
-            width: 100%;
-            height: 1px;
-            background: #8b5cf6;
-            box-shadow: 
-                0 0 10px #8b5cf6,
-                0 0 20px #8b5cf6,
-                0 0 40px #8b5cf6;
-            border-radius: 2px;
-           margin-top: 20px;
-        }
-    
+
+.neonLineBasic {
+  width: 100%;
+  height: 1px;
+  background: #8b5cf6;
+  box-shadow: 
+    0 0 10px #8b5cf6,
+    0 0 20px #8b5cf6,
+    0 0 40px #8b5cf6;
+  border-radius: 2px;
+  margin-top: 20px;
+}
+
+/* Interview Card Styles */
+.interviewCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(17, 17, 25, 0.65);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 1rem;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  margin-bottom: 12px;
+}
+
+.interviewCard:hover {
+  background: rgba(17, 17, 25, 0.75);
+  border-color: rgba(139, 92, 246, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 0 4px rgba(139, 92, 246, 0.4),
+              0 0 8px rgba(139, 92, 246, 0.3),
+              0 0 12px rgba(139, 92, 246, 0.2);
+}
+
+.interviewTitle {
+  color: #f9fafb;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.interviewCategory {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  text-transform: capitalize;
+  margin-top:10px ;
+}
+
+.interviewTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  margin-left: 30px;
+}
+
+.tagBadge {
+  background: rgba(99, 102, 241, 0.2);
+  color: #c7d2fe;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.questionCount {
+  background: #10b981;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Difficulty Colors */
+.difficultyBadge1 {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.difficultyEasy1 {
+  background: #10b981;
+  color: white;
+}
+
+.difficultyMedium1 {
+  background: #f59e0b;
+  color: white;
+}
+
+.difficultyHard1 {
+  background: #ef4444;
+  color: white;
+}
+
+.difficultyDefault1 {
+  background: #6b7280;
+  color: white;
+}
+
+.interviewDuration {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+  background: rgba(63, 63, 77, 0.4);
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(63, 63, 77, 0.3);
+}
+
+/* Loading and Error States */
+.loadingState {
+  text-align: center;
+  padding: 2rem;
+  color: #94a3b8;
+}
+
+.errorState {
+  text-align: center;
+  padding: 2rem;
+  color: #ef4444;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .questionsHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .searchWrapper {
+    max-width: 100%;
+  }
+  
+  .questionsStats {
+    justify-content: center;
+  }
+  
+  .searchInput {
+    padding: 14px 16px 14px 44px;
+    font-size: 16px;
+  }
+  
+  .interviewCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .questionRight {
+    align-items: flex-start;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .interviewTitle {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .interviewCard {
+    padding: 16px;
+  }
+  
+  .questionRight {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* Enhanced hover and active states */
+.searchWrapper:hover .searchInput {
+  border-color: #d1d5db;
+}
+
+.searchInput:active {
+  transform: translateY(1px);
+}
+
+/* Smooth animations */
+.searchWrapper,
+.searchInput,
+.searchIcon,
+.solvedCount,
+.searchResultsCount {
+  transition: all 0.2s ease;
+}
+
+/* Focus visible for accessibility */
+.searchInput:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+.theinterviewtitlebox{
+  display: flex;
+  flex-direction: column;
+}

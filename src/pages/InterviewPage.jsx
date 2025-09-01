@@ -42,6 +42,7 @@ const items = [
 
   return (
     <div className="body-container2">
+      
       <div className="dashboard-bg-orbs">
   <div className="dashboard-orb dashboard-orb1"></div>
   <div className="dashboard-orb dashboard-orb2"></div>
@@ -54,6 +55,8 @@ const items = [
       </div>
 
       <div className="containersall">
+        <h1 className="CommingSoon">Coming Soon</h1>
+      {/* 
         <div className="headsecc">
           <p>Welcome to</p>
           <div class="cardint">
@@ -75,7 +78,8 @@ const items = [
         <SlidingCard tag="Top Companies" />
         <SlidingCard tag="Popular" />
         <SlidingCard tag="Paid" />
-      </div>
+        */}
+      </div> 
       <Dock
         items={items}
         panelHeight={78}
