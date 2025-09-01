@@ -1066,7 +1066,7 @@ app.get('/api/users/:id/leetcode-stats', async (req, res) => {
 app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const { difficulty, questionsCompleted = 1 } = req.body;
+    let { difficulty, questionsCompleted = 1 } = req.body;
 
     if (!difficulty) {
       return res.status(400).json({ message: 'Difficulty is required' });
@@ -1098,11 +1098,7 @@ app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res
 
     // Update the solved count for the specific difficulty
     const currentSolved = user.leetcodeStats[normalizedDifficulty].solved || 0;
-    const newSolved = Math.min(
-      currentSolved + questionsCompleted, 
-      user.leetcodeStats[normalizedDifficulty].total
-    );
-
+    const newSolved = currentSolved+1
     // Update the stats
     user.leetcodeStats[normalizedDifficulty].solved = newSolved;
     user.leetcodeStats.lastUpdated = new Date();
@@ -1111,7 +1107,7 @@ app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res
     if (user.leetcodeStats.attempting > 0) {
       user.leetcodeStats.attempting = Math.max(0, user.leetcodeStats.attempting - questionsCompleted);
     }
-
+    questionsCompleted=1
     // Save the updated user
     await user.save();
 

@@ -989,7 +989,7 @@ export default function InterviewPortal() {
                 {getDifficultyFromPack() && (
                   <div className="askora-stats-update">
                     <span className={`difficulty-badge difficulty-${getDifficultyFromPack()}`}>
-                      +{interviewQuestions.length} {getDifficultyFromPack().toUpperCase()} Question{interviewQuestions.length > 1 ? 's' : ''}
+                      +{1} {getDifficultyFromPack().toUpperCase()} Question{interviewQuestions.length > 1 ? '1' : ''}
                     </span>
                   </div>
                 )}
