@@ -998,3 +998,7 @@ background-size:cover;
 .profile-left-panel::-webkit-scrollbar-thumb:hover {
   background: #7c3aed;
 }
+.centertexts{
+  color: white;
+  font-weight: 400;
+}

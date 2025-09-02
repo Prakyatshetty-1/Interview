@@ -9,7 +9,7 @@ const items = [
     {
       icon: <img src="/homeicon.png" alt="Home" style={{ width: '48px', height: '48px' }} />,
       label: "Home",
-      onClick: () => navigate('/'),
+      onClick: () => navigate('/Dashboard'),
     },
     {
       icon: <img src="/interviewicon.png" alt="Interviews" style={{ width: '48px', height: '48px' }} />,
