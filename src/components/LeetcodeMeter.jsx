@@ -344,26 +344,7 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
             </div>
 
             {/* Attempting badge */}
-            <div style={{
-              position: 'absolute',
-              bottom: '-1.5rem',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              backgroundColor: 'rgba(26, 26, 46, 0.9)',
-              border: '1px solid rgba(139, 92, 246, 0.3)',
-              backdropFilter: 'blur(10px)',
-              padding: '0.5rem 1rem',
-              borderRadius: '24px',
-              textAlign: 'center'
-            }}>
-              <span style={{
-                color: '#c4b5fd',
-                fontSize: '0.875rem',
-                fontWeight: '500'
-              }}>
-                {animatedAttempting} Attempting
-              </span>
-            </div>
+            
           </div>
 
           {/* Stats Cards */}

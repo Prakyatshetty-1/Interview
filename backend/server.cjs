@@ -1128,6 +1128,93 @@ app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+app.get('/api/leetcode/completed-packs', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId).select('completedPacks').lean();
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const completedPacks = user.completedPacks || [];
+
+    // Sort by completion date (most recent first)
+    const sortedPacks = completedPacks
+      .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))
+      .map(pack => ({
+        packId: pack.packId,
+        difficulty: pack.difficulty,
+        completedAt: pack.completedAt,
+        questionsCompleted: pack.questionsCompleted || 1
+      }));
+
+    res.status(200).json({
+      completedPacks: sortedPacks,
+      totalCompleted: sortedPacks.length,
+      byDifficulty: {
+        easy: sortedPacks.filter(p => p.difficulty === 'easy').length,
+        medium: sortedPacks.filter(p => p.difficulty === 'medium').length,
+        hard: sortedPacks.filter(p => p.difficulty === 'hard').length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching completed packs:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Optional: Reset completion status for a pack (useful for testing)
+app.delete('/api/leetcode/reset-completion/:packId', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { packId } = req.params;
+
+    if (!packId) {
+      return res.status(400).json({ message: 'Pack ID is required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Remove the pack from completedPacks
+    if (user.completedPacks) {
+      const originalLength = user.completedPacks.length;
+      user.completedPacks = user.completedPacks.filter(pack => 
+        String(pack.packId) !== String(packId)
+      );
+      
+      const removedCount = originalLength - user.completedPacks.length;
+      
+      if (removedCount > 0) {
+        await user.save();
+        console.log(`Reset completion status for pack ${packId}, user ${userId}`);
+        
+        res.status(200).json({
+          message: `Reset completion status for pack ${packId}`,
+          removed: removedCount,
+          remainingCompletions: user.completedPacks.length
+        });
+      } else {
+        res.status(404).json({
+          message: 'Pack completion not found'
+        });
+      }
+    } else {
+      res.status(404).json({
+        message: 'No completed packs found'
+      });
+    }
+
+  } catch (error) {
+    console.error('Error resetting pack completion:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
 
 // Add these routes to your server.cjs file after the existing Google authentication routes
 
