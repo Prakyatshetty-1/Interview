@@ -46,8 +46,11 @@ const updateLeetCodeStats = async (payload = {}) => {
     // Build body: prefer interviewId + questionIds, fallback to difficulty/count
     const body = {};
     if (payload && typeof payload === 'object') {
-      if (payload.interviewId) body.interviewId = payload.interviewId;
-      if (Array.isArray(payload.questionIds) && payload.questionIds.length) body.questionIds = payload.questionIds;
+      if (payload.interviewId) body.interviewId = String(payload.interviewId);
+      if (Array.isArray(payload.questionIds) && payload.questionIds.length) {
+        // send only truthy non-empty ids
+        body.questionIds = payload.questionIds.map(q => String(q).trim()).filter(Boolean);
+      }
       if (!body.interviewId && payload.difficulty) {
         body.difficulty = String(payload.difficulty).toLowerCase();
         body.questionsCompleted = Number(payload.questionsCompleted || 1);
@@ -69,7 +72,7 @@ const updateLeetCodeStats = async (payload = {}) => {
       body: JSON.stringify(body)
     });
 
-    // robust parse
+    // robust parse of response body (text -> JSON fallback)
     let data = {};
     try {
       const txt = await res.text();
@@ -80,29 +83,54 @@ const updateLeetCodeStats = async (payload = {}) => {
       } catch (e) {
         data = {};
       }
-    }
+    } 
 
     if (!res.ok) {
       console.warn('[updateLeetCodeStats] server returned error', res.status, data);
       return data;
     }
 
-    const leetcodeStats = data?.leetcodeStats ?? null;
-    console.log('[updateLeetCodeStats] server response leetcodeStats:', leetcodeStats, 'newlySolvedCount:', data?.newlySolvedCount);
+    // Log server response
+// --- after parsing `data` from the server (inside updateLeetCodeStats) ---
+console.log('[updateLeetCodeStats] server response leetcodeStats:', data?.leetcodeStats ?? null, 'newlySolvedCount:', data?.newlySolvedCount);
 
-    // same-tab event (fast)
-    try {
-      window.dispatchEvent(new CustomEvent('leetcodeStatsUpdated', { detail: { leetcodeStats } }));
-    } catch (e) {
-      console.warn('dispatchEvent failed', e);
-    }
+// Save latest payload for other tabs and for debugging
+try {
+  localStorage.setItem('leetcodeStatsLatest', JSON.stringify(data));
+  localStorage.setItem('leetcodeStatsLastUpdated', String(Date.now()));
+} catch (e) {
+  console.warn('[updateLeetCodeStats] failed to write localStorage:', e);
+}
 
-    // cross-tab: set a storage key so other tabs' storage listeners fire
-    try {
-      localStorage.setItem('leetcodeStatsLastUpdated', String(Date.now()));
-    } catch (e) {
-      /* ignore */
-    }
+// Expose on window for same-tab consumers that might read it synchronously
+try {
+  window.__leetcodeLatestPayload = data;
+} catch (e) {
+  /* ignore */
+}
+
+// Dispatch both shapes so all listeners (old & new) can respond
+try {
+  // legacy: some listeners expect `detail.leetcodeStats`
+  window.dispatchEvent(new CustomEvent('leetcodeStatsUpdated', {
+    detail: { leetcodeStats: data?.leetcodeStats ?? data }
+  }));
+} catch (e) {
+  console.warn('[updateLeetCodeStats] dispatch legacy failed', e);
+}
+
+try {
+  // full: dispatch the entire server payload (includes newlySolvedCount/newlySolved)
+  window.dispatchEvent(new CustomEvent('leetcodeStatsUpdatedFull', { detail: data }));
+} catch (e) {
+  console.warn('[updateLeetCodeStats] dispatch full failed', e);
+}
+
+// cross-tab: set a storage key so other tabs' storage listeners fire
+try {
+  localStorage.setItem('leetcodeStatsLastUpdated', String(Date.now()));
+} catch (e) { /* ignore */ }
+
 
     return data;
   } catch (err) {
@@ -276,7 +304,12 @@ const payload = {
 };
 
 try {
-  await updateLeetCodeStats(payload);
+  const result = await updateLeetCodeStats(payload);
+  console.log('[InterviewPortal] updateLeetCodeStats result', result);
+  if (result?.newlySolvedCount > 0) {
+    // optionally display a toast/notification
+    console.log(`[InterviewPortal] Recorded ${result.newlySolvedCount} newly solved questions.`);
+  }
 } catch (err) {
   console.warn('[InterviewPortal] updateLeetCodeStats failed', err);
 }

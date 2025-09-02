@@ -160,57 +160,99 @@ const updateLeetCodeStats = async (payload = {}) => {
 
 // LeetcodeMeter.jsx — make sure fetchLeetCodeStats is memoized, then add this effect:
 useEffect(() => {
-  const onStatsUpdated = (e) => {
-    console.log('LeetcodeMeter: leetcodeStatsUpdated event received', e?.detail);
-    const incoming = e?.detail?.leetcodeStats ?? null;
-    if (incoming) {
-      // normalize and apply immediately
-      const normalized = normalizeIncoming(incoming);
-      setStats(prev => ({
-        // merge so we don't lose any fields
-        total: typeof normalized.total === 'number' ? normalized.total : prev.total,
-        attempting: typeof normalized.attempting === 'number' ? normalized.attempting : prev.attempting,
-        easy: {
-          solved: typeof normalized.easy?.solved === 'number' ? normalized.easy.solved : prev.easy.solved,
-          total: typeof normalized.easy?.total === 'number' ? normalized.easy.total : prev.easy.total,
-        },
-        medium: {
-          solved: typeof normalized.medium?.solved === 'number' ? normalized.medium.solved : prev.medium.solved,
-          total: typeof normalized.medium?.total === 'number' ? normalized.medium.total : prev.medium.total,
-        },
-        hard: {
-          solved: typeof normalized.hard?.solved === 'number' ? normalized.hard.solved : prev.hard.solved,
-          total: typeof normalized.hard?.total === 'number' ? normalized.hard.total : prev.hard.total,
-        }
-      }));
+  // helper to normalize & apply payload object (either full payload or plain stats)
+  const applyIncoming = (rawDetail) => {
+    if (!rawDetail) return false;
 
-      // update animated counters immediately to reflect change in UI:
-      const solvedNow = (normalized.easy?.solved || 0) + (normalized.medium?.solved || 0) + (normalized.hard?.solved || 0);
-      setAnimatedSolved(solvedNow); // set directly so UI shows new number immediately
-      setAnimatedAttempting(normalized.attempting ?? 0);
-      return;
-    }
+    // support both shapes: { leetcodeStats: {...}, newlySolvedCount } OR plain stats object
+    const payload = (rawDetail.leetcodeStats ?? rawDetail);
 
-    // if event had no payload, fallback to refetch authoritative stats
-    fetchLeetCodeStats();
+    if (!payload || typeof payload !== 'object') return false;
+
+    const normalized = {
+      total: typeof payload.total === 'number' ? payload.total : stats.total,
+      attempting: typeof payload.attempting === 'number' ? payload.attempting : stats.attempting,
+      easy: {
+        solved: typeof payload.easy?.solved === 'number' ? payload.easy.solved : stats.easy.solved,
+        total: typeof payload.easy?.total === 'number' ? payload.easy.total : stats.easy.total
+      },
+      medium: {
+        solved: typeof payload.medium?.solved === 'number' ? payload.medium.solved : stats.medium.solved,
+        total: typeof payload.medium?.total === 'number' ? payload.medium.total : stats.medium.total
+      },
+      hard: {
+        solved: typeof payload.hard?.solved === 'number' ? payload.hard.solved : stats.hard.solved,
+        total: typeof payload.hard?.total === 'number' ? payload.hard.total : stats.hard.total
+      }
+    };
+
+    // apply to state
+    setStats(prev => ({
+      total: normalized.total,
+      attempting: normalized.attempting,
+      easy: { solved: normalized.easy.solved, total: normalized.easy.total },
+      medium: { solved: normalized.medium.solved, total: normalized.medium.total },
+      hard: { solved: normalized.hard.solved, total: normalized.hard.total }
+    }));
+
+    // immediate animation update
+    const solvedNow = (normalized.easy.solved || 0) + (normalized.medium.solved || 0) + (normalized.hard.solved || 0);
+    setAnimatedSolved(solvedNow);
+    setAnimatedAttempting(normalized.attempting ?? 0);
+
+    return true;
   };
 
+  // Event handlers
+  const onLegacy = (e) => {
+    console.log('LeetcodeMeter: leetcodeStatsUpdated (legacy) event received:', e?.detail);
+    const applied = applyIncoming(e?.detail ?? window.__leetcodeLatestPayload ?? null);
+    if (!applied) fetchLeetCodeStats();
+  };
+
+  const onFull = (e) => {
+    console.log('LeetcodeMeter: leetcodeStatsUpdatedFull (full) event received:', e?.detail);
+    const applied = applyIncoming(e?.detail ?? window.__leetcodeLatestPayload ?? null);
+    if (!applied) fetchLeetCodeStats();
+  };
+
+  // Listen for storage changes from other tabs (key: leetcodeStatsLatest)
   const onStorage = (e) => {
     if (!e) return;
-    if (e.key === 'leetcodeStatsLastUpdated') {
-      console.log('LeetcodeMeter: storage event - leetcodeStatsLastUpdated', e.newValue);
-      fetchLeetCodeStats();
+    if (e.key === 'leetcodeStatsLatest') {
+      console.log('LeetcodeMeter: storage event leetcodeStatsLatest received');
+      try {
+        const parsed = e.newValue ? JSON.parse(e.newValue) : null;
+        const applied = applyIncoming(parsed);
+        if (!applied) fetchLeetCodeStats();
+      } catch (err) {
+        console.warn('LeetcodeMeter: failed to parse leetcodeStatsLatest from storage', err);
+        fetchLeetCodeStats();
+      }
     }
+    // also respect leetcodeStatsLastUpdated if you want (but we prefer latest payload)
   };
 
-  window.addEventListener('leetcodeStatsUpdated', onStatsUpdated);
+  // Install listeners
+  window.addEventListener('leetcodeStatsUpdated', onLegacy);
+  window.addEventListener('leetcodeStatsUpdatedFull', onFull);
   window.addEventListener('storage', onStorage);
 
+  // If publisher already put the payload on window (same-tab race), apply it now.
+  if (typeof window !== 'undefined' && window.__leetcodeLatestPayload) {
+    console.log('LeetcodeMeter: applying existing window.__leetcodeLatestPayload on mount', window.__leetcodeLatestPayload);
+    applyIncoming(window.__leetcodeLatestPayload);
+  }
+
+  // cleanup
   return () => {
-    window.removeEventListener('leetcodeStatsUpdated', onStatsUpdated);
+    window.removeEventListener('leetcodeStatsUpdated', onLegacy);
+    window.removeEventListener('leetcodeStatsUpdatedFull', onFull);
     window.removeEventListener('storage', onStorage);
   };
-}, [fetchLeetCodeStats, normalizeIncoming]);
+  // intentionally do not depend on `stats` here beyond fetchLeetCodeStats, fetchLeetCodeStats is memoized with useCallback
+}, [fetchLeetCodeStats]);
+
 
   useEffect(() => {
     // fetch on mount & whenever userId changes

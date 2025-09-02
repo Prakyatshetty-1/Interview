@@ -1157,6 +1157,15 @@ app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res
       return res.status(400).json({ message: 'Invalid or missing interviewId' });
     }
 
+    // helper: normalize ids and strip ObjectId("...") wrappers
+    const normalizeId = (x) => {
+      if (!x) return '';
+      let s = String(x).trim();
+      const m = s.match(/^ObjectId\("?(.*)"?\)$/);
+      if (m) s = m[1];
+      return s;
+    };
+
     // Ensure user exists
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -1169,7 +1178,7 @@ app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res
     const qDifficultyMap = new Map();
     if (Array.isArray(pack.questions)) {
       for (const q of pack.questions) {
-        const qid = String(q._id ?? q.id ?? q.questionId ?? q.slug ?? "").trim();
+        const qid = normalizeId(q._id ?? q.id ?? q.questionId ?? q.slug ?? "");
         if (!qid) continue;
         const diff = (q.difficulty || q.level || q.levelName || "medium").toString().toLowerCase();
         qDifficultyMap.set(qid, diff);
@@ -1177,21 +1186,26 @@ app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res
     }
 
     // If questionIds empty -> treat as entire pack completed (use pack.questions)
-    let toMark = Array.isArray(questionIds) && questionIds.length ? questionIds.map(String) : [];
+    let toMark = Array.isArray(questionIds) && questionIds.length
+      ? questionIds.map(normalizeId).filter(Boolean)
+      : [];
     if (toMark.length === 0 && Array.isArray(pack.questions) && pack.questions.length) {
-      toMark = pack.questions.map(q => String(q._id ?? q.id ?? q.questionId ?? q.slug ?? "")).filter(Boolean);
+      toMark = pack.questions.map(q => normalizeId(q._id ?? q.id ?? q.questionId ?? q.slug ?? "")).filter(Boolean);
     }
 
     if (!Array.isArray(user.attempts)) user.attempts = [];
 
-    // Build a Set of already-solved questionIds to avoid duplicates
-    const alreadySolved = new Set(user.attempts
-      .filter(a => String(a.status || "").toLowerCase() === "solved")
-      .map(a => String(a.questionId)));
+    // Build a Set of already-solved questionIds to avoid duplicates (normalize stored ids too)
+    const alreadySolved = new Set(
+      (user.attempts || [])
+        .filter(a => String(a.status || "").toLowerCase() === "solved")
+        .map(a => normalizeId(a.questionId ?? a.qid ?? a.question ?? ""))
+        .filter(Boolean)
+    );
 
     const newlySolved = [];
     for (const qidRaw of toMark) {
-      const qid = String(qidRaw).trim();
+      const qid = normalizeId(qidRaw);
       if (!qid) continue;
       if (alreadySolved.has(qid)) continue; // dedupe: do not count again
 
