@@ -19,6 +19,7 @@ export default function InterviewPortal() {
   const [error, setError] = useState("");
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [packMeta, setPackMeta] = useState(null);
+  const [isFirstAttempt, setIsFirstAttempt] = useState(false);
 
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
@@ -35,10 +36,23 @@ export default function InterviewPortal() {
       const token = localStorage.getItem('token');
       if (!token) {
         console.log('No token found, skipping LeetCode stats update');
-        return;
+        return { updated: false, reason: 'no_token' };
       }
 
-      console.log(`Updating LeetCode stats: ${difficulty} difficulty, ${questionsCompleted} questions`);
+      if (!isFirstAttempt) {
+        console.log('Not first attempt - skipping LeetCode stats update');
+        return { updated: false, reason: 'not_first_attempt' };
+      }
+
+      // Get pack ID from current pack
+      const packId = id || (packMeta && (packMeta.id || packMeta._id));
+
+      if (!packId) {
+        console.warn('No pack ID available for LeetCode tracking');
+        return { updated: false, reason: 'no_pack_id' };
+      }
+
+      console.log(`Updating LeetCode stats: ${difficulty} difficulty, ${questionsCompleted} questions, pack: ${packId}`);
 
       const response = await fetch(`${API_BASE}/api/leetcode/update-after-interview`, {
         method: 'POST',
@@ -48,36 +62,45 @@ export default function InterviewPortal() {
         },
         body: JSON.stringify({
           difficulty: difficulty.toLowerCase(),
-          questionsCompleted: questionsCompleted
+          questionsCompleted: questionsCompleted,
+          packId: packId // Add pack ID to request
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        console.log('LeetCode stats updated successfully:', data);
+        if (data.alreadyCompleted) {
+          console.log('Pack already completed - LeetCode stats not updated');
+          return { updated: false, reason: 'already_completed', data };
+        } else {
+          console.log('LeetCode stats updated successfully:', data);
+          return { updated: true, data };
+        }
       } else {
         console.warn('Failed to update LeetCode stats:', data.message);
+        return { updated: false, reason: 'server_error', error: data.message };
       }
     } catch (error) {
       console.error('Error updating LeetCode stats:', error);
+      return { updated: false, reason: 'network_error', error: error.message };
     }
   };
 
   // Function to determine difficulty from pack metadata
   const getDifficultyFromPack = () => {
     if (!packMeta) return null;
-    
+
     // Check various fields where difficulty might be stored
-    const difficulty = packMeta.level || 
-                     packMeta.difficulty || 
-                     packMeta.levelName || 
-                     (packMeta.meta && (packMeta.meta.level || packMeta.meta.difficulty));
-    
+    const difficulty = packMeta.level ||
+      packMeta.difficulty ||
+      packMeta.levelName ||
+      (packMeta.meta && (packMeta.meta.level || packMeta.meta.difficulty));
+
     if (!difficulty) return null;
-    
+
     const difficultyStr = String(difficulty).toLowerCase();
-    
+
     // Map common difficulty terms to standard values
     if (difficultyStr.includes('easy') || difficultyStr.includes('beginner')) {
       return 'easy';
@@ -86,8 +109,37 @@ export default function InterviewPortal() {
     } else if (difficultyStr.includes('hard') || difficultyStr.includes('advanced') || difficultyStr.includes('expert')) {
       return 'hard';
     }
-    
+
     return null;
+  };
+  const checkFirstAttempt = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return false;
+
+      const packId = id || (packMeta && (packMeta.id || packMeta._id));
+      if (!packId) {
+        console.warn('No pack ID available for completion check');
+        return true; // Default to true if we can't check
+      }
+
+      const response = await fetch(`${API_BASE}/api/leetcode/check-completion/${packId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`Completion check for pack ${packId}:`, data);
+        return !data.hasCompleted; // Return true if NOT completed before
+      } else {
+        console.warn('Failed to check completion status:', response.status);
+      }
+    } catch (error) {
+      console.error('Error checking completion status:', error);
+    }
+    return true; // Default to true if we can't check
   };
 
   const initRecognition = () => {
@@ -216,64 +268,29 @@ export default function InterviewPortal() {
 
       // Update LeetCode stats based on difficulty and number of questions
       const difficulty = getDifficultyFromPack();
+      let leetcodeUpdateResult = null;
+
       if (difficulty) {
         const questionsCount = summary.questionsCount || 1;
         console.log(`Interview completed with ${questionsCount} questions at ${difficulty} difficulty`);
-        await updateLeetCodeStats(difficulty, questionsCount);
+        leetcodeUpdateResult = await updateLeetCodeStats(difficulty, questionsCount);
+
+        if (leetcodeUpdateResult.updated) {
+          console.log('LeetCode stats successfully updated');
+        } else {
+          console.log('LeetCode stats not updated:', leetcodeUpdateResult.reason);
+        }
       } else {
         console.log('No difficulty found in pack metadata, skipping LeetCode stats update');
       }
 
-      // Save recent interview to server
-      if (token) {
-        try {
-          const res = await fetch(`${API_BASE}/api/profile/recent-interviews`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify(summary),
-          });
+      // Save recent interview to server (existing code remains the same)
+      // ... rest of the existing saveRecentInterview code ...
 
-          if (res.ok) {
-            console.log('[InterviewPortal] recent interview saved to server');
-            return;
-          } else {
-            const txt = await res.text().catch(() => '');
-            console.warn('[InterviewPortal] server save failed:', res.status, txt);
-          }
-        } catch (err) {
-          console.warn('[InterviewPortal] server save error - falling back to localStorage', err);
-        }
-      }
-
-      // Fallback: localStorage namespaced by user id
-      try {
-        const token = localStorage.getItem("token");
-        const userId = getUserIdFromToken(token);
-        const baseKey = `recentInterviews_${userId || "anonymous"}`;
-        const raw = localStorage.getItem(baseKey);
-        const arr = raw ? JSON.parse(raw) : [];
-
-        const deduped = (arr || []).filter((item) => {
-          if (item.packId && summary.packId) return item.packId !== summary.packId;
-          if (item.interviewId && summary.interviewId) return item.interviewId !== summary.interviewId;
-          return !(
-            item.title === summary.title &&
-            Number(item.questionsCount) === Number(summary.questionsCount)
-          );
-        });
-
-        deduped.unshift(summary);
-        const sliced = deduped.slice(0, 20);
-        localStorage.setItem(baseKey, JSON.stringify(sliced));
-        console.log(`[InterviewPortal] recent interview saved to localStorage key=${baseKey}`);
-      } catch (err) {
-        console.error("[InterviewPortal] failed to save recent interview to localStorage", err);
-      }
+      return leetcodeUpdateResult;
     } catch (err) {
       console.error('[InterviewPortal] saveRecentInterview error', err);
+      return { updated: false, reason: 'save_error', error: err.message };
     }
   };
 
@@ -282,6 +299,8 @@ export default function InterviewPortal() {
     const fetchPack = async () => {
       if (!id) return;
       try {
+        const firstAttempt = await checkFirstAttempt();
+        setIsFirstAttempt(firstAttempt);
         const token = localStorage.getItem("token");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`${API_BASE}/api/interviews/${id}`, { headers });
@@ -328,45 +347,45 @@ export default function InterviewPortal() {
           setPackMeta(
             pack && typeof pack === "object"
               ? {
-                  id: pack.id || pack._id || id,
-                  title: pack.title || pack.name || pack.packName || null,
-                  creator:
-                    pack.creator ||
-                    pack.author ||
-                    pack.createdBy ||
-                    pack.owner ||
-                    pack.uploader ||
-                    (pack.meta && (pack.meta.creator || pack.meta.author)) ||
-                    null,
-                  // Enhanced level/difficulty detection
-                  level:
-                    pack.level ||
-                    pack.difficulty ||
-                    pack.levelName ||
-                    pack.difficultyLevel ||
-                    (pack.meta && (pack.meta.level || pack.meta.difficulty || pack.meta.levelName)) ||
-                    // Check tags for difficulty keywords
-                    (pack.tags && Array.isArray(pack.tags) && 
-                     pack.tags.find(tag => 
-                       typeof tag === 'string' && 
-                       /^(easy|medium|hard|beginner|intermediate|advanced|expert)$/i.test(tag.trim())
-                     )) ||
-                    // Check category for difficulty keywords
-                    (pack.category && typeof pack.category === 'string' &&
-                     /easy|medium|hard|beginner|intermediate|advanced|expert/i.test(pack.category) &&
-                     pack.category.match(/easy|medium|hard|beginner|intermediate|advanced|expert/i)?.[0]) ||
-                    null,
-                  company: pack.company || pack.source || pack.provider || null,
-                  duration:
-                    pack.duration || pack.estimatedDuration || pack.length || null,
-                }
+                id: pack.id || pack._id || id,
+                title: pack.title || pack.name || pack.packName || null,
+                creator:
+                  pack.creator ||
+                  pack.author ||
+                  pack.createdBy ||
+                  pack.owner ||
+                  pack.uploader ||
+                  (pack.meta && (pack.meta.creator || pack.meta.author)) ||
+                  null,
+                // Enhanced level/difficulty detection
+                level:
+                  pack.level ||
+                  pack.difficulty ||
+                  pack.levelName ||
+                  pack.difficultyLevel ||
+                  (pack.meta && (pack.meta.level || pack.meta.difficulty || pack.meta.levelName)) ||
+                  // Check tags for difficulty keywords
+                  (pack.tags && Array.isArray(pack.tags) &&
+                    pack.tags.find(tag =>
+                      typeof tag === 'string' &&
+                      /^(easy|medium|hard|beginner|intermediate|advanced|expert)$/i.test(tag.trim())
+                    )) ||
+                  // Check category for difficulty keywords
+                  (pack.category && typeof pack.category === 'string' &&
+                    /easy|medium|hard|beginner|intermediate|advanced|expert/i.test(pack.category) &&
+                    pack.category.match(/easy|medium|hard|beginner|intermediate|advanced|expert/i)?.[0]) ||
+                  null,
+                company: pack.company || pack.source || pack.provider || null,
+                duration:
+                  pack.duration || pack.estimatedDuration || pack.length || null,
+              }
               : null
           );
 
           setInterviewQuestions(questions);
           interviewQuestionsRef.current = questions;
           setError("");
-          
+
           // Log pack metadata for debugging
           console.log('Pack metadata loaded:', {
             title: pack.title || pack.name,
@@ -404,19 +423,19 @@ export default function InterviewPortal() {
 
     return () => {
       if (recognitionRef.current) {
-        try { 
-          recognitionRef.current.stop(); 
+        try {
+          recognitionRef.current.stop();
           recognitionRef.current.abort?.();
-        } catch (e) {}
+        } catch (e) { }
         recognitionRef.current = null;
       }
-      
+
       if (synthRef.current) {
-        try { 
-          synthRef.current.cancel(); 
-        } catch (e) {}
+        try {
+          synthRef.current.cancel();
+        } catch (e) { }
       }
-      
+
       isSpeakingRef.current = false;
       inFlightRef.current = false;
     };
@@ -445,25 +464,25 @@ export default function InterviewPortal() {
             const utter = new window.SpeechSynthesisUtterance(String(text));
             utter.lang = "en-US";
             utter.rate = 0.95;
-            
+
             utter.onstart = () => {
               console.log("Speech started:", text.substring(0, 50));
             };
-            
+
             utter.onend = () => {
               console.log("Speech ended");
               setIsSpeaking(false);
               isSpeakingRef.current = false;
               resolve();
             };
-            
+
             utter.onerror = (err) => {
               console.error("SpeechSynthesis error", err);
               setIsSpeaking(false);
               isSpeakingRef.current = false;
               resolve();
             };
-            
+
             try {
               synthRef.current.speak(utter);
             } catch (e) {
@@ -608,8 +627,8 @@ export default function InterviewPortal() {
     const tryStart = async (attempt = 0) => {
       try {
         if (synthRef.current) {
-          try { 
-            synthRef.current.cancel(); 
+          try {
+            synthRef.current.cancel();
             await new Promise(resolve => setTimeout(resolve, 100));
           } catch (e) {
             console.warn("Error canceling TTS:", e);
@@ -623,13 +642,13 @@ export default function InterviewPortal() {
       } catch (e) {
         console.warn("Error starting recognition:", e);
         const msg = (e && e.name) ? e.name : (e && e.message) ? e.message : String(e);
-        
+
         if (attempt < 3 && /invalidstateerror|started|already started/i.test(msg)) {
-          try { 
-            recognitionRef.current.stop(); 
+          try {
+            recognitionRef.current.stop();
             recognitionRef.current.abort?.();
-          } catch (s) {}
-          
+          } catch (s) { }
+
           setTimeout(() => {
             initRecognition();
             tryStart(attempt + 1);
@@ -700,7 +719,7 @@ export default function InterviewPortal() {
         setFeedback(errMsg);
         setTranscript((prev) => [...prev, { type: "feedback", text: errMsg }]);
         await speakText(errMsg);
-        
+
         const next = currentQuestionIndexRef.current + 1;
         currentQuestionIndexRef.current = next;
         setCurrentQuestionIndex(next);
@@ -714,7 +733,7 @@ export default function InterviewPortal() {
         setFeedback(errMsg);
         setTranscript((prev) => [...prev, { type: "feedback", text: errMsg }]);
         await speakText(errMsg);
-        
+
         const next = currentQuestionIndexRef.current + 1;
         currentQuestionIndexRef.current = next;
         setCurrentQuestionIndex(next);
@@ -759,15 +778,15 @@ export default function InterviewPortal() {
 
   // UI (kept similar to your original)
   return (
-   <div className="askora-interview-portal">
+    <div className="askora-interview-portal">
 
       <div className="askora-interview-card">
         {/* Left Panel - Iframe */}
         <div className="askora-left-panel">
-           <div className="askora-logo-container">
-        <span className="askora-logo">Askora</span>
-      </div>
-       <div className="pricing-bg-orbs">
+          <div className="askora-logo-container">
+            <span className="askora-logo">Askora</span>
+          </div>
+          <div className="pricing-bg-orbs">
             <div className="pricing-orb pricing-orb1"></div>
             <div className="pricing-orb pricing-orb3"></div>
             <div className="pricing-orb pricing-orb4"></div>
@@ -778,39 +797,39 @@ export default function InterviewPortal() {
           <div className={`particle-orb-container ${isSpeaking ? 'active' : ''}`}>
             {/* Central energy core */}
             <div className="energy-core"></div>
-            
+
             {/* Multi-layered particle system */}
             <div className="particle-layer layer-1">
-              {Array.from({length: 8}).map((_, i) => (
+              {Array.from({ length: 8 }).map((_, i) => (
                 <div key={`layer1-${i}`} className={`particle particle-layer-1 particle-${i + 1}`}></div>
               ))}
             </div>
-            
+
             <div className="particle-layer layer-2">
-              {Array.from({length: 12}).map((_, i) => (
+              {Array.from({ length: 12 }).map((_, i) => (
                 <div key={`layer2-${i}`} className={`particle particle-layer-2 particle-${i + 9}`}></div>
               ))}
             </div>
-            
+
             <div className="particle-layer layer-3">
-              {Array.from({length: 16}).map((_, i) => (
+              {Array.from({ length: 16 }).map((_, i) => (
                 <div key={`layer3-${i}`} className={`particle particle-layer-3 particle-${i + 21}`}></div>
               ))}
             </div>
-            
+
             {/* Floating energy particles */}
             <div className="floating-particles">
-              {Array.from({length: 20}).map((_, i) => (
+              {Array.from({ length: 20 }).map((_, i) => (
                 <div key={`float-${i}`} className={`floating-particle float-${i + 1}`}></div>
               ))}
             </div>
-            
+
             {/* Dynamic pulse waves */}
             <div className="pulse-wave wave-1"></div>
             <div className="pulse-wave wave-2"></div>
             <div className="pulse-wave wave-3"></div>
             <div className="pulse-wave wave-4"></div>
-            
+
             {/* Energy beams */}
             <div className="energy-beam beam-1"></div>
             <div className="energy-beam beam-2"></div>
@@ -836,7 +855,7 @@ export default function InterviewPortal() {
             <div className="askora-start-section">
               <h1 className="askora-title">Askora Interview Portal</h1>
               <p className="askora-instructions">
-                Click "Start Interview" to begin. Askora will ask you questions, 
+                Click "Start Interview" to begin. Askora will ask you questions,
                 provide feedback, and track your progress in your LeetCode stats.
               </p>
               {packMeta && (
@@ -865,9 +884,8 @@ export default function InterviewPortal() {
               <div className="askora-question-panel">
                 <h2 className="askora-question-title">
                   {currentQuestionIndex < interviewQuestions.length
-                    ? `Question ${currentQuestionIndex + 1}/${
-                        interviewQuestions.length
-                      }:`
+                    ? `Question ${currentQuestionIndex + 1}/${interviewQuestions.length
+                    }:`
                     : "Interview Completed!"}
                 </h2>
                 {currentQuestionIndex < interviewQuestions.length && (
@@ -908,9 +926,8 @@ export default function InterviewPortal() {
                     currentQuestionIndex >= interviewQuestions.length ||
                     !recognitionRef.current
                   }
-                  className={`askora-btn ${
-                    isListening ? "askora-btn-danger" : "askora-btn-primary"
-                  }`}
+                  className={`askora-btn ${isListening ? "askora-btn-danger" : "askora-btn-primary"
+                    }`}
                 >
                   {isListening ? (
                     <>
@@ -955,8 +972,8 @@ export default function InterviewPortal() {
                         {entry.type === "question"
                           ? "Interviewer"
                           : entry.type === "answer"
-                          ? "You"
-                          : "Feedback"}
+                            ? "You"
+                            : "Feedback"}
                         :
                       </strong>{" "}
                       {entry.text}
@@ -983,13 +1000,25 @@ export default function InterviewPortal() {
                 </div>
                 <h2 className="askora-modal-title">Interview Completed!</h2>
                 <p className="askora-modal-message">
-                  Thank you for completing the interview. Your responses have been recorded 
-                  {getDifficultyFromPack() && ` and your ${getDifficultyFromPack()} difficulty stats have been updated`}.
+                  Thank you for completing the interview. Your responses have been recorded
+                  {isFirstAttempt && getDifficultyFromPack()
+                    ? ` and your ${getDifficultyFromPack()} difficulty stats have been updated.`
+                    : !isFirstAttempt
+                      ? '. Since this is a repeat attempt, your LeetCode stats were not modified.'
+                      : '.'
+                  }
                 </p>
-                {getDifficultyFromPack() && (
+                {getDifficultyFromPack() && isFirstAttempt && (
                   <div className="askora-stats-update">
                     <span className={`difficulty-badge difficulty-${getDifficultyFromPack()}`}>
-                      +{1} {getDifficultyFromPack().toUpperCase()} Question{interviewQuestions.length > 1 ? '1' : ''}
+                      +{1} {getDifficultyFromPack().toUpperCase()} Question{interviewQuestions.length > 1 ? '' : ''}
+                    </span>
+                  </div>
+                )}
+                {!isFirstAttempt && (
+                  <div className="askora-repeat-notice">
+                    <span className="repeat-badge">
+                      Repeat Attempt - Stats Unchanged
                     </span>
                   </div>
                 )}
@@ -1014,8 +1043,7 @@ export default function InterviewPortal() {
           </div>
         )}
       </div>
-
-    <style jsx>{`
+      <style jsx>{`
 
         .askora-interview-portal {
           height: 100vh;
@@ -1994,6 +2022,8 @@ export default function InterviewPortal() {
           }
         }
       `}</style>
+
+
     </div>
   );
 

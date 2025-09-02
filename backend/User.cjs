@@ -138,6 +138,18 @@ const userSchema = new mongoose.Schema({
   saves: { type: [SaveSchema], default: [] },
   attempts: { type: [AttemptSchema], default: [] },
 
+  // NEW: Track completed interview packs to prevent duplicate LeetCode updates
+  completedPacks: [{
+    packId: { type: String, required: true },
+    difficulty: { 
+      type: String, 
+      enum: ['easy', 'medium', 'hard'],
+      required: true 
+    },
+    completedAt: { type: Date, default: Date.now },
+    questionsCompleted: { type: Number, default: 1 }
+  }],
+
   // Additional tracking fields
   lastLogin: {
     type: Date,
@@ -148,6 +160,8 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// NEW: Index for efficient completion lookups
+userSchema.index({ 'completedPacks.packId': 1, '_id': 1 });
 
 // Modified pre-save middleware to handle OAuth users (no password)
 userSchema.pre('save', async function (next) {
@@ -187,6 +201,35 @@ userSchema.methods.isGitHubUser = function() {
 
 userSchema.methods.isOAuthUser = function() {
   return this.isGoogleUser() || this.isGitHubUser();
+};
+
+// NEW: Instance method to check if pack is completed
+userSchema.methods.hasCompletedPack = function(packId) {
+  if (!this.completedPacks || !Array.isArray(this.completedPacks)) {
+    return false;
+  }
+  return this.completedPacks.some(pack => String(pack.packId) === String(packId));
+};
+
+// NEW: Instance method to add completed pack
+userSchema.methods.addCompletedPack = function(packId, difficulty, questionsCompleted = 1) {
+  if (!this.completedPacks) {
+    this.completedPacks = [];
+  }
+  
+  // Don't add if already completed
+  if (this.hasCompletedPack(packId)) {
+    return false;
+  }
+  
+  this.completedPacks.push({
+    packId: packId,
+    difficulty: difficulty.toLowerCase(),
+    completedAt: new Date(),
+    questionsCompleted: questionsCompleted
+  });
+  
+  return true;
 };
 
 // Method to get user public profile (without sensitive data)
@@ -239,6 +282,13 @@ userSchema.statics.findByGitHubIdOrEmail = function(githubId, email) {
       { email: email.toLowerCase() }
     ]
   });
+};
+
+// NEW: Static method to find users who completed a specific pack
+userSchema.statics.findUsersWhoCompleted = function(packId) {
+  return this.find({
+    'completedPacks.packId': String(packId)
+  }).select('name email completedPacks.$');
 };
 
 // Virtual for total problems solved
