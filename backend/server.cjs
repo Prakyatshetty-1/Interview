@@ -1150,21 +1150,24 @@ app.get('/api/users/:id/leetcode-stats', async (req, res) => {
 app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const { interviewId, questionIds = [] } = req.body || {};
+    let { difficulty, questionsCompleted = 1, packId } = req.body;
+
 
     // Validate interviewId early and return 400 for bad requests
     if (!interviewId || !mongoose.Types.ObjectId.isValid(String(interviewId))) {
       return res.status(400).json({ message: 'Invalid or missing interviewId' });
     }
 
-    // helper: normalize ids and strip ObjectId("...") wrappers
-    const normalizeId = (x) => {
-      if (!x) return '';
-      let s = String(x).trim();
-      const m = s.match(/^ObjectId\("?(.*)"?\)$/);
-      if (m) s = m[1];
-      return s;
-    };
+    if (!packId) {
+      return res.status(400).json({ message: 'Pack ID is required for tracking' });
+    }
+
+    // Normalize difficulty to match our schema (easy, medium, hard)
+    const normalizedDifficulty = difficulty.toLowerCase().trim();
+    
+    if (!['easy', 'medium', 'hard'].includes(normalizedDifficulty)) {
+      return res.status(400).json({ message: 'Invalid difficulty. Must be easy, medium, or hard' });
+    }
 
     // Ensure user exists
     const user = await User.findById(userId);
@@ -1185,79 +1188,160 @@ app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res
       }
     }
 
-    // If questionIds empty -> treat as entire pack completed (use pack.questions)
-    let toMark = Array.isArray(questionIds) && questionIds.length
-      ? questionIds.map(normalizeId).filter(Boolean)
-      : [];
-    if (toMark.length === 0 && Array.isArray(pack.questions) && pack.questions.length) {
-      toMark = pack.questions.map(q => normalizeId(q._id ?? q.id ?? q.questionId ?? q.slug ?? "")).filter(Boolean);
-    }
-
-    if (!Array.isArray(user.attempts)) user.attempts = [];
-
-    // Build a Set of already-solved questionIds to avoid duplicates (normalize stored ids too)
-    const alreadySolved = new Set(
-      (user.attempts || [])
-        .filter(a => String(a.status || "").toLowerCase() === "solved")
-        .map(a => normalizeId(a.questionId ?? a.qid ?? a.question ?? ""))
-        .filter(Boolean)
-    );
-
-    const newlySolved = [];
-    for (const qidRaw of toMark) {
-      const qid = normalizeId(qidRaw);
-      if (!qid) continue;
-      if (alreadySolved.has(qid)) continue; // dedupe: do not count again
-
-      // determine difficulty (prefer map, else fallback to request data or "medium")
-      const difficulty = (qDifficultyMap.get(qid) || "medium").toString().toLowerCase();
-
-      // push attempt record (include `date` to satisfy schema validation)
-      user.attempts.push({
-        questionId: qid,
-        interviewId: String(interviewId),
-        difficulty,
-        status: "solved",
-        solvedAt: new Date(),
-        createdAt: new Date(),
-        date: new Date()
+    // Check if pack was already completed
+    const alreadyCompleted = user.hasCompletedPack(packId);
+    
+    if (alreadyCompleted) {
+      console.log(`User ${userId} already completed pack ${packId} - skipping LeetCode update`);
+      return res.status(200).json({
+        message: 'Pack already completed - LeetCode stats not updated',
+        alreadyCompleted: true,
+        leetcodeStats: user.leetcodeStats,
+        updated: false
       });
-
-      alreadySolved.add(qid);
-      newlySolved.push({ questionId: qid, difficulty });
     }
 
-    // defensive: ensure every attempt has date (fixes old/dirty data)
-    if (Array.isArray(user.attempts)) {
-      for (const a of user.attempts) {
-        if (!a.date) a.date = a.solvedAt || a.createdAt || new Date();
-      }
+    // Initialize leetcodeStats if not exists
+    if (!user.leetcodeStats) {
+      user.leetcodeStats = {
+        total: 3632,
+        attempting: 0,
+        easy: { solved: 0, total: 886 },
+        medium: { solved: 0, total: 1889 },
+        hard: { solved: 0, total: 857 }
+      };
     }
 
-    // Recompute global totals
-    const globalTotals = await computeGlobalQuestionTotals();
+    // Update the solved count for the specific difficulty
+    const currentSolved = user.leetcodeStats[normalizedDifficulty].solved || 0;
+    const newSolved = currentSolved +1;
+    
+    // Update the stats
+    user.leetcodeStats[normalizedDifficulty].solved = newSolved;
+    user.leetcodeStats.lastUpdated = new Date();
 
-    // Recompute user's leetcodeStats from their attempts
-    const leetcodeStats = recomputeUserLeetCodeStatsFromAttempts(user, globalTotals);
+    // Mark pack as completed to prevent future updates
+    const addedCompletion = user.addCompletedPack(packId, normalizedDifficulty, questionsCompleted);
+    
+    if (!addedCompletion) {
+      console.warn(`Failed to add completion for pack ${packId} - may already exist`);
+    }
 
-    // Persist user.attempts and leetcodeStats
-    user.leetcodeStats = leetcodeStats;
+    // Also update attempting count (optional)
+    if (user.leetcodeStats.attempting > 0) {
+      user.leetcodeStats.attempting = Math.max(0, user.leetcodeStats.attempting - questionsCompleted);
+    }
+
+    // Save the updated user
     await user.save();
 
-    // Return the authoritative stats and what changed
-    return res.status(200).json({
+    console.log(`Updated LeetCode stats for user ${userId}: ${normalizedDifficulty} +${questionsCompleted} (pack: ${packId})`);
+
+    res.status(200).json({
       message: 'LeetCode stats updated successfully',
-      leetcodeStats,
-      newlySolvedCount: newlySolved.length,
-      newlySolved
+      leetcodeStats: user.leetcodeStats,
+      updated: {
+        difficulty: normalizedDifficulty,
+        questionsCompleted,
+        newSolved,
+        packId,
+        firstCompletion: true
+      },
+      alreadyCompleted: false
     });
   } catch (error) {
     console.error('Error updating LeetCode stats after interview:', error);
     return res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+app.get('/api/leetcode/check-completion/:packId', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { packId } = req.params;
+
+    if (!packId) {
+      return res.status(400).json({ message: 'Pack ID is required' });
+    }
+
+    const user = await User.findById(userId).select('completedPacks').lean();
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const hasCompleted = user.completedPacks && user.completedPacks.some(pack => 
+      String(pack.packId) === String(packId)
+    );
+
+    console.log(`Pack completion check - User: ${userId}, Pack: ${packId}, Completed: ${hasCompleted}`);
+
+    res.status(200).json({
+      hasCompleted,
+      packId,
+      completionDate: hasCompleted 
+        ? user.completedPacks.find(pack => String(pack.packId) === String(packId))?.completedAt 
+        : null
+    });
+
+  } catch (error) {
+    console.error('Error checking pack completion:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Optional: Reset completion status for a pack (useful for testing)
+app.delete('/api/leetcode/reset-completion/:packId', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { packId } = req.params;
+
+    if (!packId) {
+      return res.status(400).json({ message: 'Pack ID is required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Remove the pack from completedPacks
+    if (user.completedPacks) {
+      const originalLength = user.completedPacks.length;
+      user.completedPacks = user.completedPacks.filter(pack => 
+        String(pack.packId) !== String(packId)
+      );
+      
+      const removedCount = originalLength - user.completedPacks.length;
+      
+      if (removedCount > 0) {
+        await user.save();
+        console.log(`Reset completion status for pack ${packId}, user ${userId}`);
+        
+        res.status(200).json({
+          message: `Reset completion status for pack ${packId}`,
+          removed: removedCount,
+          remainingCompletions: user.completedPacks.length
+        });
+      } else {
+        res.status(404).json({
+          message: 'Pack completion not found'
+        });
+      }
+    } else {
+      res.status(404).json({
+        message: 'No completed packs found'
+      });
+    }
+
+  } catch (error) {
+    console.error('Error resetting pack completion:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
 
 // Add these routes to your server.cjs file after the existing Google authentication routes
+
+
 
 // GitHub Sign Up Route (for new users)
 app.post('/github-signup', async (req, res) => {
