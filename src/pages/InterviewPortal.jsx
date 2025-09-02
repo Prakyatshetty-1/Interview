@@ -236,63 +236,63 @@ export default function InterviewPortal() {
 
   // Modified saveRecentInterview function to also update LeetCode stats
   const saveRecentInterview = async () => {
-    try {
-      const summaryTitle = (packMeta && packMeta.title)
-        ? String(packMeta.title).slice(0, 120)
-        : (Array.isArray(interviewQuestionsRef.current) && interviewQuestionsRef.current[0])
-          ? String(interviewQuestionsRef.current[0]).slice(0, 120)
-          : `Interview ${id || ""}`;
+  try {
+    const summaryTitle = (packMeta && packMeta.title)
+      ? String(packMeta.title).slice(0, 120)
+      : (Array.isArray(interviewQuestionsRef.current) && interviewQuestionsRef.current[0])
+        ? String(interviewQuestionsRef.current[0]).slice(0, 120)
+        : `Interview ${id || ""}`;
 
-      const summary = {
-        interviewId: id || null,
-        packId: (packMeta && packMeta.id) || id || null,
-        id: (packMeta && packMeta.id) || id || null,
-        title: summaryTitle,
-        questionsCount: Array.isArray(interviewQuestionsRef.current)
-          ? interviewQuestionsRef.current.length
-          : (interviewQuestions.length || 0),
-        attemptedAt: new Date().toISOString(),
-        transcript: transcript.slice(-30).map((t) => ({
-          type: t.type,
-          text: String(t.text).slice(0, 600),
-        })),
-        creator: (packMeta && packMeta.creator) || null,
-        level: (packMeta && packMeta.level) || null,
-        company: (packMeta && packMeta.company) || null,
-        duration: (packMeta && packMeta.duration) || null,
-      };
+    const summary = {
+      interviewId: id || null,
+      packId: (packMeta && packMeta.id) || id || null,
+      id: (packMeta && packMeta.id) || id || null,
+      title: summaryTitle,
+      questionsCount: Array.isArray(interviewQuestionsRef.current)
+        ? interviewQuestionsRef.current.length
+        : (interviewQuestions.length || 0),
+      attemptedAt: new Date().toISOString(),
+      transcript: transcript.slice(-30).map((t) => ({
+        type: t.type,
+        text: String(t.text).slice(0, 600),
+      })),
+      creator: (packMeta && packMeta.creator) || null,
+      level: (packMeta && packMeta.level) || null,
+      company: (packMeta && packMeta.company) || null,
+      duration: (packMeta && packMeta.duration) || null,
+    };
 
-      const token = localStorage.getItem('token');
-      const userId = getUserIdFromToken(token);
-      if (userId) summary.userId = userId;
+    const token = localStorage.getItem('token');
+    const userId = getUserIdFromToken(token);
+    if (userId) summary.userId = userId;
 
-      // Update LeetCode stats based on difficulty and number of questions
-      const difficulty = getDifficultyFromPack();
-      let leetcodeUpdateResult = null;
-
-      if (difficulty) {
-        const questionsCount = summary.questionsCount || 1;
-        console.log(`Interview completed with ${questionsCount} questions at ${difficulty} difficulty`);
-        leetcodeUpdateResult = await updateLeetCodeStats(difficulty, questionsCount);
-
-        if (leetcodeUpdateResult.updated) {
-          console.log('LeetCode stats successfully updated');
-        } else {
-          console.log('LeetCode stats not updated:', leetcodeUpdateResult.reason);
-        }
+    // Update LeetCode stats based on difficulty and number of questions
+    const difficulty = getDifficultyFromPack();
+    let leetcodeUpdateResult = null;
+    
+    if (difficulty) {
+      const questionsCount = summary.questionsCount || 1;
+      console.log(`Interview completed with ${questionsCount} questions at ${difficulty} difficulty`);
+      leetcodeUpdateResult = await updateLeetCodeStats(difficulty, questionsCount);
+      
+      if (leetcodeUpdateResult.updated) {
+        console.log('LeetCode stats successfully updated');
       } else {
-        console.log('No difficulty found in pack metadata, skipping LeetCode stats update');
+        console.log('LeetCode stats not updated:', leetcodeUpdateResult.reason);
       }
-
-      // Save recent interview to server (existing code remains the same)
-      // ... rest of the existing saveRecentInterview code ...
-
-      return leetcodeUpdateResult;
-    } catch (err) {
-      console.error('[InterviewPortal] saveRecentInterview error', err);
-      return { updated: false, reason: 'save_error', error: err.message };
+    } else {
+      console.log('No difficulty found in pack metadata, skipping LeetCode stats update');
     }
-  };
+
+    // Save recent interview to server (existing code remains the same)
+    // ... rest of the existing saveRecentInterview code ...
+
+    return leetcodeUpdateResult;
+  } catch (err) {
+    console.error('[InterviewPortal] saveRecentInterview error', err);
+    return { updated: false, reason: 'save_error', error: err.message };
+  }
+};
 
   // fetch pack & map questions robustly
   useEffect(() => {

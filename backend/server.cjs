@@ -1115,7 +1115,7 @@ app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res
 
     // Update the solved count for the specific difficulty
     const currentSolved = user.leetcodeStats[normalizedDifficulty].solved || 0;
-    const newSolved = currentSolved + questionsCompleted;
+    const newSolved = currentSolved +1;
     
     // Update the stats
     user.leetcodeStats[normalizedDifficulty].solved = newSolved;
@@ -1242,6 +1242,8 @@ app.delete('/api/leetcode/reset-completion/:packId', authMiddleware, async (req,
 });
 
 // Add these routes to your server.cjs file after the existing Google authentication routes
+
+
 
 // GitHub Sign Up Route (for new users)
 app.post('/github-signup', async (req, res) => {
