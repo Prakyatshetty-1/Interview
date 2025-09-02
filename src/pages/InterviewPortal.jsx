@@ -8,8 +8,7 @@ export default function InterviewPortal() {
   const navigate = useNavigate();
 
   const [interviewStarted, setInterviewStarted] = useState(false);
-  const [interviewQuestions, setInterviewQuestions] = useState([]); // array of strings for UI
-
+  const [interviewQuestions, setInterviewQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -25,14 +24,73 @@ export default function InterviewPortal() {
 
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
-
-  // stable refs to avoid state/closure races
   const currentQuestionIndexRef = useRef(0);
   const inFlightRef = useRef(false);
-  const interviewQuestionsRef = useRef([]); // <-- latest questions for callbacks
-  const isSpeakingRef = useRef(false); // More reliable speech tracking
+  const interviewQuestionsRef = useRef([]);
+  const isSpeakingRef = useRef(false);
 
   const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+
+  // Add function to update LeetCode stats
+  const updateLeetCodeStats = async (difficulty, questionsCompleted = 1) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('No token found, skipping LeetCode stats update');
+        return;
+      }
+
+      console.log(`Updating LeetCode stats: ${difficulty} difficulty, ${questionsCompleted} questions`);
+
+      const response = await fetch(`${API_BASE}/api/leetcode/update-after-interview`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          difficulty: difficulty.toLowerCase(),
+          questionsCompleted: questionsCompleted
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('LeetCode stats updated successfully:', data);
+      } else {
+        console.warn('Failed to update LeetCode stats:', data.message);
+      }
+    } catch (error) {
+      console.error('Error updating LeetCode stats:', error);
+    }
+  };
+
+  // Function to determine difficulty from pack metadata
+  const getDifficultyFromPack = () => {
+    if (!packMeta) return null;
+    
+    // Check various fields where difficulty might be stored
+    const difficulty = packMeta.level || 
+                     packMeta.difficulty || 
+                     packMeta.levelName || 
+                     (packMeta.meta && (packMeta.meta.level || packMeta.meta.difficulty));
+    
+    if (!difficulty) return null;
+    
+    const difficultyStr = String(difficulty).toLowerCase();
+    
+    // Map common difficulty terms to standard values
+    if (difficultyStr.includes('easy') || difficultyStr.includes('beginner')) {
+      return 'easy';
+    } else if (difficultyStr.includes('medium') || difficultyStr.includes('intermediate')) {
+      return 'medium';
+    } else if (difficultyStr.includes('hard') || difficultyStr.includes('advanced') || difficultyStr.includes('expert')) {
+      return 'hard';
+    }
+    
+    return null;
+  };
 
   const initRecognition = () => {
     try {
@@ -49,13 +107,11 @@ export default function InterviewPortal() {
       rec.lang = "en-US";
 
       rec.onstart = () => {
-        // when engine reports start, ensure UI is consistent
         setIsListening(true);
       };
 
       rec.onresult = (event) => {
         try {
-          // Stop right away to avoid receiving additional results or duplicates
           try { rec.stop(); } catch (e) { /* ignore */ }
           setIsListening(false);
 
@@ -68,14 +124,13 @@ export default function InterviewPortal() {
           }
 
           if (inFlightRef.current) {
-            console.warn("[recognition] onresult but a request is already in flight — ignoring extra result.");
+            console.warn("[recognition] onresult but a request is already in flight – ignoring extra result.");
             return;
           }
 
           setUserAnswerText(speechResult);
           setTranscript((prev) => [...prev, { type: "answer", text: speechResult }]);
 
-          // fetch the current question from the stable ref
           const qIndex = typeof currentQuestionIndexRef.current === "number" ? currentQuestionIndexRef.current : currentQuestionIndex;
           const question = Array.isArray(interviewQuestionsRef.current) ? interviewQuestionsRef.current[qIndex] : undefined;
 
@@ -93,7 +148,6 @@ export default function InterviewPortal() {
         } else if (event.error === "no-speech") {
           setError("No speech detected. Please try again.");
         } else {
-          // attempt gentle reinit
           setTimeout(() => {
             try {
               initRecognition();
@@ -105,7 +159,6 @@ export default function InterviewPortal() {
       };
 
       rec.onend = () => {
-        // normal end; keep UI consistent
         setIsListening(false);
       };
 
@@ -117,301 +170,114 @@ export default function InterviewPortal() {
     }
   };
 
-// helper: try to pull user id from a JWT in localStorage (best-effort, non-verified decode)
-const getUserIdFromToken = (token) => {
-  if (!token || typeof token !== "string") return null;
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-    const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const json = JSON.parse(decodeURIComponent(escape(atob(payload))));
-    // Try common claim names
-    return json.sub || json.userId || json.id || json._id || null;
-  } catch (e) {
-    return null;
-  }
-};
-// Updated functions for InterviewPortal.jsx
-
-// Add this near the beginning of your startInterview function
-const startInterview = () => {
-  if (!interviewQuestionsRef.current || interviewQuestionsRef.current.length === 0) {
-    setError("No questions available for this pack.");
-    return;
-  }
-  
-  setInterviewStarted(true);
-  currentQuestionIndexRef.current = 0;
-  setShowCompletionModal(false);
-
-  setCurrentQuestionIndex(0);
-  setTranscript([]);
-  setFeedback("");
-  setUserAnswerText("");
-
-  inFlightRef.current = false;
-  
-  // Update "attempting" count when starting interview
-  updateLeetCodeAttempting();
-  
-  askQuestion(0);
-};
-
-// New function to update attempting count
-const updateLeetCodeAttempting = async () => {
-  try {
-    // Determine difficulty from pack metadata
-    let difficulty = 'medium'; // default
-    
-    if (packMeta && packMeta.level) {
-      const level = packMeta.level.toLowerCase();
-      if (level.includes('easy') || level.includes('beginner')) {
-        difficulty = 'easy';
-      } else if (level.includes('hard') || level.includes('expert') || level.includes('senior')) {
-        difficulty = 'hard';
-      } else {
-        difficulty = 'medium';
-      }
-    } else {
-      // Fallback: determine difficulty based on number of questions
-      const questionCount = interviewQuestionsRef.current?.length || 0;
-      if (questionCount <= 3) {
-        difficulty = 'easy';
-      } else if (questionCount >= 7) {
-        difficulty = 'hard';
-      } else {
-        difficulty = 'medium';
-      }
+  // helper: try to pull user id from a JWT in localStorage
+  const getUserIdFromToken = (token) => {
+    if (!token || typeof token !== "string") return null;
+    try {
+      const parts = token.split(".");
+      if (parts.length !== 3) return null;
+      const payload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const json = JSON.parse(decodeURIComponent(escape(atob(payload))));
+      return json.sub || json.userId || json.id || json._id || null;
+    } catch (e) {
+      return null;
     }
-
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.warn('No auth token found, skipping attempting count update');
-      return;
-    }
-
-    const response = await fetch(`${API_BASE}/api/leetcode/start-interview`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ difficulty }),
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      console.log('Attempting count updated:', result);
-    } else {
-      console.warn('Failed to update attempting count:', response.status);
-    }
-  } catch (error) {
-    console.error('Error updating attempting count:', error);
-  }
-};
-
-// Updated updateLeetCodeStats function
-const updateLeetCodeStats = async () => {
-  try {
-    // Extract difficulty from pack metadata or interview questions
-    let difficulty = 'medium'; // default
-    
-    // Try to determine difficulty from pack metadata
-    if (packMeta && packMeta.level) {
-      const level = packMeta.level.toLowerCase();
-      if (level.includes('easy') || level.includes('beginner')) {
-        difficulty = 'easy';
-      } else if (level.includes('hard') || level.includes('expert') || level.includes('senior')) {
-        difficulty = 'hard';
-      } else {
-        difficulty = 'medium';
-      }
-    } else {
-      // Fallback: determine difficulty based on number of questions or other criteria
-      const questionCount = interviewQuestionsRef.current?.length || 0;
-      if (questionCount <= 3) {
-        difficulty = 'easy';
-      } else if (questionCount >= 7) {
-        difficulty = 'hard';
-      } else {
-        difficulty = 'medium';
-      }
-    }
-
-    // Calculate questions completed (could be 1 per question or treat whole interview as 1)
-    const questionsCompleted = 1; // Treat each completed interview as 1 solved problem
-
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.warn('No auth token found, skipping LeetCode stats update');
-      return;
-    }
-
-    console.log(`Updating LeetCode stats: ${difficulty} difficulty, ${questionsCompleted} questions`);
-
-    const response = await fetch(`${API_BASE}/api/leetcode/update-after-interview`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        difficulty: difficulty,
-        questionsCompleted: questionsCompleted
-      }),
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      console.log('LeetCode stats updated successfully:', result);
-      
-      // Show success message to user (optional)
-      setFeedback(prev => prev + `\n\n🎉 Great job! Your ${difficulty} LeetCode progress has been updated (+${questionsCompleted} solved).`);
-    } else {
-      const errorText = await response.text();
-      console.warn('Failed to update LeetCode stats:', response.status, errorText);
-    }
-  } catch (error) {
-    console.error('Error updating LeetCode stats:', error);
-  }
-};
-
-// Make sure your askQuestion function calls updateLeetCodeStats when interview completes
-const askQuestion = async (index) => {
-  if (!interviewQuestionsRef.current || index >= interviewQuestionsRef.current.length) {
-    const completionMessage = "Interview completed! Thank you for your time.";
-    setTranscript((prev) => [...prev, { type: "feedback", text: completionMessage }]);
-    await speakText(completionMessage);
-    setInterviewStarted(false);
-    
-    // Update LeetCode stats after interview completion
-    await updateLeetCodeStats();
-    
-    setShowCompletionModal(true);
-    return;
-  }
-
-  currentQuestionIndexRef.current = index;
-  setCurrentQuestionIndex(index);
-
-  const question = interviewQuestionsRef.current[index];
-  setTranscript((prev) => [...prev, { type: "question", text: question }]);
-
-  // Stop any ongoing recognition before speaking
-  if (isListening) {
-    stopListening();
-    // Wait for recognition to fully stop
-    await new Promise(resolve => setTimeout(resolve, 100));
-  }
-
-  await speakText(question);
-
-  // Ensure recognizer is ready
-  if (!recognitionRef.current) {
-    initRecognition();
-  }
-
-  // Longer delay to ensure speech synthesis is completely finished
-  setTimeout(() => startListening(), 300);
-};
-// Save recently attempted interview to server (if logged in) or fallback to localStorage (namespaced by user)
-const saveRecentInterview = async () => {
-  try {
-  // Build a robust title (avoid ternary/operator precedence issues)
-  const summaryTitle = (packMeta && packMeta.title)
-    ? String(packMeta.title).slice(0, 120)
-    : (Array.isArray(interviewQuestionsRef.current) && interviewQuestionsRef.current[0])
-      ? String(interviewQuestionsRef.current[0]).slice(0, 120)
-      : `Interview ${id || ""}`;
-
-  const summary = {
-    // canonical IDs
-    interviewId: id || null,
-    packId: (packMeta && packMeta.id) || id || null,
-    id: (packMeta && packMeta.id) || id || null,
-
-    // display/meta
-    title: summaryTitle,
-    questionsCount: Array.isArray(interviewQuestionsRef.current)
-      ? interviewQuestionsRef.current.length
-      : (interviewQuestions.length || 0),
-
-    // canonical attempt timestamp used by Profile mapping
-    attemptedAt: new Date().toISOString(),
-
-    // transcript trimmed
-    transcript: transcript.slice(-30).map((t) => ({
-      type: t.type,
-      text: String(t.text).slice(0, 600),
-    })),
-
-    // new fields so Profile can render creator/level/company/duration
-    creator: (packMeta && packMeta.creator) || null,
-    level: (packMeta && packMeta.level) || null,
-    company: (packMeta && packMeta.company) || null,
-    duration: (packMeta && packMeta.duration) || null,
   };
 
-    const token = localStorage.getItem('token');
-    const userId = getUserIdFromToken(token);
-    // attach userId to the summary as well (harmless and helpful)
-    if (userId) summary.userId = userId;
+  // Modified saveRecentInterview function to also update LeetCode stats
+  const saveRecentInterview = async () => {
+    try {
+      const summaryTitle = (packMeta && packMeta.title)
+        ? String(packMeta.title).slice(0, 120)
+        : (Array.isArray(interviewQuestionsRef.current) && interviewQuestionsRef.current[0])
+          ? String(interviewQuestionsRef.current[0]).slice(0, 120)
+          : `Interview ${id || ""}`;
 
-    if (token) {
-      // try server endpoint first (server should associate with authenticated user)
+      const summary = {
+        interviewId: id || null,
+        packId: (packMeta && packMeta.id) || id || null,
+        id: (packMeta && packMeta.id) || id || null,
+        title: summaryTitle,
+        questionsCount: Array.isArray(interviewQuestionsRef.current)
+          ? interviewQuestionsRef.current.length
+          : (interviewQuestions.length || 0),
+        attemptedAt: new Date().toISOString(),
+        transcript: transcript.slice(-30).map((t) => ({
+          type: t.type,
+          text: String(t.text).slice(0, 600),
+        })),
+        creator: (packMeta && packMeta.creator) || null,
+        level: (packMeta && packMeta.level) || null,
+        company: (packMeta && packMeta.company) || null,
+        duration: (packMeta && packMeta.duration) || null,
+      };
+
+      const token = localStorage.getItem('token');
+      const userId = getUserIdFromToken(token);
+      if (userId) summary.userId = userId;
+
+      // Update LeetCode stats based on difficulty and number of questions
+      const difficulty = getDifficultyFromPack();
+      if (difficulty) {
+        const questionsCount = summary.questionsCount || 1;
+        console.log(`Interview completed with ${questionsCount} questions at ${difficulty} difficulty`);
+        await updateLeetCodeStats(difficulty, questionsCount);
+      } else {
+        console.log('No difficulty found in pack metadata, skipping LeetCode stats update');
+      }
+
+      // Save recent interview to server
+      if (token) {
+        try {
+          const res = await fetch(`${API_BASE}/api/profile/recent-interviews`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(summary),
+          });
+
+          if (res.ok) {
+            console.log('[InterviewPortal] recent interview saved to server');
+            return;
+          } else {
+            const txt = await res.text().catch(() => '');
+            console.warn('[InterviewPortal] server save failed:', res.status, txt);
+          }
+        } catch (err) {
+          console.warn('[InterviewPortal] server save error - falling back to localStorage', err);
+        }
+      }
+
+      // Fallback: localStorage namespaced by user id
       try {
-        const res = await fetch(`${API_BASE}/api/profile/recent-interviews`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify(summary),
+        const token = localStorage.getItem("token");
+        const userId = getUserIdFromToken(token);
+        const baseKey = `recentInterviews_${userId || "anonymous"}`;
+        const raw = localStorage.getItem(baseKey);
+        const arr = raw ? JSON.parse(raw) : [];
+
+        const deduped = (arr || []).filter((item) => {
+          if (item.packId && summary.packId) return item.packId !== summary.packId;
+          if (item.interviewId && summary.interviewId) return item.interviewId !== summary.interviewId;
+          return !(
+            item.title === summary.title &&
+            Number(item.questionsCount) === Number(summary.questionsCount)
+          );
         });
 
-        if (res.ok) {
-          console.log('[InterviewPortal] recent interview saved to server');
-          return;
-        } else {
-          const txt = await res.text().catch(() => '');
-          console.warn('[InterviewPortal] server save failed:', res.status, txt);
-          // continue to local fallback instead of returning
-        }
+        deduped.unshift(summary);
+        const sliced = deduped.slice(0, 20);
+        localStorage.setItem(baseKey, JSON.stringify(sliced));
+        console.log(`[InterviewPortal] recent interview saved to localStorage key=${baseKey}`);
       } catch (err) {
-        console.warn('[InterviewPortal] server save error - falling back to localStorage', err);
+        console.error("[InterviewPortal] failed to save recent interview to localStorage", err);
       }
+    } catch (err) {
+      console.error('[InterviewPortal] saveRecentInterview error', err);
     }
-
-  // Fallback: localStorage namespaced by user id
-  try {
-    const token = localStorage.getItem("token");
-    const userId = getUserIdFromToken(token);
-    const baseKey = `recentInterviews_${userId || "anonymous"}`;
-    const raw = localStorage.getItem(baseKey);
-    const arr = raw ? JSON.parse(raw) : [];
-
-    // remove any existing entry for same packId/interviewId so we can put it at front (dedupe)
-    const deduped = (arr || []).filter((item) => {
-      if (item.packId && summary.packId) return item.packId !== summary.packId;
-      if (item.interviewId && summary.interviewId) return item.interviewId !== summary.interviewId;
-      // fallback to title + questionsCount comparison
-      return !(
-        item.title === summary.title &&
-        Number(item.questionsCount) === Number(summary.questionsCount)
-      );
-    });
-
-    deduped.unshift(summary);
-    const sliced = deduped.slice(0, 20);
-    localStorage.setItem(baseKey, JSON.stringify(sliced));
-    console.log(`[InterviewPortal] recent interview saved to localStorage key=${baseKey}`);
-  } catch (err) {
-    console.error("[InterviewPortal] failed to save recent interview to localStorage", err);
-  }
-  } catch (err) {
-    console.error('[InterviewPortal] saveRecentInterview error', err);
-  }
-};
+  };
 
   // fetch pack & map questions robustly
   useEffect(() => {
@@ -460,39 +326,56 @@ const saveRecentInterview = async () => {
           setInterviewQuestions([]);
           interviewQuestionsRef.current = [];
         } else {
-// store pack meta if available (so we can show a title/creator/level later)
-setPackMeta(
-  pack && typeof pack === "object"
-    ? {
-        id: pack.id || pack._id || id,
-        title: pack.title || pack.name || pack.packName || null,
-        // try several common names for creator/author/uploader
-        creator:
-          pack.creator ||
-          pack.author ||
-          pack.createdBy ||
-          pack.owner ||
-          pack.uploader ||
-          (pack.meta && (pack.meta.creator || pack.meta.author)) ||
-          null,
-        // try several common names for level/difficulty
-        level:
-          pack.level ||
-          pack.difficulty ||
-          pack.levelName ||
-          (pack.meta && (pack.meta.level || pack.meta.difficulty)) ||
-          null,
-        // optional helpful fields
-        company: pack.company || pack.source || pack.provider || null,
-        duration:
-          pack.duration || pack.estimatedDuration || pack.length || null,
-      }
-    : null
-);
+          // Enhanced pack metadata extraction
+          setPackMeta(
+            pack && typeof pack === "object"
+              ? {
+                  id: pack.id || pack._id || id,
+                  title: pack.title || pack.name || pack.packName || null,
+                  creator:
+                    pack.creator ||
+                    pack.author ||
+                    pack.createdBy ||
+                    pack.owner ||
+                    pack.uploader ||
+                    (pack.meta && (pack.meta.creator || pack.meta.author)) ||
+                    null,
+                  // Enhanced level/difficulty detection
+                  level:
+                    pack.level ||
+                    pack.difficulty ||
+                    pack.levelName ||
+                    pack.difficultyLevel ||
+                    (pack.meta && (pack.meta.level || pack.meta.difficulty || pack.meta.levelName)) ||
+                    // Check tags for difficulty keywords
+                    (pack.tags && Array.isArray(pack.tags) && 
+                     pack.tags.find(tag => 
+                       typeof tag === 'string' && 
+                       /^(easy|medium|hard|beginner|intermediate|advanced|expert)$/i.test(tag.trim())
+                     )) ||
+                    // Check category for difficulty keywords
+                    (pack.category && typeof pack.category === 'string' &&
+                     /easy|medium|hard|beginner|intermediate|advanced|expert/i.test(pack.category) &&
+                     pack.category.match(/easy|medium|hard|beginner|intermediate|advanced|expert/i)?.[0]) ||
+                    null,
+                  company: pack.company || pack.source || pack.provider || null,
+                  duration:
+                    pack.duration || pack.estimatedDuration || pack.length || null,
+                }
+              : null
+          );
 
           setInterviewQuestions(questions);
-          interviewQuestionsRef.current = questions; // keep the ref up-to-date
+          interviewQuestionsRef.current = questions;
           setError("");
+          
+          // Log pack metadata for debugging
+          console.log('Pack metadata loaded:', {
+            title: pack.title || pack.name,
+            level: pack.level || pack.difficulty,
+            tags: pack.tags,
+            category: pack.category
+          });
         }
       } catch (err) {
         console.error("Error fetching interview pack:", err);
@@ -511,7 +394,6 @@ setPackMeta(
       synthRef.current = window.speechSynthesis;
     }
 
-
     if (typeof window !== "undefined") {
       if (!(window.SpeechRecognition || window.webkitSpeechRecognition) && !("speechSynthesis" in window)) {
         setError("Neither Speech Recognition nor Speech Synthesis is supported. Use Chrome for best experience.");
@@ -523,7 +405,6 @@ setPackMeta(
     }
 
     return () => {
-      // More thorough cleanup
       if (recognitionRef.current) {
         try { 
           recognitionRef.current.stop(); 
@@ -538,11 +419,9 @@ setPackMeta(
         } catch (e) {}
       }
       
-      // Reset refs
       isSpeakingRef.current = false;
       inFlightRef.current = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // speak text & return when finished - IMPROVED VERSION
@@ -553,10 +432,8 @@ setPackMeta(
         return;
       }
 
-      // Wait for any existing speech to finish before starting new one
       const startSpeech = () => {
         if (isSpeakingRef.current) {
-          // If already speaking, wait a bit and try again
           setTimeout(startSpeech, 100);
           return;
         }
@@ -564,10 +441,8 @@ setPackMeta(
         setIsSpeaking(true);
         isSpeakingRef.current = true;
 
-        // Cancel any pending speeches more safely
         try {
           synthRef.current.cancel();
-          // Wait a moment for cancel to take effect
           setTimeout(() => {
             const utter = new window.SpeechSynthesisUtterance(String(text));
             utter.lang = "en-US";
@@ -588,7 +463,6 @@ setPackMeta(
               console.error("SpeechSynthesis error", err);
               setIsSpeaking(false);
               isSpeakingRef.current = false;
-              // Don't reject, just resolve to continue the flow
               resolve();
             };
             
@@ -642,7 +516,6 @@ setPackMeta(
             await wait(500 * (attempt + 1));
             continue;
           } else {
-            // try to return fallback message if present in body
             try {
               const parsed = text ? JSON.parse(text) : {};
               return parsed.feedback || parsed.error || `AI service returned ${res.status}`;
@@ -683,19 +556,62 @@ setPackMeta(
     }
   };
 
-  
+  // ask question: put in transcript, speak it, then start listening
+  const askQuestion = async (index) => {
+    if (!interviewQuestionsRef.current || index >= interviewQuestionsRef.current.length) {
+      const completionMessage = "Interview completed! Thank you for your time.";
+      setTranscript((prev) => [...prev, { type: "feedback", text: completionMessage }]);
+      await speakText(completionMessage);
+      setInterviewStarted(false);
+      setShowCompletionModal(true);
+      return;
+    }
 
+    currentQuestionIndexRef.current = index;
+    setCurrentQuestionIndex(index);
 
+    const question = interviewQuestionsRef.current[index];
+    setTranscript((prev) => [...prev, { type: "question", text: question }]);
+
+    if (isListening) {
+      stopListening();
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    await speakText(question);
+
+    if (!recognitionRef.current) {
+      initRecognition();
+    }
+
+    setTimeout(() => startListening(), 300);
+  };
+
+  const startInterview = () => {
+    if (!interviewQuestionsRef.current || interviewQuestionsRef.current.length === 0) {
+      setError("No questions available for this pack.");
+      return;
+    }
+    setInterviewStarted(true);
+    currentQuestionIndexRef.current = 0;
+    setShowCompletionModal(false);
+
+    setCurrentQuestionIndex(0);
+    setTranscript([]);
+    setFeedback("");
+    setUserAnswerText("");
+
+    inFlightRef.current = false;
+    askQuestion(0);
+  };
 
   // Helper function for actually starting recognition
   const actuallyStartListening = async () => {
     const tryStart = async (attempt = 0) => {
       try {
-        // More aggressive TTS cancellation
         if (synthRef.current) {
           try { 
             synthRef.current.cancel(); 
-            // Wait for cancel to take effect
             await new Promise(resolve => setTimeout(resolve, 100));
           } catch (e) {
             console.warn("Error canceling TTS:", e);
@@ -711,13 +627,11 @@ setPackMeta(
         const msg = (e && e.name) ? e.name : (e && e.message) ? e.message : String(e);
         
         if (attempt < 3 && /invalidstateerror|started|already started/i.test(msg)) {
-          // Clean up recognition state more thoroughly
           try { 
             recognitionRef.current.stop(); 
             recognitionRef.current.abort?.();
           } catch (s) {}
           
-          // Reinitialize recognition if needed
           setTimeout(() => {
             initRecognition();
             tryStart(attempt + 1);
@@ -733,7 +647,6 @@ setPackMeta(
     tryStart();
   };
 
-  // resilient startListening that handles InvalidStateError by reinit/retry - IMPROVED
   const startListening = async () => {
     if (!recognitionRef.current) {
       setError("Speech Recognition is not available in your browser.");
@@ -741,14 +654,12 @@ setPackMeta(
     }
     if (isListening) return;
 
-    // Wait for speech synthesis to complete before starting recognition
     if (isSpeakingRef.current) {
       console.log("Waiting for speech to finish before starting recognition...");
       const waitForSpeech = () => {
         if (isSpeakingRef.current) {
           setTimeout(waitForSpeech, 100);
         } else {
-          // Add extra delay to ensure TTS is fully finished
           setTimeout(() => actuallyStartListening(), 200);
         }
       };
@@ -757,22 +668,18 @@ setPackMeta(
     }
 
     actuallyStartListening();
-
   };
 
   const stopListening = () => {
     if (recognitionRef.current && isListening) {
-
       try {
         recognitionRef.current.stop();
       } catch (e) {
         console.warn("Error stopping recognizer:", e);
       }
-
       setIsListening(false);
     }
   };
-
 
   // process user answer -> call backend -> speak feedback -> advance
   const processUserAnswer = async (answer, passedQuestion = null, passedIndex = null) => {
@@ -931,10 +838,21 @@ setPackMeta(
             <div className="askora-start-section">
               <h1 className="askora-title">Askora Interview Portal</h1>
               <p className="askora-instructions">
-                Click "Start Interview" to begin. Askora will ask you 5
-                questions, provide feedback, and then move to the next
-                question.
+                Click "Start Interview" to begin. Askora will ask you questions, 
+                provide feedback, and track your progress in your LeetCode stats.
               </p>
+              {packMeta && (
+                <div className="askora-pack-info">
+                  <h3>{packMeta.title}</h3>
+                  {packMeta.level && (
+                    <span className={`difficulty-badge difficulty-${getDifficultyFromPack() || 'unknown'}`}>
+                      {packMeta.level}
+                    </span>
+                  )}
+                  {packMeta.creator && <p>Created by: {packMeta.creator}</p>}
+                  {packMeta.company && <p>Company: {packMeta.company}</p>}
+                </div>
+              )}
               <button
                 onClick={startInterview}
                 className="askora-btn askora-btn-primary askora-btn-large"
@@ -1068,13 +986,20 @@ setPackMeta(
                 </div>
                 <h2 className="askora-modal-title">Interview Completed!</h2>
                 <p className="askora-modal-message">
-                  Thank you for attempting the interview. Your responses have been recorded and will be reviewed.
+                  Thank you for completing the interview. Your responses have been recorded 
+                  {getDifficultyFromPack() && ` and your ${getDifficultyFromPack()} difficulty stats have been updated`}.
                 </p>
+                {getDifficultyFromPack() && (
+                  <div className="askora-stats-update">
+                    <span className={`difficulty-badge difficulty-${getDifficultyFromPack()}`}>
+                      +{1} {getDifficultyFromPack().toUpperCase()} Question{interviewQuestions.length > 1 ? '1' : ''}
+                    </span>
+                  </div>
+                )}
                 <div className="askora-modal-actions">
                   <button
 
                     onClick={async () => {
-                      // Save recent interview, then go back
                       try {
                         await saveRecentInterview();
                       } catch (e) {

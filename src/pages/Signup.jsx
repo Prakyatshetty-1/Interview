@@ -51,7 +51,7 @@ const Signup = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:5000/signup', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ const Signup = () => {
     console.log("Sending user data to backend for signup:", userData);
     
     // Send Google user data to your backend for SIGNUP
-    const response = await fetch('http://localhost:5000/google-signup', {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE}/google-signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -214,7 +214,7 @@ const Signup = () => {
       console.log("Sending user data to backend for GitHub signup:", userData);
       
       // Send GitHub user data to your backend for SIGNUP
-      const response = await fetch('http://localhost:5000/github-signup', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/github-signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -28,7 +28,7 @@ export default function QuestionFolder() {
                 setLoading(true);
                 console.log('Fetching interviews for topic:', topic);
                 
-                const response = await fetch(`http://localhost:5000/api/interviews/by-tag/${encodeURIComponent(topic)}`);
+                const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/interviews/by-tag/${encodeURIComponent(topic)}`);
                 console.log('Response status:', response.status);
                 
                 if (!response.ok) {

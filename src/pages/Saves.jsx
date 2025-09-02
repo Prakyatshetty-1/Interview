@@ -14,7 +14,7 @@ export default function Saves() {
       const token = localStorage.getItem('token');
       const headers = { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
 
-      const res = await fetch("http://localhost:5000/api/saved", { headers });
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/saved`, { headers });
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) {
           console.warn('Unauthorized - redirect to login');

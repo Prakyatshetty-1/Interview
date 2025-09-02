@@ -10,7 +10,7 @@ export default function SaveCard(props) {
     console.log("Unsaving card with ID:", props.id);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/saved/${props.id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/saved/${props.id}`, {
         method: "DELETE",
       });
 
