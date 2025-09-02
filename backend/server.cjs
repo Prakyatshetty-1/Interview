@@ -1156,6 +1156,7 @@ app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
 app.get('/api/leetcode/check-completion/:packId', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -1165,11 +1166,13 @@ app.get('/api/leetcode/check-completion/:packId', authMiddleware, async (req, re
       return res.status(400).json({ message: 'Pack ID is required' });
     }
 
+
     const user = await User.findById(userId).select('completedPacks').lean();
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
 
     const hasCompleted = user.completedPacks && user.completedPacks.some(pack => 
       String(pack.packId) === String(packId)
@@ -1187,6 +1190,7 @@ app.get('/api/leetcode/check-completion/:packId', authMiddleware, async (req, re
 
   } catch (error) {
     console.error('Error checking pack completion:', error);
+
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
