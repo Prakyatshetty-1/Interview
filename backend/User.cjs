@@ -140,17 +140,15 @@ const userSchema = new mongoose.Schema({
 
   // NEW: Track completed interview packs to prevent duplicate LeetCode updates
   completedPacks: [{
-  packId: { type: String, required: true },
-  title: { type: String, required: true }, // ✅ add this
-  difficulty: { 
-    type: String, 
-    enum: ['easy', 'medium', 'hard'],
-    required: true 
-  },
-  completedAt: { type: Date, default: Date.now },
-  questionsCompleted: { type: Number, default: 1 }
-}],
-
+    packId: { type: String, required: true },
+    difficulty: { 
+      type: String, 
+      enum: ['easy', 'medium', 'hard'],
+      required: true 
+    },
+    completedAt: { type: Date, default: Date.now },
+    questionsCompleted: { type: Number, default: 1 }
+  }],
 
   // Additional tracking fields
   lastLogin: {
@@ -214,28 +212,23 @@ userSchema.methods.hasCompletedPack = function(packId) {
 };
 
 // NEW: Instance method to add completed pack
-userSchema.methods.addCompletedPack = async function (packId, difficulty, questionsCompleted = 1) {
+userSchema.methods.addCompletedPack = function(packId, difficulty, questionsCompleted = 1) {
   if (!this.completedPacks) {
     this.completedPacks = [];
   }
-
+  
   // Don't add if already completed
   if (this.hasCompletedPack(packId)) {
     return false;
   }
-
-  // ✅ fetch title from Pack collection
-  const pack = await Pack.findById(packId).select("packName");
-  const title = pack ? pack.packName : "Untitled Interview";
-
+  
   this.completedPacks.push({
     packId: packId,
-    title: title, // auto-filled
     difficulty: difficulty.toLowerCase(),
     completedAt: new Date(),
-    questionsCompleted: questionsCompleted,
+    questionsCompleted: questionsCompleted
   });
-
+  
   return true;
 };
 

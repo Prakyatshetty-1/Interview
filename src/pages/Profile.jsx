@@ -1174,22 +1174,27 @@ const unfollowUser = async (targetUserId) => {
 
 {/* Recently Attempted Interviews */}
 <div className="recent-interviews-section">
-  <h1 className="recent-interviews-title">{isOwnProfile ? "Recently Attempted Interviews" : "Recently Viewed Interviews"}</h1>
+  <h1 className="recent-interviews-title">
+    {isOwnProfile ? "Recently Attempted Interviews" : "Recently Viewed Interviews"}
+  </h1>
+
   <div className="interviews-grid">
-    {recentInterviews && recentInterviews.length > 0 ? (
-        recentInterviews.map((it, idx) => (
-      <Card
-        key={it.id || it.packId || idx}
-        title={it.title || it.packName || it.name || "Untitled Interview"}
-        company={it.company || it.source || it.provider || ""}
-        difficulty={it.difficulty || it.level || "—"}
-        level={it.level || it.difficulty || it.levelName || ""}
-        creator={it.creator || it.author || it.createdBy || it.packCreator || ""}
-        duration={it.duration || it.estimatedDuration || it.length || "—"}
-        attemptedAt={it.attemptedAt || it.attempted_on || it.attemptedAtISO || it.completedAt || it.createdAt || null}
-        onClick={() => { if (it.packId || it.id) navigate(`/interview/${it.packId || it.id}`); }}
-      />
-        ))
+    {user.completedPacks && user.completedPacks.length > 0 ? (
+      user.completedPacks.map((it, idx) => (
+        <Card
+          key={it.id || it.packId || idx}
+          title={it.title || it.packName || it.name || "Untitled Interview"}
+          company={it.company || it.source || it.provider || ""}
+          difficulty={it.difficulty || it.level || "—"}
+          level={it.level || it.difficulty || it.levelName || ""}
+          creator={it.creator || it.author || it.createdBy || it.packCreator || ""}
+          duration={it.duration || it.estimatedDuration || it.length || "—"}
+          attemptedAt={it.attemptedAt || it.attempted_on || it.attemptedAtISO || it.completedAt || it.createdAt || null}
+          onClick={() => { 
+            if (it.packId || it.id) navigate(`/interview/${it.packId || it.id}`); 
+          }}
+        />
+      ))
     ) : (
       <div style={{ color: "#9ca3af", padding: "12px 0" }}>
         No recently attempted interviews yet.
@@ -1197,6 +1202,7 @@ const unfollowUser = async (targetUserId) => {
     )}
   </div>
 </div>
+
     
             {/* rest of the right panel (topics, schedule, recent interviews) remains unchanged */}
           </div>
