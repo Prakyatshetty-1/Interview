@@ -15,7 +15,7 @@ export default function CreatedBy(){
       </div>
     <div className="creators">
                 <div className="creatorcard">
-                    <img className='bhavith1' src='../../public/prakyatghibli.png' alt="Prakyat"/>
+                    <img className='bhavith1' src='/prakyatghibli.png' alt="Prakyat"/>
                     <div className="creator-info">
                         <h3 className="creator-name">Prakyat</h3>
                         <p className="creator-role12">Frontend Developer</p>
@@ -39,7 +39,7 @@ export default function CreatedBy(){
                     </div>
                 </div>
                 <div className="creatorcard">
-                    <img className='bhavith' src='../../public/bhavith.png' alt="Bhavith"/>
+                    <img className='bhavith' src='/bhavith.png' alt="Bhavith"/>
                     <div className="creator-info">
                         <h3 className="creator-name">Bhavith</h3>
                         <p className="creator-role12">Frontend Developer</p>
@@ -63,7 +63,7 @@ export default function CreatedBy(){
                     </div>
                 </div>
                 <div className="creatorcard">
-                    <img className='bhavith1' src='../../public/swaraj.png' alt="Swaraj"/>
+                    <img className='bhavith1' src='/public/swaraj.png' alt="Swaraj"/>
                     <div className="creator-info">
                         <h3 className="creator-name">Swaraj</h3>
                         <p className="creator-role12">Backend Developer</p>
