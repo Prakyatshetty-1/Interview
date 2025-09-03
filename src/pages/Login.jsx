@@ -13,8 +13,7 @@ import {
   GithubAuthProvider 
 } from "firebase/auth";
 import { 
-  googleAuth, 
-  githubAuth, 
+  auth,
   googleProvider, 
   githubProvider 
 } from '../FirebaseOauth/firebase.js';
@@ -109,16 +108,16 @@ const Login = () => {
   useEffect(() => {
     const handleRedirectResult = async () => {
       try {
-        // Check both auth instances for redirect results
-        const googleResult = await getRedirectResult(googleAuth);
-        const githubResult = await getRedirectResult(githubAuth);
+        const result = await getRedirectResult(auth);
         
-        if (googleResult) {
-          console.log("Google redirect result received:", googleResult);
-          await processAuthResult(googleResult, 'Google');
-        } else if (githubResult) {
-          console.log("GitHub redirect result received:", githubResult);
-          await processAuthResult(githubResult, 'GitHub');
+        if (result) {
+          console.log("Redirect result received:", result);
+          
+          // Determine provider from result
+          const providerId = result.user.providerData[0]?.providerId;
+          const provider = providerId === 'google.com' ? 'Google' : 'GitHub';
+          
+          await processAuthResult(result, provider);
         }
       } catch (error) {
         console.error("Redirect result error:", error);
@@ -291,15 +290,13 @@ const Login = () => {
         }
         
         // Sign out to prevent confusion
-        const authInstance = provider === 'Google' ? googleAuth : githubAuth;
-        await authInstance.signOut();
+        await auth.signOut();
       }
       
     } catch (error) {
       console.error(`Error processing ${provider} auth result:`, error);
       showToast('Login Failed', 'Authentication failed', 'error');
-      const authInstance = provider === 'Google' ? googleAuth : githubAuth;
-      await authInstance.signOut();
+      await auth.signOut();
     }
   };
 
@@ -323,12 +320,17 @@ const Login = () => {
     }
   };
 
-  // Detect if device is mobile or if popup might be blocked
+  // Enhanced detection for redirect vs popup
   const shouldUseRedirect = () => {
+    // Always use redirect in production to avoid CORS issues
+    if (import.meta.env.PROD) {
+      return true;
+    }
+    
     // Check for mobile devices
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    // Check for browsers that commonly block popups (like Safari in private mode)
+    // Check for browsers that commonly block popups
     const isPrivateMode = window.navigator.userAgent.includes('Safari') && 
                           !window.navigator.userAgent.includes('Chrome');
     
@@ -342,33 +344,32 @@ const Login = () => {
       console.log("Starting Google Sign-In...");
       
       if (shouldUseRedirect()) {
-        // Use redirect for mobile devices or when popups might be blocked
         console.log("Using redirect flow for Google");
-        await signInWithRedirect(googleAuth, googleProvider);
+        await signInWithRedirect(auth, googleProvider);
         // The result will be handled in the useEffect hook when the page reloads
       } else {
         // Try popup first, fallback to redirect if it fails
         console.log("Attempting popup flow for Google");
         try {
-          const result = await signInWithPopup(googleAuth, googleProvider);
+          const result = await signInWithPopup(auth, googleProvider);
           await processAuthResult(result, 'Google');
         } catch (popupError) {
           if (popupError.code === 'auth/popup-blocked' || 
-              popupError.code === 'auth/popup-closed-by-user') {
+              popupError.code === 'auth/popup-closed-by-user' ||
+              popupError.message.includes('Cross-Origin-Opener-Policy')) {
             console.log("Popup blocked, falling back to redirect");
-            await signInWithRedirect(googleAuth, googleProvider);
-            return; // Exit early as redirect will handle the flow
+            await signInWithRedirect(auth, googleProvider);
+            return;
           }
-          throw popupError; // Re-throw other errors
+          throw popupError;
         }
       }
       
     } catch (error) {
       handleAuthError(error);
       
-      // Ensure user is signed out on error
       try {
-        await googleAuth.signOut();
+        await auth.signOut();
       } catch (signOutError) {
         console.error("Error signing out:", signOutError);
       }
@@ -376,7 +377,6 @@ const Login = () => {
       if (!shouldUseRedirect()) {
         setIsLoading(false);
       }
-      // For redirect, loading state will be reset on page reload
     }
   };
 
@@ -387,33 +387,30 @@ const Login = () => {
       console.log("Starting GitHub Sign-In...");
       
       if (shouldUseRedirect()) {
-        // Use redirect for mobile devices or when popups might be blocked
         console.log("Using redirect flow for GitHub");
-        await signInWithRedirect(githubAuth, githubProvider);
-        // The result will be handled in the useEffect hook when the page reloads
+        await signInWithRedirect(auth, githubProvider);
       } else {
-        // Try popup first, fallback to redirect if it fails
         console.log("Attempting popup flow for GitHub");
         try {
-          const result = await signInWithPopup(githubAuth, githubProvider);
+          const result = await signInWithPopup(auth, githubProvider);
           await processAuthResult(result, 'GitHub');
         } catch (popupError) {
           if (popupError.code === 'auth/popup-blocked' || 
-              popupError.code === 'auth/popup-closed-by-user') {
+              popupError.code === 'auth/popup-closed-by-user' ||
+              popupError.message.includes('Cross-Origin-Opener-Policy')) {
             console.log("Popup blocked, falling back to redirect");
-            await signInWithRedirect(githubAuth, githubProvider);
-            return; // Exit early as redirect will handle the flow
+            await signInWithRedirect(auth, githubProvider);
+            return;
           }
-          throw popupError; // Re-throw other errors
+          throw popupError;
         }
       }
       
     } catch (error) {
       handleAuthError(error);
       
-      // Ensure user is signed out on error
       try {
-        await githubAuth.signOut();
+        await auth.signOut();
       } catch (signOutError) {
         console.error("Error signing out:", signOutError);
       }
@@ -421,7 +418,6 @@ const Login = () => {
       if (!shouldUseRedirect()) {
         setIsLoading(false);
       }
-      // For redirect, loading state will be reset on page reload
     }
   };
 
@@ -506,8 +502,8 @@ const Login = () => {
                 </a>
               </div>
 
-              <button type="submit" className="create-button1">
-                <span>Sign in</span>
+              <button type="submit" className="create-button1" disabled={isLoading}>
+                <span>{isLoading ? 'Signing in...' : 'Sign in'}</span>
                 <div className="button-glow1"></div>
               </button>
             </form>
@@ -560,7 +556,7 @@ const Login = () => {
             </button>
 
             {/* LinkedIn Sign In */}
-            <button onClick={handleLinkedInSignIn} className="google-button" style={{ marginTop: '0.75rem' }}>
+            <button onClick={handleLinkedInSignIn} className="google-button" style={{ marginTop: '0.75rem' }} disabled={isLoading}>
               <svg width="20" height="20" viewBox="0 0 24 24" className="google-icon" fill="currentColor">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
               </svg>
