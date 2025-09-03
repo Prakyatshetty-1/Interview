@@ -1,5 +1,5 @@
 import LeetcodeMeter from '../components/LeetcodeMeter'
-import styles from './QuestionFolder.module.css' // Import CSS module
+import styles from './Questionfolder.module.css' // Import CSS module
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Dock from "../react-bits/Dock";
