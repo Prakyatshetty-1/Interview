@@ -24,7 +24,7 @@ app.use(cors({
     'http://localhost:5173',  // Vite dev server
     'http://127.0.0.1:5173',  // Alternative localhost
     'https://askora-ai.vercel.app',
-    'https://interview-nxbs.onrender.com/'
+    'https://interview-nxbs.onrender.com'
   ],
   credentials: true,
   // include PATCH here (and any other methods you expect)
@@ -39,7 +39,7 @@ app.options('*', cors({
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'https://askora-ai.vercel.app',
-    'https://interview-nxbs.onrender.com/'
+    'https://interview-nxbs.onrender.com'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
