@@ -23,7 +23,7 @@ export default function CommunityPage() {
 
   return (
     <div className="community-page">
-     <img src="../../public/community.png"/>
+     <img src="/community.png"/>
      <h1>
       Find Your Tribe,<br/>Build Your Network.
      </h1>
