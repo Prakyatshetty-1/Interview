@@ -33,11 +33,18 @@ googleAuth.languageCode = 'en';
 const githubAuth = getAuth(githubApp);
 githubAuth.languageCode = 'en';
 
-// Initialize Providers
+// Initialize Providers with custom parameters to avoid COOP issues
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account',
+  ux_mode: 'popup'
+});
 
 const githubProvider = new GithubAuthProvider();
 githubProvider.addScope('user:email');
+githubProvider.setCustomParameters({
+  allow_signup: 'true'
+});
 
 // Export everything
 export { 

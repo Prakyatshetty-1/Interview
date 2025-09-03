@@ -5,13 +5,19 @@ import LoginImage from "../assets/Image3.png";
 import { Link, useNavigate } from 'react-router-dom';
 
 // Import Firebase auth functions from combined configuration
-import { signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
+import { 
+  signInWithPopup, 
+  signInWithRedirect, 
+  getRedirectResult,
+  GoogleAuthProvider, 
+  GithubAuthProvider 
+} from "firebase/auth";
 import { 
   googleAuth, 
   githubAuth, 
   googleProvider, 
   githubProvider 
-} from '../FirebaseOauth/firebase.js'; // Combined configuration
+} from '../FirebaseOauth/firebase.js';
 
 // Custom Toast Component
 const Toast = ({ message, description, type = 'success', isVisible, onClose }) => {
@@ -77,7 +83,6 @@ const Toast = ({ message, description, type = 'success', isVisible, onClose }) =
               <p className="toast-description">{description}</p>
             </div>
           </div>
-          
         </div>
       </div>
     </div>
@@ -85,13 +90,11 @@ const Toast = ({ message, description, type = 'success', isVisible, onClose }) =
 };
 
 const Login = () => {
-const [isLoading, setIsLoading] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
   const [focusedField, setFocusedField] = useState(null);
   const [toast, setToast] = useState({
     isVisible: false,
@@ -101,6 +104,30 @@ const [isLoading, setIsLoading] = useState(false);
   });
 
   const navigate = useNavigate();
+
+  // Check for redirect result on component mount
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        // Check both auth instances for redirect results
+        const googleResult = await getRedirectResult(googleAuth);
+        const githubResult = await getRedirectResult(githubAuth);
+        
+        if (googleResult) {
+          console.log("Google redirect result received:", googleResult);
+          await processAuthResult(googleResult, 'Google');
+        } else if (githubResult) {
+          console.log("GitHub redirect result received:", githubResult);
+          await processAuthResult(githubResult, 'GitHub');
+        }
+      } catch (error) {
+        console.error("Redirect result error:", error);
+        handleAuthError(error);
+      }
+    };
+
+    handleRedirectResult();
+  }, []);
 
   const showToast = (message, description, type = 'success') => {
     setToast({
@@ -125,6 +152,7 @@ const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE}/login`, {
@@ -171,158 +199,31 @@ const [isLoading, setIsLoading] = useState(false);
     } catch (error) {
       console.error('Login error:', error);
       showToast('Connection Error', 'Something went wrong during login', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-      
-  try {
-    console.log("Starting Google Sign-In...");
-    const result = await signInWithPopup(googleAuth, googleProvider); // Use googleAuth and googleProvider
-    
-    // This gives you a Google Access Token
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const token = credential?.accessToken;
-    const user = result.user;
-    
-    console.log("Google Sign-In successful:", user);
-    
-    // Prepare user data to send to backend
-    const userData = {
-      name: user.displayName,
-      email: user.email,
-      uid: user.uid,
-      photoURL: user.photoURL
-    };
-    
-    console.log("Sending user data to backend for login:", userData);
-    
-    // Send Google user data to your backend for LOGIN (not signup)
-    const response = await fetch(`${import.meta.env.VITE_API_BASE}/google-login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
-    
-    const data = await response.json();
-    console.log('Google login response:', data);
-    
-    if (response.ok) {
-      // Store the token in localStorage
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-      }
-      
-      showToast('Login Successful!', 'Welcome back to Askora', 'success');
-      
-      // Check if user has filled preferences
-      try {
-        const prefResponse = await fetch(`${import.meta.env.VITE_API_BASE}/api/preference/check`, {
-          headers: {
-            Authorization: `Bearer ${data.token}`,
-          },
-        });
-
-        const prefData = await prefResponse.json();
-
-        // Navigate after showing toast
-        setTimeout(() => {
-          if (prefResponse.ok && prefData.alreadySubmitted) {
-            navigate('/dashboard');
-          } else {
-            navigate('/Preference');
-          }
-        }, 2000);
-      } catch (err) {
-        console.error("Error checking preferences", err);
-        setTimeout(() => navigate('/Preference'), 2000);
-      }
-      
-    } else {
-      console.error("Failed to authenticate user:", data.message);
-      
-      // Handle specific error cases
-      if (response.status === 404 && data.code === 'USER_NOT_FOUND') {
-        showToast(
-          'Account Not Found', 
-          'No account found with this Google account. Please sign up first.', 
-          'error'
-        );
-      } else if (response.status === 400 && data.code === 'DIFFERENT_AUTH_METHOD') {
-        showToast(
-          'Different Sign-in Method', 
-          'This email is registered with password. Please use email/password login.', 
-          'error'
-        );
-      } else {
-        showToast(
-          'Login Failed', 
-          data.message || 'Google sign-in failed', 
-          'error'
-        );
-      }
-      
-      // Sign out from Google to prevent confusion
-      await googleAuth.signOut();
-    }
-    
-  } catch (error) {
-    console.error("Google Sign-In error:", error);
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    
-    // Handle specific Firebase error cases
-    if (errorCode === 'auth/popup-closed-by-user') {
-      showToast('Sign-in Cancelled', 'Google sign-in was cancelled', 'error');
-    } else if (errorCode === 'auth/popup-blocked') {
-      showToast('Popup Blocked', 'Please allow popups for this site and try again', 'error');
-    } else if (errorCode === 'auth/network-request-failed') {
-      showToast('Network Error', 'Please check your internet connection', 'error');
-    } else {
-      showToast('Sign-in Failed', 'Google Sign-In failed: ' + errorMessage, 'error');
-    }
-    
-    // Ensure user is signed out from Google on error
+  // Unified function to process auth results
+  const processAuthResult = async (result, provider) => {
     try {
-      await googleAuth.signOut();
-    } catch (signOutError) {
-      console.error("Error signing out:", signOutError);
-    }
-  } finally {
-    setIsLoading(false);
-  }
-  };
-
-  const handleGitHubSignIn = async () => {
-    setIsLoading(true);
-    
-    try {
-      console.log("Starting GitHub Sign-In...");
-      const result = await signInWithPopup(githubAuth, githubProvider); // Use githubAuth and githubProvider
-      
-      // This gives you a GitHub Access Token
-      const credential = GithubAuthProvider.credentialFromResult(result);
-      const token = credential?.accessToken;
       const user = result.user;
       
-      console.log("GitHub Sign-In successful:", user);
+      console.log(`${provider} Sign-In successful:`, user);
       
       // Prepare user data to send to backend
       const userData = {
-        name: user.displayName || user.email.split('@')[0], // Use email prefix if displayName is null
+        name: user.displayName || user.email.split('@')[0],
         email: user.email,
         uid: user.uid,
         photoURL: user.photoURL
       };
       
-      console.log("Sending user data to backend for GitHub login:", userData);
+      const endpoint = provider === 'Google' ? '/google-login' : '/github-login';
+      console.log(`Sending user data to backend for ${provider} login:`, userData);
       
-      // Send GitHub user data to your backend for LOGIN (not signup)
-      const response = await fetch(`${import.meta.env.VITE_API_BASE}/github-login`, {
+      // Send user data to your backend for LOGIN
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -331,7 +232,7 @@ const [isLoading, setIsLoading] = useState(false);
       });
       
       const data = await response.json();
-      console.log('GitHub login response:', data);
+      console.log(`${provider} login response:`, data);
       
       if (response.ok) {
         // Store the token in localStorage
@@ -372,7 +273,7 @@ const [isLoading, setIsLoading] = useState(false);
         if (response.status === 404 && data.code === 'USER_NOT_FOUND') {
           showToast(
             'Account Not Found', 
-            'No account found with this GitHub account. Please sign up first.', 
+            `No account found with this ${provider} account. Please sign up first.`, 
             'error'
           );
         } else if (response.status === 400 && data.code === 'DIFFERENT_AUTH_METHOD') {
@@ -384,41 +285,143 @@ const [isLoading, setIsLoading] = useState(false);
         } else {
           showToast(
             'Login Failed', 
-            data.message || 'GitHub sign-in failed', 
+            data.message || `${provider} sign-in failed`, 
             'error'
           );
         }
         
-        // Sign out from GitHub to prevent confusion
-        await githubAuth.signOut();
+        // Sign out to prevent confusion
+        const authInstance = provider === 'Google' ? googleAuth : githubAuth;
+        await authInstance.signOut();
       }
       
     } catch (error) {
-      console.error("GitHub Sign-In error:", error);
-      const errorCode = error.code;
-      const errorMessage = error.message;
+      console.error(`Error processing ${provider} auth result:`, error);
+      showToast('Login Failed', 'Authentication failed', 'error');
+      const authInstance = provider === 'Google' ? googleAuth : githubAuth;
+      await authInstance.signOut();
+    }
+  };
+
+  // Unified error handler
+  const handleAuthError = (error) => {
+    console.error("Authentication error:", error);
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    
+    // Handle specific Firebase error cases
+    if (errorCode === 'auth/popup-closed-by-user') {
+      showToast('Sign-in Cancelled', 'Sign-in was cancelled', 'error');
+    } else if (errorCode === 'auth/popup-blocked') {
+      showToast('Popup Blocked', 'Please allow popups for this site and try again', 'error');
+    } else if (errorCode === 'auth/network-request-failed') {
+      showToast('Network Error', 'Please check your internet connection', 'error');
+    } else if (errorCode === 'auth/account-exists-with-different-credential') {
+      showToast('Account Exists', 'An account with this email already exists with a different sign-in method', 'error');
+    } else {
+      showToast('Sign-in Failed', errorMessage, 'error');
+    }
+  };
+
+  // Detect if device is mobile or if popup might be blocked
+  const shouldUseRedirect = () => {
+    // Check for mobile devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Check for browsers that commonly block popups (like Safari in private mode)
+    const isPrivateMode = window.navigator.userAgent.includes('Safari') && 
+                          !window.navigator.userAgent.includes('Chrome');
+    
+    return isMobile || isPrivateMode;
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
       
-      // Handle specific Firebase error cases
-      if (errorCode === 'auth/popup-closed-by-user') {
-        showToast('Sign-in Cancelled', 'GitHub sign-in was cancelled', 'error');
-      } else if (errorCode === 'auth/popup-blocked') {
-        showToast('Popup Blocked', 'Please allow popups for this site and try again', 'error');
-      } else if (errorCode === 'auth/network-request-failed') {
-        showToast('Network Error', 'Please check your internet connection', 'error');
-      } else if (errorCode === 'auth/account-exists-with-different-credential') {
-        showToast('Account Exists', 'An account with this email already exists with a different sign-in method', 'error');
+    try {
+      console.log("Starting Google Sign-In...");
+      
+      if (shouldUseRedirect()) {
+        // Use redirect for mobile devices or when popups might be blocked
+        console.log("Using redirect flow for Google");
+        await signInWithRedirect(googleAuth, googleProvider);
+        // The result will be handled in the useEffect hook when the page reloads
       } else {
-        showToast('Sign-in Failed', 'GitHub Sign-In failed: ' + errorMessage, 'error');
+        // Try popup first, fallback to redirect if it fails
+        console.log("Attempting popup flow for Google");
+        try {
+          const result = await signInWithPopup(googleAuth, googleProvider);
+          await processAuthResult(result, 'Google');
+        } catch (popupError) {
+          if (popupError.code === 'auth/popup-blocked' || 
+              popupError.code === 'auth/popup-closed-by-user') {
+            console.log("Popup blocked, falling back to redirect");
+            await signInWithRedirect(googleAuth, googleProvider);
+            return; // Exit early as redirect will handle the flow
+          }
+          throw popupError; // Re-throw other errors
+        }
       }
       
-      // Ensure user is signed out from GitHub on error
+    } catch (error) {
+      handleAuthError(error);
+      
+      // Ensure user is signed out on error
+      try {
+        await googleAuth.signOut();
+      } catch (signOutError) {
+        console.error("Error signing out:", signOutError);
+      }
+    } finally {
+      if (!shouldUseRedirect()) {
+        setIsLoading(false);
+      }
+      // For redirect, loading state will be reset on page reload
+    }
+  };
+
+  const handleGitHubSignIn = async () => {
+    setIsLoading(true);
+    
+    try {
+      console.log("Starting GitHub Sign-In...");
+      
+      if (shouldUseRedirect()) {
+        // Use redirect for mobile devices or when popups might be blocked
+        console.log("Using redirect flow for GitHub");
+        await signInWithRedirect(githubAuth, githubProvider);
+        // The result will be handled in the useEffect hook when the page reloads
+      } else {
+        // Try popup first, fallback to redirect if it fails
+        console.log("Attempting popup flow for GitHub");
+        try {
+          const result = await signInWithPopup(githubAuth, githubProvider);
+          await processAuthResult(result, 'GitHub');
+        } catch (popupError) {
+          if (popupError.code === 'auth/popup-blocked' || 
+              popupError.code === 'auth/popup-closed-by-user') {
+            console.log("Popup blocked, falling back to redirect");
+            await signInWithRedirect(githubAuth, githubProvider);
+            return; // Exit early as redirect will handle the flow
+          }
+          throw popupError; // Re-throw other errors
+        }
+      }
+      
+    } catch (error) {
+      handleAuthError(error);
+      
+      // Ensure user is signed out on error
       try {
         await githubAuth.signOut();
       } catch (signOutError) {
         console.error("Error signing out:", signOutError);
       }
     } finally {
-      setIsLoading(false);
+      if (!shouldUseRedirect()) {
+        setIsLoading(false);
+      }
+      // For redirect, loading state will be reset on page reload
     }
   };
 

@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'
 import './Signup.css';
 import SignupImage from "../assets/Image3.png";
 import { Link } from 'react-router-dom';
 
 // Import Firebase auth functions and configurations from unified file
-import { signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
 import { 
-  googleAuth, 
-  githubAuth, 
+  signInWithPopup, 
+  signInWithRedirect, 
+  getRedirectResult,
+  GoogleAuthProvider, 
+  GithubAuthProvider 
+} from "firebase/auth";
+import { 
+  auth,
   googleProvider, 
   githubProvider 
-} from '../FirebaseOauth/firebase.js'; // Updated import from unified file
+} from '../FirebaseOauth/firebase.js';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -28,6 +33,24 @@ const Signup = () => {
     type: 'success'
   });
   const navigate = useNavigate();
+
+  // Check for redirect result on component mount
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log("Redirect result received:", result);
+          await processAuthResult(result);
+        }
+      } catch (error) {
+        console.error("Redirect result error:", error);
+        handleAuthError(error);
+      }
+    };
+
+    handleRedirectResult();
+  }, []);
 
   const showToast = (message, description, type = 'success') => {
     setToast({
@@ -70,151 +93,39 @@ const Signup = () => {
         }
         
         console.log("Form submitted successfully");
-        alert("Signup successful!");
-        navigate("/Preference");
+        showToast('Account Created!', 'Welcome to Askora!', 'success');
+        setTimeout(() => navigate("/Preference"), 2000);
       } else {
         console.error("Form submission failed:", data.message);
-        alert(data.message || "Signup failed. Try again.");
+        showToast('Signup Failed', data.message || "Signup failed. Try again.", 'error');
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert("Something went wrong. Please try again later.");
+      showToast('Connection Error', "Something went wrong. Please try again later.", 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-      
-  try {
-    console.log("Starting Google Sign-Up...");
-    const result = await signInWithPopup(googleAuth, googleProvider); // Use googleAuth and googleProvider
-    
-    // This gives you a Google Access Token
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const token = credential?.accessToken;
-    const user = result.user;
-    
-    console.log("Google Sign-In successful:", user);
-    
-    // Prepare user data to send to backend
-    const userData = {
-      name: user.displayName,
-      email: user.email,
-      uid: user.uid,
-      photoURL: user.photoURL
-    };
-    
-    console.log("Sending user data to backend for signup:", userData);
-    
-    // Send Google user data to your backend for SIGNUP
-    const response = await fetch(`${import.meta.env.VITE_API_BASE}/google-signup`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
-    
-    const data = await response.json();
-    console.log('Google signup response:', data);
-    
-    if (response.ok) {
-      // Store the token in localStorage
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-      }
-      
-      showToast('Account Created!', 'Welcome to Askora! Please set your preferences.', 'success');
-      
-      // Navigate to preferences page after signup
-      setTimeout(() => {
-        navigate('/Preference');
-      }, 2000);
-      
-    } else {
-      console.error("Failed to create user account:", data.message);
-      
-      // Handle specific error cases
-      if (response.status === 400 && data.code === 'USER_EXISTS') {
-        showToast(
-          'Account Already Exists', 
-          'An account with this Google account already exists. Please use Sign In instead.', 
-          'error'
-        );
-      } else if (response.status === 400 && data.code === 'EMAIL_EXISTS') {
-        showToast(
-          'Email Already Registered', 
-          'This email is already registered with password. Please use email/password login.', 
-          'error'
-        );
-      } else {
-        showToast(
-          'Signup Failed', 
-          data.message || 'Google sign-up failed', 
-          'error'
-        );
-      }
-      
-      // Sign out from Google to prevent confusion
-      await googleAuth.signOut();
-    }
-    
-  } catch (error) {
-    console.error("Google Sign-Up error:", error);
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    
-    // Handle specific Firebase error cases
-    if (errorCode === 'auth/popup-closed-by-user') {
-      showToast('Sign-up Cancelled', 'Google sign-up was cancelled', 'error');
-    } else if (errorCode === 'auth/popup-blocked') {
-      showToast('Popup Blocked', 'Please allow popups for this site and try again', 'error');
-    } else if (errorCode === 'auth/network-request-failed') {
-      showToast('Network Error', 'Please check your internet connection', 'error');
-    } else {
-      showToast('Sign-up Failed', 'Google Sign-Up failed: ' + errorMessage, 'error');
-    }
-    
-    // Ensure user is signed out from Google on error
+  // Unified function to process auth results
+  const processAuthResult = async (result, provider = 'unknown') => {
     try {
-      await googleAuth.signOut();
-    } catch (signOutError) {
-      console.error("Error signing out:", signOutError);
-    }
-  } finally {
-    setIsLoading(false);
-  }
-  };
-
-  const handleGitHubSignIn = async () => {
-    setIsLoading(true);
-    
-    try {
-      console.log("Starting GitHub Sign-Up...");
-      const result = await signInWithPopup(githubAuth, githubProvider); // Use githubAuth and githubProvider
-      
-      // This gives you a GitHub Access Token
-      const credential = GithubAuthProvider.credentialFromResult(result);
-      const token = credential?.accessToken;
       const user = result.user;
-      
-      console.log("GitHub Sign-In successful:", user);
+      console.log(`${provider} Sign-In successful:`, user);
       
       // Prepare user data to send to backend
       const userData = {
-        name: user.displayName || user.email.split('@')[0], // Use email prefix if displayName is null
+        name: user.displayName || user.email.split('@')[0],
         email: user.email,
         uid: user.uid,
         photoURL: user.photoURL
       };
       
-      console.log("Sending user data to backend for GitHub signup:", userData);
+      const endpoint = provider === 'Google' ? '/google-signup' : '/github-signup';
+      console.log(`Sending user data to backend for ${provider} signup:`, userData);
       
-      // Send GitHub user data to your backend for SIGNUP
-      const response = await fetch(`${import.meta.env.VITE_API_BASE}/github-signup`, {
+      // Send user data to your backend for SIGNUP
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -223,7 +134,7 @@ const Signup = () => {
       });
       
       const data = await response.json();
-      console.log('GitHub signup response:', data);
+      console.log(`${provider} signup response:`, data);
       
       if (response.ok) {
         // Store the token in localStorage
@@ -246,7 +157,7 @@ const Signup = () => {
         if (response.status === 400 && data.code === 'USER_EXISTS') {
           showToast(
             'Account Already Exists', 
-            'An account with this GitHub account already exists. Please use Sign In instead.', 
+            `An account with this ${provider} account already exists. Please use Sign In instead.`, 
             'error'
           );
         } else if (response.status === 400 && data.code === 'EMAIL_EXISTS') {
@@ -258,47 +169,161 @@ const Signup = () => {
         } else {
           showToast(
             'Signup Failed', 
-            data.message || 'GitHub sign-up failed', 
+            data.message || `${provider} sign-up failed`, 
             'error'
           );
         }
         
-        // Sign out from GitHub to prevent confusion
-        await githubAuth.signOut();
+        // Sign out to prevent confusion
+        await auth.signOut();
       }
       
     } catch (error) {
-      console.error("GitHub Sign-Up error:", error);
-      const errorCode = error.code;
-      const errorMessage = error.message;
+      console.error(`Error processing ${provider} auth result:`, error);
+      showToast('Signup Failed', `${provider} sign-up failed`, 'error');
+      await auth.signOut();
+    }
+  };
+
+  // Unified error handler
+  const handleAuthError = (error) => {
+    console.error("Authentication error:", error);
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    
+    // Handle specific Firebase error cases
+    if (errorCode === 'auth/popup-closed-by-user') {
+      showToast('Sign-up Cancelled', 'Sign-up was cancelled', 'error');
+    } else if (errorCode === 'auth/popup-blocked') {
+      showToast('Popup Blocked', 'Please allow popups for this site and try again', 'error');
+    } else if (errorCode === 'auth/network-request-failed') {
+      showToast('Network Error', 'Please check your internet connection', 'error');
+    } else if (errorCode === 'auth/account-exists-with-different-credential') {
+      showToast('Account Exists', 'An account with this email already exists with a different sign-in method', 'error');
+    } else {
+      showToast('Sign-up Failed', errorMessage, 'error');
+    }
+  };
+
+  // Detect if device is mobile or if popup might be blocked
+  const shouldUseRedirect = () => {
+    // Check for mobile devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Check for browsers that commonly block popups (like Safari in private mode)
+    const isPrivateMode = window.navigator.userAgent.includes('Safari') && 
+                          !window.navigator.userAgent.includes('Chrome');
+    
+    return isMobile || isPrivateMode;
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
       
-      // Handle specific Firebase error cases
-      if (errorCode === 'auth/popup-closed-by-user') {
-        showToast('Sign-up Cancelled', 'GitHub sign-up was cancelled', 'error');
-      } else if (errorCode === 'auth/popup-blocked') {
-        showToast('Popup Blocked', 'Please allow popups for this site and try again', 'error');
-      } else if (errorCode === 'auth/network-request-failed') {
-        showToast('Network Error', 'Please check your internet connection', 'error');
-      } else if (errorCode === 'auth/account-exists-with-different-credential') {
-        showToast('Account Exists', 'An account with this email already exists with a different sign-in method', 'error');
+    try {
+      console.log("Starting Google Sign-Up...");
+      
+      if (shouldUseRedirect()) {
+        // Use redirect for mobile devices or when popups might be blocked
+        console.log("Using redirect flow for Google");
+        await signInWithRedirect(googleAuth, googleProvider);
+        // The result will be handled in the useEffect hook when the page reloads
       } else {
-        showToast('Sign-up Failed', 'GitHub Sign-Up failed: ' + errorMessage, 'error');
+        // Try popup first, fallback to redirect if it fails
+        console.log("Attempting popup flow for Google");
+        try {
+          const result = await signInWithPopup(googleAuth, googleProvider);
+          await processAuthResult(result, 'Google');
+        } catch (popupError) {
+          if (popupError.code === 'auth/popup-blocked' || 
+              popupError.code === 'auth/popup-closed-by-user') {
+            console.log("Popup blocked, falling back to redirect");
+            await signInWithRedirect(googleAuth, googleProvider);
+            return; // Exit early as redirect will handle the flow
+          }
+          throw popupError; // Re-throw other errors
+        }
       }
       
-      // Ensure user is signed out from GitHub on error
+    } catch (error) {
+      handleAuthError(error);
+      
+      // Ensure user is signed out on error
+      try {
+        await googleAuth.signOut();
+      } catch (signOutError) {
+        console.error("Error signing out:", signOutError);
+      }
+    } finally {
+      if (!shouldUseRedirect()) {
+        setIsLoading(false);
+      }
+      // For redirect, loading state will be reset on page reload
+    }
+  };
+
+  const handleGitHubSignIn = async () => {
+    setIsLoading(true);
+    
+    try {
+      console.log("Starting GitHub Sign-Up...");
+      
+      if (shouldUseRedirect()) {
+        // Use redirect for mobile devices or when popups might be blocked
+        console.log("Using redirect flow for GitHub");
+        await signInWithRedirect(githubAuth, githubProvider);
+        // The result will be handled in the useEffect hook when the page reloads
+      } else {
+        // Try popup first, fallback to redirect if it fails
+        console.log("Attempting popup flow for GitHub");
+        try {
+          const result = await signInWithPopup(githubAuth, githubProvider);
+          await processAuthResult(result, 'GitHub');
+        } catch (popupError) {
+          if (popupError.code === 'auth/popup-blocked' || 
+              popupError.code === 'auth/popup-closed-by-user') {
+            console.log("Popup blocked, falling back to redirect");
+            await signInWithRedirect(githubAuth, githubProvider);
+            return; // Exit early as redirect will handle the flow
+          }
+          throw popupError; // Re-throw other errors
+        }
+      }
+      
+    } catch (error) {
+      handleAuthError(error);
+      
+      // Ensure user is signed out on error
       try {
         await githubAuth.signOut();
       } catch (signOutError) {
         console.error("Error signing out:", signOutError);
       }
     } finally {
-      setIsLoading(false);
+      if (!shouldUseRedirect()) {
+        setIsLoading(false);
+      }
+      // For redirect, loading state will be reset on page reload
     }
   };
 
   return (
     <div className="signup-container">
-      {/* Toast would go here - you need to implement the Toast component similar to Login.jsx */}
+      {/* Toast Component - You'll need to create this similar to Login.jsx */}
+      {toast.isVisible && (
+        <div className="toast-container">
+          <div className="toast-wrapper">
+            <div className={`toast-alert ${toast.type === 'success' ? 'toast-success' : 'toast-error'}`}>
+              <div className="toast-content">
+                <div className="toast-text">
+                  <p className="toast-title">{toast.message}</p>
+                  <p className="toast-description">{toast.description}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Left Panel - Form */}
       <div className="left-panel">
