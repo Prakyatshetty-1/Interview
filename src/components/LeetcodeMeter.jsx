@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
 
@@ -26,14 +26,14 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
   };
 
   // Fetch stats (public if userId provided, else authed)
-  const fetchLeetCodeStats = useCallback(async () => {
+  const fetchLeetCodeStats = async () => {
     setLoading(true);
     setError(null);
     clearTimers();
 
     try {
       if (userId) {
-        // public profile logic (unchanged)...
+        // try public endpoint for leetcode stats first
         let res = await fetch(`${API_BASE}/api/users/${userId}/leetcode-stats`);
         if (res.ok) {
           const json = await res.json();
@@ -42,6 +42,7 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
           setLoading(false);
           return;
         }
+        // fallback: fetch public user object and look for leetcodeStats inside
         res = await fetch(`${API_BASE}/api/users/${userId}`);
         if (res.ok) {
           const json = await res.json();
@@ -50,21 +51,26 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
           setLoading(false);
           return;
         }
+
+        // If we get here, public fetch failed — show empty/default but no crash
         setStats(prev => ({ ...prev, attempting: 0 }));
         setLoading(false);
         return;
       }
 
+      // own profile: authenticated endpoint
       const token = localStorage.getItem('token');
       if (!token) {
         setError('Please log in to view your LeetCode stats');
         setLoading(false);
         return;
       }
-
       const res = await fetch(`${API_BASE}/api/leetcode/stats`, {
         method: 'GET',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!res.ok) {
@@ -83,176 +89,57 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
     } finally {
       setLoading(false);
     }
-  }, [userId])
+  };
 
   // Normalize incoming shapes into our expected stats shape
-  // inside your fetchLeetCodeStats / normalizeIncoming path (frontend)
   const normalizeIncoming = (incoming) => {
     if (!incoming) return stats;
-    // if server returns { leetcodeStats: {...} }
-    const data = incoming.leetcodeStats ?? incoming;
     return {
-      total: typeof data.total === 'number' ? data.total : stats.total,
-      attempting: typeof data.attempting === 'number' ? data.attempting : stats.attempting,
+      total: incoming.total ?? stats.total,
+      attempting: incoming.attempting ?? stats.attempting,
       easy: {
-        solved: typeof data.easy?.solved === 'number' ? data.easy.solved : stats.easy.solved,
-        total: typeof data.easy?.total === 'number' ? data.easy.total : stats.easy.total
+        solved: incoming.easy?.solved ?? incoming.easySolved ?? (incoming.easy && incoming.easy[0]) ?? stats.easy.solved,
+        total: incoming.easy?.total ?? stats.easy.total
       },
       medium: {
-        solved: typeof data.medium?.solved === 'number' ? data.medium.solved : stats.medium.solved,
-        total: typeof data.medium?.total === 'number' ? data.medium.total : stats.medium.total
+        solved: incoming.medium?.solved ?? incoming.mediumSolved ?? stats.medium.solved,
+        total: incoming.medium?.total ?? stats.medium.total
       },
       hard: {
-        solved: typeof data.hard?.solved === 'number' ? data.hard.solved : stats.hard.solved,
-        total: typeof data.hard?.total === 'number' ? data.hard.total : stats.hard.total
+        solved: incoming.hard?.solved ?? incoming.hardSolved ?? stats.hard.solved,
+        total: incoming.hard?.total ?? stats.hard.total
       }
     };
   };
 
-
-// send payload: { interviewId, questionIds } preferably; fallback: { difficulty, questionsCompleted }
-const updateLeetCodeStats = async (payload = {}) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.log('No token found, skipping LeetCode stats update');
-      return;
-    }
-
-    // build body: prefer interviewId + questionIds
-    const body = {};
-    if (payload.interviewId) body.interviewId = payload.interviewId;
-    if (Array.isArray(payload.questionIds) && payload.questionIds.length) body.questionIds = payload.questionIds;
-    // fallback: keep old difficulty/questionsCompleted shape if that's all you have
-    if (!body.interviewId && payload.difficulty) {
-      body.difficulty = payload.difficulty;
-      body.questionsCompleted = payload.questionsCompleted ?? 1;
-    }
-
-    const response = await fetch(`${API_BASE}/api/leetcode/update-after-interview`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      console.log('LeetCode stats updated successfully:', data);
-      // notify other parts of the app (same tab + other tabs)
-      try {
-        // same-tab listeners
-        window.dispatchEvent(new CustomEvent('leetcodeStatsUpdated', { detail: { leetcodeStats: data.leetcodeStats || null } }));
-        // cross-tab listeners (storage event fires in other tabs)
-        localStorage.setItem('leetcodeStatsLastUpdated', Date.now().toString());
-      } catch (e) {
-        /* ignore */
+  // PUT update (only for own profile)
+  const updateLeetCodeStats = async (newStats) => {
+    if (!isOwnProfile) return;
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Not authenticated');
+        return;
       }
-    } else {
-      console.warn('Failed to update LeetCode stats:', data.message || data);
-    }
-  } catch (error) {
-    console.error('Error updating LeetCode stats:', error);
-  }
-};
-
-// LeetcodeMeter.jsx — make sure fetchLeetCodeStats is memoized, then add this effect:
-useEffect(() => {
-  // helper to normalize & apply payload object (either full payload or plain stats)
-  const applyIncoming = (rawDetail) => {
-    if (!rawDetail) return false;
-
-    // support both shapes: { leetcodeStats: {...}, newlySolvedCount } OR plain stats object
-    const payload = (rawDetail.leetcodeStats ?? rawDetail);
-
-    if (!payload || typeof payload !== 'object') return false;
-
-    const normalized = {
-      total: typeof payload.total === 'number' ? payload.total : stats.total,
-      attempting: typeof payload.attempting === 'number' ? payload.attempting : stats.attempting,
-      easy: {
-        solved: typeof payload.easy?.solved === 'number' ? payload.easy.solved : stats.easy.solved,
-        total: typeof payload.easy?.total === 'number' ? payload.easy.total : stats.easy.total
-      },
-      medium: {
-        solved: typeof payload.medium?.solved === 'number' ? payload.medium.solved : stats.medium.solved,
-        total: typeof payload.medium?.total === 'number' ? payload.medium.total : stats.medium.total
-      },
-      hard: {
-        solved: typeof payload.hard?.solved === 'number' ? payload.hard.solved : stats.hard.solved,
-        total: typeof payload.hard?.total === 'number' ? payload.hard.total : stats.hard.total
+      const res = await fetch(`${API_BASE}/api/leetcode/stats`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ leetcodeStats: newStats })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const incoming = data?.leetcodeStats ?? newStats;
+        setStats(normalizeIncoming(incoming));
+      } else {
+        console.warn('Failed to update LeetCode stats', await res.text());
       }
-    };
-
-    // apply to state
-    setStats(prev => ({
-      total: normalized.total,
-      attempting: normalized.attempting,
-      easy: { solved: normalized.easy.solved, total: normalized.easy.total },
-      medium: { solved: normalized.medium.solved, total: normalized.medium.total },
-      hard: { solved: normalized.hard.solved, total: normalized.hard.total }
-    }));
-
-    // immediate animation update
-    const solvedNow = (normalized.easy.solved || 0) + (normalized.medium.solved || 0) + (normalized.hard.solved || 0);
-    setAnimatedSolved(solvedNow);
-    setAnimatedAttempting(normalized.attempting ?? 0);
-
-    return true;
-  };
-
-  // Event handlers
-  const onLegacy = (e) => {
-    console.log('LeetcodeMeter: leetcodeStatsUpdated (legacy) event received:', e?.detail);
-    const applied = applyIncoming(e?.detail ?? window.__leetcodeLatestPayload ?? null);
-    if (!applied) fetchLeetCodeStats();
-  };
-
-  const onFull = (e) => {
-    console.log('LeetcodeMeter: leetcodeStatsUpdatedFull (full) event received:', e?.detail);
-    const applied = applyIncoming(e?.detail ?? window.__leetcodeLatestPayload ?? null);
-    if (!applied) fetchLeetCodeStats();
-  };
-
-  // Listen for storage changes from other tabs (key: leetcodeStatsLatest)
-  const onStorage = (e) => {
-    if (!e) return;
-    if (e.key === 'leetcodeStatsLatest') {
-      console.log('LeetcodeMeter: storage event leetcodeStatsLatest received');
-      try {
-        const parsed = e.newValue ? JSON.parse(e.newValue) : null;
-        const applied = applyIncoming(parsed);
-        if (!applied) fetchLeetCodeStats();
-      } catch (err) {
-        console.warn('LeetcodeMeter: failed to parse leetcodeStatsLatest from storage', err);
-        fetchLeetCodeStats();
-      }
+    } catch (err) {
+      console.error('Error updating LeetCode stats:', err);
     }
-    // also respect leetcodeStatsLastUpdated if you want (but we prefer latest payload)
   };
-
-  // Install listeners
-  window.addEventListener('leetcodeStatsUpdated', onLegacy);
-  window.addEventListener('leetcodeStatsUpdatedFull', onFull);
-  window.addEventListener('storage', onStorage);
-
-  // If publisher already put the payload on window (same-tab race), apply it now.
-  if (typeof window !== 'undefined' && window.__leetcodeLatestPayload) {
-    console.log('LeetcodeMeter: applying existing window.__leetcodeLatestPayload on mount', window.__leetcodeLatestPayload);
-    applyIncoming(window.__leetcodeLatestPayload);
-  }
-
-  // cleanup
-  return () => {
-    window.removeEventListener('leetcodeStatsUpdated', onLegacy);
-    window.removeEventListener('leetcodeStatsUpdatedFull', onFull);
-    window.removeEventListener('storage', onStorage);
-  };
-  // intentionally do not depend on `stats` here beyond fetchLeetCodeStats, fetchLeetCodeStats is memoized with useCallback
-}, [fetchLeetCodeStats]);
-
 
   useEffect(() => {
     // fetch on mount & whenever userId changes
