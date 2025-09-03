@@ -1023,141 +1023,55 @@ app.get('/api/users/:id/contributions', async (req, res) => {
 });
 
 // GET own leetcode stats (authenticated)
-// server.cjs (patch for leetcode stats + update-after-interview)
-// --- require models at top of file ---
-// --- helper: compute totals for all questions in interviews collection ---
-async function computeGlobalQuestionTotals() {
-  // Aggregate questions across interviews by question.difficulty.
-  // Assumes each interview document has a 'questions' array, where each question may have a 'difficulty' field.
-  // If difficulty missing, treat as 'medium' fallback.
-  const agg = await Interview.aggregate([
-    { $project: { questions: 1 } },
-    { $unwind: { path: "$questions", preserveNullAndEmptyArrays: false } },
-    {
-      $group: {
-        _id: { $toLower: { $ifNull: ["$questions.difficulty", "medium"] } },
-        count: { $sum: 1 }
-      }
-    }
-  ]);
-
-  const totals = { easy: 0, medium: 0, hard: 0, total: 0 };
-  for (const row of agg) {
-    const key = (row._id || "").toString().toLowerCase();
-    if (key.includes("easy")) totals.easy += row.count;
-    else if (key.includes("hard")) totals.hard += row.count;
-    else totals.medium += row.count;
-  }
-  totals.total = totals.easy + totals.medium + totals.hard;
-  return totals;
-}
-
-// --- helper: recompute user leetcodeStats from user.attempts array and global totals ---
-function recomputeUserLeetCodeStatsFromAttempts(user, globalTotals = null) {
-  // user.attempts expected to be array of { questionId:String, difficulty: "easy"|"medium"|"hard", status: "solved"|"attempting" | ... , solvedAt: Date }
-  const solvedQuestionIdsByDifficulty = { easy: new Set(), medium: new Set(), hard: new Set() };
-  let attempting = 0;
-
-  if (Array.isArray(user.attempts)) {
-    for (const a of user.attempts) {
-      const status = (a.status || "").toString().toLowerCase();
-      const difficulty = (a.difficulty || "medium").toString().toLowerCase();
-      const qid = String(a.questionId || a.qid || a.question || "").trim();
-      if (!qid) continue;
-
-      if (status === "solved" || status === "completed") {
-        if (difficulty.includes("easy")) solvedQuestionIdsByDifficulty.easy.add(qid);
-        else if (difficulty.includes("hard")) solvedQuestionIdsByDifficulty.hard.add(qid);
-        else solvedQuestionIdsByDifficulty.medium.add(qid);
-      } else if (status === "attempting" || status === "inprogress" || a.attempting) {
-        attempting += 1;
-      }
-    }
-  }
-
-  const easySolved = solvedQuestionIdsByDifficulty.easy.size;
-  const mediumSolved = solvedQuestionIdsByDifficulty.medium.size;
-  const hardSolved = solvedQuestionIdsByDifficulty.hard.size;
-  const totalSolved = easySolved + mediumSolved + hardSolved;
-
-  const leetcodeStats = {
-    total: (globalTotals && typeof globalTotals.total === 'number') ? globalTotals.total : (user.leetcodeStats?.total || 0),
-    attempting: typeof user.leetcodeStats?.attempting === 'number' ? user.leetcodeStats.attempting : attempting,
-    easy: {
-      solved: easySolved,
-      total: (globalTotals && typeof globalTotals.easy === 'number') ? globalTotals.easy : (user.leetcodeStats?.easy?.total || 0)
-    },
-    medium: {
-      solved: mediumSolved,
-      total: (globalTotals && typeof globalTotals.medium === 'number') ? globalTotals.medium : (user.leetcodeStats?.medium?.total || 0)
-    },
-    hard: {
-      solved: hardSolved,
-      total: (globalTotals && typeof globalTotals.hard === 'number') ? globalTotals.hard : (user.leetcodeStats?.hard?.total || 0)
-    },
-    lastUpdated: new Date()
-  };
-
-  return leetcodeStats;
-}
-
-// --- GET own leetcode stats (authenticated) ---
 app.get('/api/leetcode/stats', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).lean();
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    // compute global totals from interviews collection
-    const globalTotals = await computeGlobalQuestionTotals();
-
-    // recompute authoritative stats based on saved attempts
-    const leetcodeStats = recomputeUserLeetCodeStatsFromAttempts(user, globalTotals);
-
-    // save leetcodeStats back to user if you want them persisted (optional)
-    await User.findByIdAndUpdate(user._id, { leetcodeStats }, { new: true }).catch(() => { /* ignore */ });
-
-    res.status(200).json({ leetcodeStats });
+    const user = await User.findById(req.user.id).select('leetcodeStats').lean();
+    const defaultStats = {
+      total: 0,
+      attempting: 0,
+      easy: { solved: 0, total: 0 },
+      medium: { solved: 0, total: 0 },
+      hard: { solved: 0, total: 0 }
+    };
+    res.status(200).json({ leetcodeStats: user?.leetcodeStats || defaultStats });
   } catch (err) {
     console.error('Error fetching leetcode stats:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
-// --- Public: get another user's leetcode stats (no auth) ---
+// PUT update own leetcode stats (authenticated)
+
+
+// Public: get another user's leetcode stats (no auth)
 app.get('/api/users/:id/leetcode-stats', async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) return res.status(400).json({ message: 'Missing id' });
 
-    const user = await User.findById(id).lean();
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const user = await User.findById(id).select('leetcodeStats').lean();
+    const defaultStats = {
+      total: 0,
+      attempting: 0,
+      easy: { solved: 0, total: 0 },
+      medium: { solved: 0, total: 0 },
+      hard: { solved: 0, total: 0 }
+    };
 
-    // compute global totals
-    const globalTotals = await computeGlobalQuestionTotals();
-
-    // recompute authoritative stats from attempts
-    const leetcodeStats = recomputeUserLeetCodeStatsFromAttempts(user, globalTotals);
-
-    res.status(200).json({ leetcodeStats });
+    res.status(200).json({ leetcodeStats: user?.leetcodeStats || defaultStats });
   } catch (err) {
     console.error('Error fetching public leetcode stats:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
-// --- POST /api/leetcode/update-after-interview ---
-// Body expected: { interviewId: "689b5...", questionIds: ["q1","q2"] }
-// If questionIds omitted, assume whole pack -> treat each question in pack as completed.
-// POST /api/leetcode/update-after-interview
 app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
     let { difficulty, questionsCompleted = 1, packId } = req.body;
 
-
-    // Validate interviewId early and return 400 for bad requests
-    if (!interviewId || !mongoose.Types.ObjectId.isValid(String(interviewId))) {
-      return res.status(400).json({ message: 'Invalid or missing interviewId' });
+    if (!difficulty) {
+      return res.status(400).json({ message: 'Difficulty is required' });
     }
 
     if (!packId) {
@@ -1171,23 +1085,10 @@ app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res
       return res.status(400).json({ message: 'Invalid difficulty. Must be easy, medium, or hard' });
     }
 
-    // Ensure user exists
+    // Get current user
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    // Fetch pack to map questionIds -> difficulty when needed
-    const pack = await Interview.findById(interviewId).lean();
-    if (!pack) return res.status(404).json({ message: 'Interview/pack not found' });
-
-    // Build a map of questionId -> difficulty from the pack (if pack has question objects)
-    const qDifficultyMap = new Map();
-    if (Array.isArray(pack.questions)) {
-      for (const q of pack.questions) {
-        const qid = normalizeId(q._id ?? q.id ?? q.questionId ?? q.slug ?? "");
-        if (!qid) continue;
-        const diff = (q.difficulty || q.level || q.levelName || "medium").toString().toLowerCase();
-        qDifficultyMap.set(qid, diff);
-      }
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
     // Check if pack was already completed
@@ -1251,9 +1152,10 @@ app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res
       },
       alreadyCompleted: false
     });
+
   } catch (error) {
     console.error('Error updating LeetCode stats after interview:', error);
-    return res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
