@@ -17,12 +17,8 @@
   position: relative;
   height: 140px;
   width: 310px;
-  background: linear-gradient(135deg, 
-    #4c1d95 0%, 
-    #7c3aed 25%, 
-    #a855f7 50%, 
-    #ec4899 75%, 
-    #ef4444 100%
+  background:black
+    
   );
   margin-top: 5px;
   margin-left: 5px;
