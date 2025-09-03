@@ -63,7 +63,7 @@ export default function CreatedBy(){
                     </div>
                 </div>
                 <div className="creatorcard">
-                    <img className='bhavith1' src='/public/swaraj.png' alt="Swaraj"/>
+                    <img className='bhavith1' src='/swaraj.png' alt="Swaraj"/>
                     <div className="creator-info">
                         <h3 className="creator-name">Swaraj</h3>
                         <p className="creator-role12">Backend Developer</p>
