@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const { ObjectId } = require("mongodb");
 const { Interview } = require("./db.cjs"); // mongoose model
 const User = require("./User.cjs");
-const SECRET_KEY = "askorishere";
+const SECRET_KEY = process.env.SECRET_KEY;
 
 // Middleware to check JWT
 function authenticateToken(req, res, next) {

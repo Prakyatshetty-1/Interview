@@ -3,7 +3,7 @@
 const { MongoClient } = require("mongodb");
 const mongoose = require("mongoose");
 
-const uri = "mongodb://localhost:27017/interview-app"; // Use full DB name here
+const uri =process.env.MONGO_URI; // Use full DB name here
 const client = new MongoClient(uri);
 
 let db;

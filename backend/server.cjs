@@ -23,6 +23,7 @@ app.use(cors({
   origin: [
     'http://localhost:5173',  // Vite dev server
     'http://127.0.0.1:5173',  // Alternative localhost
+    'https://askora-ai.vercel.app'
   ],
   credentials: true,
   // include PATCH here (and any other methods you expect)
@@ -35,7 +36,8 @@ app.use(cors({
 app.options('*', cors({
   origin: [
     'http://localhost:5173',
-    'http://127.0.0.1:5173'
+    'http://127.0.0.1:5173',
+    'https://askora-ai.vercel.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -96,8 +98,7 @@ mongoose.connect(MONGO_URI)
     console.log('MongoDB connected');
 
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-      console.log(`CORS enabled for: http://localhost:5173`);
+      console.log(`Server is running on port`);
     });
   })
   .catch(err => {
