@@ -11,14 +11,6 @@ const GEMINI_URL = GEMINI_KEY
   ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`
   : null;
 
-// Add this temporary debug code
-console.log('=== Environment Debug ===');
-console.log('Current working directory:', process.cwd());
-console.log('__dirname:', __dirname);
-console.log('All environment variables with GEMINI:', Object.keys(process.env).filter(key => key.includes('GEMINI')));
-console.log('process.env.GEMINI_API_KEY:', process.env.GEMINI_API_KEY);
-console.log('process.env.VITE_GEMINI_API_KEY:', process.env.VITE_GEMINI_API_KEY);
-console.log('========================');
 
 // helper to produce a small, useful fallback feedback
 function fallbackFeedback(question, answer) {

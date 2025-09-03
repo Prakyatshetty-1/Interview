@@ -5,10 +5,12 @@ const cors = require('cors');
 const User = require('./User.cjs');
 const bcrypt = require('bcrypt');
 const app = express();
+require("dotenv").config();
+
 const PORT = 5000;
-const MONGO_URI = 'mongodb://localhost:27017/interview-app';
+const MONGO_URI = process.env.MONGO_URI;
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = 'askorishere';
+const SECRET_KEY = process.env.SECRET_KEY;
 const interviewRoutes = require("./interview.cjs");
 const { connectToDb } = require('./db.cjs');
 const { Interview } = require("./db.cjs");
@@ -21,6 +23,8 @@ app.use(cors({
   origin: [
     'http://localhost:5173',  // Vite dev server
     'http://127.0.0.1:5173',  // Alternative localhost
+    'https://askora-ai.vercel.app',
+    'https://interview-nxbs.onrender.com'
   ],
   credentials: true,
   // include PATCH here (and any other methods you expect)
@@ -33,7 +37,9 @@ app.use(cors({
 app.options('*', cors({
   origin: [
     'http://localhost:5173',
-    'http://127.0.0.1:5173'
+    'http://127.0.0.1:5173',
+    'https://askora-ai.vercel.app',
+    'https://interview-nxbs.onrender.com'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -88,22 +94,18 @@ const validateEmail = (email) => {
 };
 
 // ✅ Database connection and server startup
-connectToDb().then(() => {
-  mongoose.connect(MONGO_URI)
-    .then(() => {
-      console.log('MongoDB connected');
 
-      app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
-        console.log(`CORS enabled for: http://localhost:5173`);
-      });
-    })
-    .catch(err => {
-      console.error('Error connecting to MongoDB (Mongoose):', err.message);
+mongoose.connect(MONGO_URI)
+  .then(() => {
+    console.log('MongoDB connected');
+
+    app.listen(PORT, () => {
+      console.log(`Server is running on port`);
     });
-}).catch(err => {
-  console.error('Database connection failed:', err);
-});
+  })
+  .catch(err => {
+    console.error('Error connecting to MongoDB (Mongoose):', err.message);
+  });
 
 // ✅ Auth routes
 app.post('/login', async (req, res) => {
@@ -1254,6 +1256,7 @@ app.post('/api/leetcode/update-after-interview', authMiddleware, async (req, res
     return res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
 app.get('/api/leetcode/check-completion/:packId', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -1263,11 +1266,13 @@ app.get('/api/leetcode/check-completion/:packId', authMiddleware, async (req, re
       return res.status(400).json({ message: 'Pack ID is required' });
     }
 
+
     const user = await User.findById(userId).select('completedPacks').lean();
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
 
     const hasCompleted = user.completedPacks && user.completedPacks.some(pack => 
       String(pack.packId) === String(packId)
@@ -1285,6 +1290,7 @@ app.get('/api/leetcode/check-completion/:packId', authMiddleware, async (req, re
 
   } catch (error) {
     console.error('Error checking pack completion:', error);
+
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });

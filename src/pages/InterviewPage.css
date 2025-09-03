@@ -5,10 +5,16 @@
     width: 100%;
     min-height: 100vh;
     background-color: rgba(15, 16, 31, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+   
+}.CommingSoon{
+  font-size: 100px;
+  font-weight: 400;
+  color: white;
 }
-.containersall{
-    margin-top: 7%;
-}
+
 .headsecc{
     color:white;
     margin-left: 140px;

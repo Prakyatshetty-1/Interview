@@ -14,7 +14,7 @@ export default function Dashboard() {
   };
 
   const dockItems = [
-    { icon: <img src="/homeicon.png" alt="Home" style={{ width: 48, height: 48 }} />, label: "Home", onClick: () => navigate('/') },
+    { icon: <img src="/homeicon.png" alt="Home" style={{ width: 48, height: 48 }} />, label: "Home", onClick: () => navigate('/Dashboard') },
     { icon: <img src="/interviewicon.png" alt="Interviews" style={{ width: 48, height: 48 }} />, label: "Interviews", onClick: () => navigate('/Interview') },
     { icon: <img src="/createicon.png" alt="Create" style={{ width: 48, height: 48 }} />, label: "Create", onClick: () => navigate('/Create') },
     { icon: <img src="/favicon.png" alt="Saves" style={{ width: 48, height: 48 }} />, label: "Saves", onClick: () => navigate('/Saves') },

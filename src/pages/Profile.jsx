@@ -631,7 +631,7 @@ const unfollowUser = async (targetUserId) => {
   const handleProfilePicChange = () => alert("Profile picture change functionality would be implemented here");
 
   const items = [
-    { icon: <img src="/homeicon.png" alt="Home" style={{ width: '48px', height: '48px' }} />, label: "Home", onClick: () => navigate("/") },
+    { icon: <img src="/homeicon.png" alt="Home" style={{ width: '48px', height: '48px' }} />, label: "Home", onClick: () => navigate("/Dashboard") },
     { icon: <img src="/interviewicon.png" alt="Interviews" style={{ width: '48px', height: '48px' }} />, label: "Interviews", onClick: () => navigate("/Interview") },
     { icon: <img src="/createicon.png" alt="Create" style={{ width: '48px', height: '48px' }} />, label: "Create", onClick: () => navigate("/Create") },
     { icon: <img src="/favicon.png" alt="Saves" style={{ width: '48px', height: '48px' }} />, label: "Saves", onClick: () => navigate("/Saves") },
@@ -706,7 +706,11 @@ const unfollowUser = async (targetUserId) => {
     alt="Profile"
     style={{ width: '100%', height: '100%', borderRadius: '8px', objectFit: 'cover' }}
   />
-) : null}
+) : <img
+    src="/profilepic4.png"
+    alt="Profile"
+    style={{ width: '100%', height: '100%', borderRadius: '8px', objectFit: 'cover' }}
+  />}
 
               </div>
               <div style={{ color: "white", marginTop: "30px" }}>
@@ -906,7 +910,11 @@ const unfollowUser = async (targetUserId) => {
     alt="Profile"
     style={{ width: '100%', height: '100%', borderRadius: '8px', objectFit: 'cover' }}
   />
-) : null}
+) : <img
+    src="/profilepic4.png"
+    alt="Profile"
+    style={{ width: '100%', height: '100%', borderRadius: '8px', objectFit: 'cover' }}
+  /> }
 
               </div>
 
@@ -1174,29 +1182,15 @@ const unfollowUser = async (targetUserId) => {
 
 {/* Recently Attempted Interviews */}
 <div className="recent-interviews-section">
-  <h1 className="recent-interviews-title">{isOwnProfile ? "Recently Attempted Interviews" : "Recently Viewed Interviews"}</h1>
+  <h1 className="recent-interviews-title">
+    {isOwnProfile ? "Recently Attempted Interviews" : "Recently Viewed Interviews"}
+  </h1>
+
   <div className="interviews-grid">
-    {recentInterviews && recentInterviews.length > 0 ? (
-        recentInterviews.map((it, idx) => (
-      <Card
-        key={it.id || it.packId || idx}
-        title={it.title || it.packName || it.name || "Untitled Interview"}
-        company={it.company || it.source || it.provider || ""}
-        difficulty={it.difficulty || it.level || "—"}
-        level={it.level || it.difficulty || it.levelName || ""}
-        creator={it.creator || it.author || it.createdBy || it.packCreator || ""}
-        duration={it.duration || it.estimatedDuration || it.length || "—"}
-        attemptedAt={it.attemptedAt || it.attempted_on || it.attemptedAtISO || it.completedAt || it.createdAt || null}
-        onClick={() => { if (it.packId || it.id) navigate(`/interview/${it.packId || it.id}`); }}
-      />
-        ))
-    ) : (
-      <div style={{ color: "#9ca3af", padding: "12px 0" }}>
-        No recently attempted interviews yet.
-      </div>
-    )}
+    <h1 className="centertexts">Upcoming soon</h1>
   </div>
 </div>
+
     
             {/* rest of the right panel (topics, schedule, recent interviews) remains unchanged */}
           </div>

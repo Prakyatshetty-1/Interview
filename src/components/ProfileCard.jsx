@@ -87,11 +87,11 @@ function ProfileCard(props) {
     <div className={styles.profileCard}>
       <div className={styles.cardContent}>
         <div className={styles.cardHeader}>
-          <div className={styles.gradientBars}>
+         
             <div className={styles.profileImage}>
               <img src={avatar} alt={profile.name || "User"} />
             </div>
-          </div>
+          
         </div>
 
         <div className={styles.userInfo}>

@@ -18,8 +18,10 @@ export default function InterviewPortal() {
   const [transcript, setTranscript] = useState([]);
   const [error, setError] = useState("");
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+
   const [packMeta, setPackMeta] = useState(null);
   const [isFirstAttempt, setIsFirstAttempt] = useState(false);
+
 
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
@@ -1023,8 +1025,9 @@ interviewQuestionIdsRef.current = questionIds.filter(Boolean); // keep only trut
                 <div className="askora-modal-icon">
                   <div className="success-checkmark">
                     <div className="check-icon">
-                      <span className="icon-line line-tip"></span>
-                      <span className="icon-line line-long"></span>
+
+                      
+
                     </div>
                   </div>
                 </div>
@@ -1054,6 +1057,7 @@ interviewQuestionIdsRef.current = questionIds.filter(Boolean); // keep only trut
                 )}
                 <div className="askora-modal-actions">
                   <button
+
                     onClick={async () => {
                       try {
                         await saveRecentInterview();
@@ -1063,6 +1067,7 @@ interviewQuestionIdsRef.current = questionIds.filter(Boolean); // keep only trut
                         navigate('/dashboard');
                       }
                     }}
+
                     className="askora-btn askora-btn-primary askora-btn-large"
                   >
                     Back to Dashboard
