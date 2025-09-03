@@ -23,7 +23,8 @@ app.use(cors({
   origin: [
     'http://localhost:5173',  // Vite dev server
     'http://127.0.0.1:5173',  // Alternative localhost
-    'https://askora-ai.vercel.app'
+    'https://askora-ai.vercel.app',
+    'https://askora.onrender.com/signup'
   ],
   credentials: true,
   // include PATCH here (and any other methods you expect)
@@ -37,7 +38,8 @@ app.options('*', cors({
   origin: [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'https://askora-ai.vercel.app'
+    'https://askora-ai.vercel.app',
+    'https://askora.onrender.com/signup'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
