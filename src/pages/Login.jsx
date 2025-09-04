@@ -344,7 +344,7 @@ const Login = () => {
     try {
       console.log("Starting Google Sign-In...");
       
-      if (shouldUseRedirect()) {
+      if (false) {
         console.log("Using redirect flow for Google");
         await signInWithRedirect(auth, googleProvider);
         // The result will be handled in the useEffect hook when the page reloads
