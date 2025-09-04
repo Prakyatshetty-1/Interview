@@ -105,28 +105,28 @@ const Login = () => {
   const navigate = useNavigate();
 
   // Check for redirect result on component mount
-  useEffect(() => {
-    const handleRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
+  // useEffect(() => {
+  //   const handleRedirectResult = async () => {
+  //     try {
+  //       const result = await getRedirectResult(auth);
         
-        if (result) {
-          console.log("Redirect result received:", result);
+  //       if (result) {
+  //         console.log("Redirect result received:", result);
           
-          // Determine provider from result
-          const providerId = result.user.providerData[0]?.providerId;
-          const provider = providerId === 'google.com' ? 'Google' : 'GitHub';
+  //         // Determine provider from result
+  //         const providerId = result.user.providerData[0]?.providerId;
+  //         const provider = providerId === 'google.com' ? 'Google' : 'GitHub';
           
-          await processAuthResult(result, provider);
-        }
-      } catch (error) {
-        console.error("Redirect result error:", error);
-        handleAuthError(error);
-      }
-    };
+  //         await processAuthResult(result, provider);
+  //       }
+  //     } catch (error) {
+  //       console.error("Redirect result error:", error);
+  //       handleAuthError(error);
+  //     }
+  //   };
 
-    handleRedirectResult();
-  }, []);
+  //   handleRedirectResult();
+  // }, []);
 
   const showToast = (message, description, type = 'success') => {
     setToast({
