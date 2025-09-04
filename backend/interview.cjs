@@ -177,4 +177,53 @@ router.get("/:id", authenticateToken, async (req, res) => {
   }
 });
 
+router.get('/stats', async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    const pipeline = [];
+
+    // If userId provided, match only that user's interviews
+    if (userId) {
+      // validate ObjectId
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ error: 'Invalid userId' });
+      }
+      pipeline.push({ $match: { user: new mongoose.Types.ObjectId(userId) } });
+    }
+
+    // Unwind questions; preserveNullAndEmptyArrays not needed because we only want question docs
+    pipeline.push(
+      { $unwind: '$questions' },
+      {
+        $group: {
+          _id: { $toLower: { $ifNull: ['$questions.difficulty', 'unknown'] } },
+          count: { $sum: 1 }
+        }
+      }
+    );
+
+    const agg = await Interview.aggregate(pipeline);
+
+    let easy = 0, medium = 0, hard = 0;
+    agg.forEach(item => {
+      if (item._id === 'easy') easy = item.count;
+      else if (item._id === 'medium') medium = item.count;
+      else if (item._id === 'hard') hard = item.count;
+      // other categories are ignored for the LeetCode meter, but you can keep them if needed
+    });
+
+    const total = easy + medium + hard;
+
+    return res.json({
+      total,
+      easy: { total: easy },
+      medium: { total: medium },
+      hard: { total: hard }
+    });
+  } catch (err) {
+    console.error('Error fetching interview stats:', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
 module.exports = router;

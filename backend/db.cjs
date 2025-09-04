@@ -1,4 +1,6 @@
 // backend/db.cjs
+require("dotenv").config();
+console.log("MONGO_URI from .env:", process.env.MONGO_URI);
 
 const { MongoClient } = require("mongodb");
 const mongoose = require("mongoose");

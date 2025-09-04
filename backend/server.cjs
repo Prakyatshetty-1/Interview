@@ -12,6 +12,7 @@ const MONGO_URI = process.env.MONGO_URI;
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = process.env.SECRET_KEY;
 const interviewRoutes = require("./interview.cjs");
+const interviewsRouter = require('./interview.cjs');
 const { connectToDb } = require('./db.cjs');
 const { Interview } = require("./db.cjs");
 const aiRoutes = require("./ai.cjs");
@@ -67,7 +68,7 @@ app.use("/api/ai", aiRoutes);
 
 // ✅ Add other routes (interview router)
 app.use('/api/interviews', interviewRoutes);
-
+app.use('/api/interviews', interviewsRouter);
 // ✅ Root route
 app.get('/', (req, res) => {
   res.send('API is working');

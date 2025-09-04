@@ -6,11 +6,11 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
   const [animatedSolved, setAnimatedSolved] = useState(0);
   const [animatedAttempting, setAnimatedAttempting] = useState(0);
   const [stats, setStats] = useState({
-    total: 3632,
+    total: 0,
     attempting: 0,
-    easy: { solved: 0, total: 886 },
-    medium: { solved: 0, total: 1889 },
-    hard: { solved: 0, total: 857 }
+    easy: { solved: 0, total: 0 },
+    medium: { solved: 0, total: 0 },
+    hard: { solved: 0, total: 0 }
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -141,9 +141,55 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
     }
   };
 
+    // replace your fetchQuestionTotals with this
+    const fetchQuestionTotals = async () => {
+      try {
+        // build URL: if userId prop present, ask for per-user totals
+        const url = `${API_BASE}/api/interviews/stats${userId ? `?userId=${userId}` : ''}`;
+
+        // If your server requires auth for this endpoint, include token (safe fallback).
+        // If you made the route public, server will ignore the header.
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+
+        const res = await fetch(url, { method: 'GET', headers });
+
+        if (!res.ok) {
+          // helpful debug logs — inspect these in browser console
+          console.warn('fetchQuestionTotals failed', { url, status: res.status });
+          const text = await res.text().catch(() => '');
+          console.warn('response body:', text);
+
+          // If 401, show a non-blocking console message; do not break the UI
+          if (res.status === 401) {
+            // Optionally set an error only if you want the user to see it
+            // setError('Stats endpoint requires login. Log in to view totals.');
+            return;
+          }
+          return;
+        }
+
+        const json = await res.json();
+
+        // merge totals into existing stats (don't overwrite solved/attempting)
+        setStats(prev => ({
+          ...prev,
+          total: json.total ?? prev.total,
+          easy: { ...prev.easy, total: json.easy?.total ?? prev.easy.total },
+          medium: { ...prev.medium, total: json.medium?.total ?? prev.medium.total },
+          hard: { ...prev.hard, total: json.hard?.total ?? prev.hard.total }
+        }));
+      } catch (err) {
+        console.error('Failed to fetch question totals:', err);
+      }
+    };
+
+
+
   useEffect(() => {
     // fetch on mount & whenever userId changes
     fetchLeetCodeStats();
+    fetchQuestionTotals();
     return () => {
       clearTimers();
     };
