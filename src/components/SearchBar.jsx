@@ -29,32 +29,35 @@ export default function SearchBar({ onCardClick }) {
   const [isTopicsExpanded, setIsTopicsExpanded] = useState(false)
   const [isTopicsModalOpen, setIsTopicsModalOpen] = useState(false)
 
-  const categoryImageMap = {
-    "accounting": "https://res.cloudinary.com/dmbavexyg/image/upload/v1756975018/askora_public/Accounting.png",
-    "ai research": "https://res.cloudinary.com/dmbavexyg/image/upload/v1756975027/askora_public/AIResearch.png",
-    "aerospace engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/v1756975023/askora_public/AerospaceEngineer.png",
-    "application security engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/v1756975039/askora_public/ApplicationSecurityEngineer.png",
-    "back end": "/BackEndDev.png",
-    "chemical engineer": "/ChemicalEngineer.png",
-    "civil engineer": "/CivilEngineer.png",
-    "cloud engineer": "/CloudEngineering.png",
-    "cyber security": "/CyberSecurity.png",
-    "data engineer": "/DataEngineer.png",
-    "data scientist": "/DataScientist.png",
-    "desktop dev": "/DesktopDev.png",
-    "devops engineer": "/DevOpsEngineer.png",
-    "electrical engineering": "/ElectricalEngineering.png",
-    "electronics engineer": "/ElectronicsEngineer.png",
-    "front end": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto/v1756975099/askora_public/FrontEndDev.png",
-    "full stack": "/FullStackWebDev.png",
-    "game development": "/GameDeveloper.png",
-    "ml engineer": "/MLEngineering.png",
-    "mechanical engineering": "/MechanicalEngineering.png",
-    "mobile dev": "/MobileDev.png",
-    "robotics engineer": "/Robotics.png",
-    "security engineer": "/SecurityEngineering.png",
-    "site reliability engineer": "/SiteReliabilityEngineer.png",
-  };
+
+ const categoryImageMap = {
+  "accounting": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975018/askora_public/Accounting.png",
+  "ai research": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975027/askora_public/AIResearch.png",
+  "aerospace engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975023/askora_public/AerospaceEngineer.png",
+  "application security engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975039/askora_public/ApplicationSecurityEngineer.png",
+  "back end": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975044/askora_public/BackEndDev.png",
+  "chemical engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975054/askora_public/ChemicalEngineer.png",
+  "civil engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975056/askora_public/CivilEngineer.png",
+  "cloud engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975058/askora_public/CloudEngineering.png",
+  "cyber security": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975067/askora_public/CyberSecurity.png",
+  "data engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975069/askora_public/DataEngineer.png",
+  "data scientist": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975073/askora_public/DataScientist.png",
+  "desktop dev": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975075/askora_public/DesktopDev.png",
+  "devops engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975077/askora_public/DevOpsEngineer.png",
+  "electrical engineering": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975080/askora_public/ElectricalEngineering.png",
+  "electronics engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975082/askora_public/ElectronicsEngineer.png",
+  "front end": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975099/askora_public/FrontEndDev.png",
+  "full stack": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975102/askora_public/FullStackWebDev.png",
+  "game development": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975104/askora_public/GameDeveloper.png",
+  "ml engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975134/askora_public/MLEngineering.png",
+  "mechanical engineering": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975126/askora_public/MechanicalEngineering.png",
+  "mobile dev": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975137/askora_public/MobileDev.png",
+  "robotics engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975181/askora_public/Robotics.png",
+  "security engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975185/askora_public/SecurityEngineering.png",
+  "site reliability engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975190/askora_public/SiteReliabilityEngineer.png",
+};
+
+
 
   const getImageForCategory = (category) => {
   if (!category) return "/default.png";
