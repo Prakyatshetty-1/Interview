@@ -290,8 +290,8 @@ const Signup = () => {
   // Enhanced detection for redirect vs popup
   const shouldUseRedirect = () => {
     // Always use redirect in production to avoid CORS issues
-    if (import.meta.env.PROD) {
-      return true;
+    if (true) {
+      return false;
     }
     
     // Check for mobile devices
