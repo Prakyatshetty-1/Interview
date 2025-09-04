@@ -19,33 +19,33 @@ const aiRoutes = require("./ai.cjs");
 console.log("Starting server...");
 
 // ✅ CORS configuration - THIS MUST BE BEFORE OTHER MIDDLEWARE
-// app.use(cors({
-//   origin: [
-//     'http://localhost:5173',  // Vite dev server
-//     'http://127.0.0.1:5173',  // Alternative localhost
-//     'https://askora-ai.vercel.app',
-//     'https://interview-nxbs.onrender.com'
-//   ],
-//   credentials: true,
-//   // include PATCH here (and any other methods you expect)
-//   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-//   optionsSuccessStatus: 200 // For legacy browser support
-// }));
+app.use(cors({
+  origin: [
+    'http://localhost:5173',  // Vite dev server
+    'http://127.0.0.1:5173',  // Alternative localhost
+    'https://askora-ai.vercel.app',
+    'https://interview-nxbs.onrender.com'
+  ],
+  credentials: true,
+  // include PATCH here (and any other methods you expect)
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200 // For legacy browser support
+}));
 
-// // Handle preflight requests explicitly with same options to ensure PATCH is allowed
-// app.options('*', cors({
-//   origin: [
-//     'http://localhost:5173',
-//     'http://127.0.0.1:5173',
-//     'https://askora-ai.vercel.app',
-//     'https://interview-nxbs.onrender.com'
-//   ],
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-//   optionsSuccessStatus: 200
-// }));
+// Handle preflight requests explicitly with same options to ensure PATCH is allowed
+app.options('*', cors({
+  origin: [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://askora-ai.vercel.app',
+    'https://interview-nxbs.onrender.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
+}));
 
 // Optional fallback — this makes sure the header is present if some middleware later overrides it
 app.use((req, res, next) => {
