@@ -325,7 +325,7 @@ const Login = () => {
   const shouldUseRedirect = () => {
     // Always use redirect in production to avoid CORS issues
     if (true) {
-      return true;
+      return false;
     }
     
     // Check for mobile devices
@@ -346,13 +346,13 @@ const Login = () => {
       
       if (shouldUseRedirect()) {
         console.log("Using redirect flow for Google");
-        await signInWithPopup(auth, googleProvider); 
+        await signInWithRedirect(auth, googleProvider);
         // The result will be handled in the useEffect hook when the page reloads
       } else {
         // Try popup first, fallback to redirect if it fails
         console.log("Attempting popup flow for Google");
         try {
-          const result = await signInWithRedirect(auth, googleProvider);
+          const result = await signInWithPopup(auth, googleProvider);
           await processAuthResult(result, 'Google');
         } catch (popupError) {
           if (popupError.code === 'auth/popup-blocked' || 
