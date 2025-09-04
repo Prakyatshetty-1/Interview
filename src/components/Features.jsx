@@ -47,7 +47,8 @@ export default function Features() {
                 <h1 className="uptext">Best</h1>
                 <h1 className="dntext">The Plan</h1>
               </div>
-              <img src="./features1.png"/>
+              <img src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto/v1756975093/askora_public/features1.png"
+              loading="lazy"/>
             </div>
           </div>
           <div className="bottomotherfeaturebox">
@@ -58,11 +59,17 @@ export default function Features() {
                   <div className="bottomboxcircle3"></div>
                   <div className="bottomboxcircle4"></div>
                 
-                <div className="mockup"></div>
+                <img 
+  class="mockup" 
+  src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto/v1756975095/askora_public/features2.png" 
+  alt="features"
+  loading="lazy"
+/>
               </div>
               <div className="bottomboxouter2">
                 <div className="bottomboxbox"></div>
-                <img src="/star.png"></img>
+                <img src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto/v1756975192/askora_public/star.png"
+                loading="lazy"></img>
                 <h1>All around<br/> the globe</h1>
                 <p>500 clients accross <br/> 15 countries</p>
                 <div className="bottomboxcircle1"></div>
