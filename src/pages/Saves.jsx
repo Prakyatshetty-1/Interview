@@ -37,18 +37,69 @@ export default function Saves() {
     setSavedCards((prev) => prev.filter((s) => s._id !== savedDocId));
   };
 
-  const items = [
-    { icon: <img src="/homeicon.png" alt="Home" style={{ width: '48px', height: '48px' }} />, label: "Home", onClick: () => navigate('/Dashboard') },
-    { icon: <img src="/interviewicon.png" alt="Interviews" style={{ width: '48px', height: '48px' }} />, label: "Interviews", onClick: () => navigate('/Interview') },
-    { icon: <img src="/createicon.png" alt="Create" style={{ width: '48px', height: '48px' }} />, label: "Create", onClick: () => navigate('/Create') },
-    { icon: <img src="/favicon.png" alt="Saves" style={{ width: '48px', height: '48px' }} />, label: "Saves", onClick: () => navigate('/Saves') },
-    { icon: <img src="/profileicon.png" alt="Profile" style={{ width: '48px', height: '48px' }} />, label: "Profile", onClick: () => navigate('/Profile') },
-     {
-      icon: <img src="/ViewProfile.png" alt="Settings"style={{ width: '48px', height: '48px' }} />,
-      label: "Explore",
-       onClick: () => navigate('/ViewProfile'),
-    },
-  ];
+  const dockItems = [
+  { 
+    icon: <img 
+            src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975111/askora_public/homeicon.png" 
+            alt="Home" 
+            style={{ width: 48, height: 48 }} 
+            loading="lazy"
+          />, 
+    label: "Home", 
+    onClick: () => navigate('/Dashboard') 
+  },
+  { 
+    icon: <img 
+            src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975117/askora_public/interviewicon.png" 
+            alt="Interviews" 
+            style={{ width: 48, height: 48 }} 
+            loading="lazy"
+          />, 
+    label: "Interviews", 
+    onClick: () => navigate('/Interview') 
+  },
+  { 
+    icon: <img 
+            src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975063/askora_public/createicon.png" 
+            alt="Create" 
+            style={{ width: 48, height: 48 }} 
+            loading="lazy"
+          />, 
+    label: "Create", 
+    onClick: () => navigate('/Create') 
+  },
+  { 
+    icon: <img 
+            src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975089/askora_public/favicon.png" 
+            alt="Saves" 
+            style={{ width: 48, height: 48 }} 
+            loading="lazy"
+          />, 
+    label: "Saves", 
+    onClick: () => navigate('/Saves') 
+  },
+  { 
+    icon: <img 
+            src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975168/askora_public/profileicon.png" 
+            alt="Profile" 
+            style={{ width: 48, height: 48 }} 
+            loading="lazy"
+          />, 
+    label: "Profile", 
+    onClick: () => navigate('/Profile') 
+  },
+  { 
+    icon: <img 
+            src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975204/askora_public/ViewProfile.png" 
+            alt="Explore" 
+            style={{ width: 48, height: 48 }} 
+            loading="lazy"
+          />, 
+    label: "Explore", 
+    onClick: () => navigate('/ViewProfile') 
+  },
+];
+
 
   return (
     <div className="containsaves">
@@ -91,7 +142,8 @@ export default function Saves() {
           })
         ) : (
           <div className="nosavesyet">
-            <img src="./saves.png" alt="" className="nosave" />
+            <img src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975183/askora_public/saves.png" 
+            loading='lazy' alt="" className="nosave" />
             <h1>Still waiting for your first save!</h1>
           </div>
         )}
