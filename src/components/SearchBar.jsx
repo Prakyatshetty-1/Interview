@@ -30,10 +30,10 @@ export default function SearchBar({ onCardClick }) {
   const [isTopicsModalOpen, setIsTopicsModalOpen] = useState(false)
 
   const categoryImageMap = {
-    "accounting": "/Accounting.png",
-    "ai research": "/AIResearch.png",
-    "aerospace engineer": "/AerospaceEngineer.png",
-    "application security engineer": "/ApplicationSecurityEngineer.png",
+    "accounting": "https://res.cloudinary.com/dmbavexyg/image/upload/v1756975018/askora_public/Accounting.png",
+    "ai research": "https://res.cloudinary.com/dmbavexyg/image/upload/v1756975027/askora_public/AIResearch.png",
+    "aerospace engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/v1756975023/askora_public/AerospaceEngineer.png",
+    "application security engineer": "https://res.cloudinary.com/dmbavexyg/image/upload/v1756975039/askora_public/ApplicationSecurityEngineer.png",
     "back end": "/BackEndDev.png",
     "chemical engineer": "/ChemicalEngineer.png",
     "civil engineer": "/CivilEngineer.png",
@@ -45,7 +45,7 @@ export default function SearchBar({ onCardClick }) {
     "devops engineer": "/DevOpsEngineer.png",
     "electrical engineering": "/ElectricalEngineering.png",
     "electronics engineer": "/ElectronicsEngineer.png",
-    "front end": "/FrontEndDev.png",
+    "front end": "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto/v1756975099/askora_public/FrontEndDev.png",
     "full stack": "/FullStackWebDev.png",
     "game development": "/GameDeveloper.png",
     "ml engineer": "/MLEngineering.png",
