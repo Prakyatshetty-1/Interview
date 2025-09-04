@@ -23,7 +23,8 @@ export default function CommunityPage() {
 
   return (
     <div className="community-page">
-     <img src="/community.png"/>
+     <img src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto/v1756975061/askora_public/community.png"
+     loading="lazy"/>
      <h1>
       Find Your Tribe,<br/>Build Your Network.
      </h1>
