@@ -4,12 +4,12 @@ import { getAuth, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
 
 // Use a single Firebase configuration for both providers
 const firebaseConfig = {
-  apiKey: "AIzaSyC10qep9vmD6V9GHv0TJZvPjeCL9iwfVyk",
-  authDomain: "interviewapp-c2082.firebaseapp.com",
-  projectId: "interviewapp-c2082",
-  storageBucket: "interviewapp-c2082.firebasestorage.app",
-  messagingSenderId: "368524080705",
-  appId: "1:368524080705:web:19b137744f56924b0e78c0"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase app
