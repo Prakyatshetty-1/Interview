@@ -324,7 +324,7 @@ const Login = () => {
   // Enhanced detection for redirect vs popup
   const shouldUseRedirect = () => {
     // Always use redirect in production to avoid CORS issues
-    if (import.meta.env.PROD) {
+    if (true) {
       return true;
     }
     
@@ -344,7 +344,7 @@ const Login = () => {
     try {
       console.log("Starting Google Sign-In...");
       
-      if (false) {
+      if (shouldUseRedirect()) {
         console.log("Using redirect flow for Google");
         await signInWithRedirect(auth, googleProvider);
         // The result will be handled in the useEffect hook when the page reloads
