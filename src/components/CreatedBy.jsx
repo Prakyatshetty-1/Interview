@@ -15,7 +15,8 @@ export default function CreatedBy(){
       </div>
     <div className="creators">
                 <div className="creatorcard">
-                    <img className='bhavith1' src='/prakyatghibli.png' alt="Prakyat"/>
+                    <img className='bhavith1' src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto/v1756975157/askora_public/prakyatghibli.png"
+                    loading='lazy' alt="Prakyat"/>
                     <div className="creator-info">
                         <h3 className="creator-name">Prakyat</h3>
                         <p className="creator-role12">Frontend Developer</p>
@@ -39,7 +40,8 @@ export default function CreatedBy(){
                     </div>
                 </div>
                 <div className="creatorcard">
-                    <img className='bhavith' src='/bhavith.png' alt="Bhavith"/>
+                    <img className='bhavith' src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto/v1756975045/askora_public/bhavith.png"
+                    loading='lazy' alt="Bhavith"/>
                     <div className="creator-info">
                         <h3 className="creator-name">Bhavith</h3>
                         <p className="creator-role12">Frontend Developer</p>
@@ -63,7 +65,8 @@ export default function CreatedBy(){
                     </div>
                 </div>
                 <div className="creatorcard">
-                    <img className='bhavith1' src='/swaraj.png' alt="Swaraj"/>
+                    <img className='bhavith1' src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto/v1756975195/askora_public/swaraj.png"
+                    loading='lazy' alt="Swaraj"/>
                     <div className="creator-info">
                         <h3 className="creator-name">Swaraj</h3>
                         <p className="creator-role12">Backend Developer</p>
