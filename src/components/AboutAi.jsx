@@ -61,8 +61,9 @@ const AboutAi = () => {
                   rel="noopener noreferrer"
                 >
                   <img
-                    src="/aboutaivideo.png"
+                    src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto/v1756975015/askora_public/aboutaivideo.png"
                     alt="Watch Video"
+                    loading="lazy"
                     width="420"
                     height="245"
                   />
@@ -97,22 +98,25 @@ const AboutAi = () => {
               <div className="card-avatars">
                 <div className="cardavatar-container">
                   <img
-                    src="/profilepic2.png"
+                    src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto/v1756975170/askora_public/profilepic1.png"
                     alt="Profile 1"
+                     loading="lazy"
                     className="cardavatar"
                   />
                 </div>
                 <div className="avatar-container">
                   <img
-                    src="/profilepic1.png"
+                    src="https://res.cloudinary.com/dmbavexyg/image/upload/v1756975172/askora_public/profilepic2.png"
                     alt="Profile 2"
+                    loading="lazy"
                     className="cardavatar"
                   />
                 </div>
                 <div className="avatar-container">
                   <img
-                    src="/profilepic3.png"
+                    src="https://res.cloudinary.com/dmbavexyg/image/upload/v1756975175/askora_public/profilepic3.png"
                     alt="Profile 3"
+                    loading="lazy"
                     className="cardavatar"
                   />
                 </div>
