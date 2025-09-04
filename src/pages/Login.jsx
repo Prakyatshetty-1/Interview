@@ -346,13 +346,13 @@ const Login = () => {
       
       if (shouldUseRedirect()) {
         console.log("Using redirect flow for Google");
-        await signInWithRedirect(auth, googleProvider);
+        await signInWithPopup(auth, googleProvider); 
         // The result will be handled in the useEffect hook when the page reloads
       } else {
         // Try popup first, fallback to redirect if it fails
         console.log("Attempting popup flow for Google");
         try {
-          const result = await signInWithPopup(auth, googleProvider);
+          const result = await signInWithRedirect(auth, googleProvider);
           await processAuthResult(result, 'Google');
         } catch (popupError) {
           if (popupError.code === 'auth/popup-blocked' || 
