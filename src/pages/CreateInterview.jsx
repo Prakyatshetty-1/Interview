@@ -1024,19 +1024,19 @@ const handleDetailsSubmit = async () => {
         {/* Star Background */}
   <div className="star-background">
     <div className="star star-1">
-      <img src="/star.png" alt="star" />
+      <img src= "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975192/askora_public/star.png" alt="star" />
     </div>
     <div className="star star-2">
-      <img src="/star.png" alt="star" />
+      <img src= "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975192/askora_public/star.png" alt="star" />
     </div>
     <div className="star star-3">
-      <img src="/star.png" alt="star" />
+      <img src= "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975192/askora_public/star.png" alt="star" />
     </div>
     <div className="star star-4">
-      <img src="/star.png" alt="star" />
+      <img src= "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975192/askora_public/star.png" alt="star" />
     </div>
     <div className="star star-5">
-      <img src="/star.png" alt="star" />
+      <img src= "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975192/askora_public/star.png" alt="star" />
     </div>
   </div>
                 <CardHeader className="intro-header">
