@@ -11,7 +11,7 @@ const questions = [
     title: "Tell us about your professional status",
     subtitle: "Help us understand your current situation better",
     type: "multi-question",
-    image: "/pref1.png",
+    image: "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975159/askora_public/pref1.png",
     subQuestions: [
       {
         id: "status",
@@ -40,7 +40,7 @@ const questions = [
     title: "Your educational and professional background",
     subtitle: "Tell us more about your background",
     type: "multi-question",
-    image: "/pref2.png",
+    image: "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975162/askora_public/pref2.png",
     subQuestions: [
       {
         id: "college",
@@ -63,7 +63,7 @@ const questions = [
     title: "Your career goals and platform usage",
     subtitle: "Help us understand your aspirations and how we can help",
     type: "multi-question",
-    image: "/pref3.png",
+    image: "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975164/askora_public/pref3.png",
     subQuestions: [
       {
         id: "career_roles",
@@ -92,7 +92,7 @@ const questions = [
     title: "Where did you hear about us?",
     subtitle: "Help us understand how you discovered our platform",
     type: "radio",
-    image: "/pref4.png",
+    image: "https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975166/askora_public/pref4.png",
     required: true,
     options: [
       "🌐 Google Search",
@@ -100,9 +100,9 @@ const questions = [
       "🧑‍🤝‍🧑 Friend or Referral",
       "📰 Online Ads or Promotions"
     ]
-  },
-  
-]
+  }
+];
+
 
 export default function Preference() {
 
@@ -154,10 +154,10 @@ useEffect(() => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#f9f9f9",
+          backgroundColor: "rgba(15, 16, 31, 0.6)",
         }}
       >
-        <h2 style={{ fontSize: "1.5rem", color: "#333" }}>Checking your preferences...</h2>
+       <div class="spinner"></div>
       </div>
     );
   }
