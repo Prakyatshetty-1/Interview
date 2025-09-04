@@ -37,7 +37,7 @@ export default function Saves() {
     setSavedCards((prev) => prev.filter((s) => s._id !== savedDocId));
   };
 
-  const dockItems = [
+  const items = [
   { 
     icon: <img 
             src="https://res.cloudinary.com/dmbavexyg/image/upload/f_auto,q_auto,dpr_auto/v1756975111/askora_public/homeicon.png" 
