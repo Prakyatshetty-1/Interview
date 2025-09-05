@@ -1,0 +1,27 @@
+.loader {
+  width: 5.4em;
+  height: 5.4em;
+  border: 0.4em solid rgb(84, 84, 84);
+  border-left-color: #a23ffc;
+  border-radius: 45%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+.preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0d0d0d; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+}

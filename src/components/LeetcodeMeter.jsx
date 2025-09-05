@@ -140,14 +140,116 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
       console.error('Error updating LeetCode stats:', err);
     }
   };
+  
+  const fetchQuestionTotals = async () => {
+  try {
+    const basePath = `${API_BASE}/api/interviews`;
+    const preferredUrl = `${basePath}/stats${userId ? `?userId=${userId}` : ''}`;
+    console.log('[LeetMeter] try preferred ->', preferredUrl);
+
+    const token = localStorage.getItem('token');
+    const headers = token
+      ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+      : { 'Content-Type': 'application/json' };
+
+    // fetch once and read text once
+    const res = await fetch(preferredUrl, { method: 'GET', headers });
+    console.log('[LeetMeter] preferred status', res.status);
+    const text = await res.text().catch(() => '');
+    if (res.ok) {
+      const json = text ? JSON.parse(text) : {};
+      console.log('[LeetMeter] interview totals (preferred) response', json);
+
+      // server returns either:
+      //  - global-only: { total, easy: {total}, ... }
+      //  - user+global: { user: {...}, global: {...} }
+      const userPart = json.user || null;
+      const globalPart = json.global || (json.total ? json : null);
+
+      // If userId was provided, prefer userPart when it has actual counts,
+      // otherwise fall back to globalPart. If no userId, use globalPart/json.
+      let chosen = null;
+      if (userId) {
+        const userHasData = userPart && (Number(userPart.total) > 0 ||
+                                (userPart.easy?.total > 0) ||
+                                (userPart.medium?.total > 0) ||
+                                (userPart.hard?.total > 0));
+        chosen = userHasData ? userPart : (globalPart || userPart || {});
+      } else {
+        chosen = globalPart || json || {};
+      }
+
+      // normalize chosen shape (some fields might be missing)
+      const newTotals = {
+        total: Number(chosen.total ?? 0),
+        easyTotal: Number(chosen.easy?.total ?? 0),
+        mediumTotal: Number(chosen.medium?.total ?? 0),
+        hardTotal: Number(chosen.hard?.total ?? 0)
+      };
+
+      // update stats in-place: only the `.total` fields for categories are set here
+      setStats(prev => ({
+        ...prev,
+        total: newTotals.total ?? prev.total,
+        easy: { ...prev.easy, total: newTotals.easyTotal ?? prev.easy.total },
+        medium: { ...prev.medium, total: newTotals.mediumTotal ?? prev.medium.total },
+        hard: { ...prev.hard, total: newTotals.hardTotal ?? prev.hard.total }
+      }));
+
+      // success -> stop here (don't fall through to fallback)
+      return;
+    }
+
+    // preferred failed — log server body and fall back
+    console.warn('[LeetMeter] preferred failed', res.status, text);
+
+    const fallbackUrl = `${basePath}/stats-simple${userId ? `?userId=${userId}` : ''}`;
+    console.log('[LeetMeter] fallback ->', fallbackUrl);
+    const res2 = await fetch(fallbackUrl, { method: 'GET', headers });
+    console.log('[LeetMeter] fallback status', res2.status);
+    const text2 = await res2.text().catch(() => '');
+    if (!res2.ok) {
+      console.warn('[LeetMeter] fallback failed', res2.status, text2);
+      return;
+    }
+
+    const json2 = text2 ? JSON.parse(text2) : {};
+    console.log('[LeetMeter] interview totals (fallback) response', json2);
+    setStats(prev => ({
+      ...prev,
+      total: json2?.total ?? prev.total,
+      easy: { ...prev.easy, total: json2?.easy?.total ?? prev.easy.total },
+      medium: { ...prev.medium, total: json2?.medium?.total ?? prev.medium.total },
+      hard: { ...prev.hard, total: json2?.hard?.total ?? prev.hard.total }
+    }));
+  } catch (err) {
+    console.error('Failed to fetch question totals (both routes):', err);
+  }
+};
+
 
   useEffect(() => {
-    // fetch on mount & whenever userId changes
-    fetchLeetCodeStats();
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        // fetch the leetcode/user stats first (so they initialize)
+        await fetchLeetCodeStats();
+
+        // then fetch question totals and merge (prevents overwrite)
+        if (!cancelled) await fetchQuestionTotals();
+      } catch (err) {
+        console.error('Error during stats load sequence:', err);
+      }
+    };
+
+    load();
+
     return () => {
+      cancelled = true;
       clearTimers();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   // compute solved and stroke

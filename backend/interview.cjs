@@ -164,6 +164,144 @@ router.get("/debug/tags", async (req, res) => {
 });
 
 // ✅ Protected route - Get a single interview by ID
+router.get('/stats', async (req, res) => {
+  try {
+    console.log('[interview.stats] incoming query:', req.query);
+
+    if (!Interview) {
+      console.error('[interview.stats] Interview model missing');
+      return res.status(500).json({ error: 'Server error: Interview model missing' });
+    }
+
+    const { userId } = req.query;
+
+    // Helper to run aggregation that groups by difficulty
+    const runAgg = async (matchFilter = {}) => {
+      const pipeline = [
+        { $match: matchFilter },
+        { $project: { questions: { $ifNull: ['$questions', []] } } },
+        { $unwind: { path: '$questions', preserveNullAndEmptyArrays: false } },
+        // group by lowercased difficulty
+        { $group: { _id: { $toLower: { $ifNull: ['$questions.difficulty', 'unknown'] } }, count: { $sum: 1 } } }
+      ];
+      return Interview.aggregate(pipeline).allowDiskUse(true);
+    };
+
+    // If a userId is provided, validate it and compute both user & overall counts
+    if (userId) {
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ error: 'Invalid userId' });
+      }
+
+      const userMatch = { user: new mongoose.Types.ObjectId(userId) };
+      const [userAgg, globalAgg] = await Promise.all([runAgg(userMatch), runAgg({})]);
+
+      console.log('[interview.stats] userAgg:', userAgg);
+      console.log('[interview.stats] globalAgg:', globalAgg);
+
+      const toCounts = (agg) => {
+        let easy = 0, medium = 0, hard = 0;
+        (agg || []).forEach(item => {
+          if (!item || typeof item._id === 'undefined' || item._id === null) return;
+          const key = String(item._id).trim().toLowerCase();
+          if (key === 'easy') easy = item.count;
+          else if (key === 'medium') medium = item.count;
+          else if (key === 'hard') hard = item.count;
+        });
+        return { total: easy + medium + hard, easy, medium, hard };
+      };
+
+      const userCounts = toCounts(userAgg);
+      const globalCounts = toCounts(globalAgg);
+
+      return res.json({
+        user: {
+          total: userCounts.total,
+          easy: { total: userCounts.easy },
+          medium: { total: userCounts.medium },
+          hard: { total: userCounts.hard }
+        },
+        global: {
+          total: globalCounts.total,
+          easy: { total: globalCounts.easy },
+          medium: { total: globalCounts.medium },
+          hard: { total: globalCounts.hard }
+        }
+      });
+    }
+
+    // No userId: return global counts only
+    const globalAgg = await runAgg({});
+    console.log('[interview.stats] globalAgg:', globalAgg);
+
+    let easy = 0, medium = 0, hard = 0;
+    (globalAgg || []).forEach(item => {
+      const key = String(item._id).trim().toLowerCase();
+      if (key === 'easy') easy = item.count;
+      else if (key === 'medium') medium = item.count;
+      else if (key === 'hard') hard = item.count;
+    });
+
+    const total = easy + medium + hard;
+    return res.json({
+      total,
+      easy: { total: easy },
+      medium: { total: medium },
+      hard: { total: hard }
+    });
+
+  } catch (err) {
+    console.error('[interview.stats] ERROR:', err && err.stack ? err.stack : err);
+    return res.status(500).json({ error: 'Server error', detail: err?.message ?? String(err) });
+  }
+});
+
+router.get('/stats-simple', async (req, res) => {
+  try {
+    console.log('[interview.stats-simple] incoming query:', req.query);
+
+    if (!Interview) {
+      console.error('[interview.stats-simple] Interview model missing');
+      return res.status(500).json({ error: 'Server error: Interview model missing' });
+    }
+
+    const { userId } = req.query;
+    const filter = {};
+    if (userId) {
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ error: 'Invalid userId' });
+      }
+      filter.user = new mongoose.Types.ObjectId(userId);
+    }
+
+    const docs = await Interview.find(filter, { questions: 1 }).lean().exec();
+
+    let easy = 0, medium = 0, hard = 0;
+    for (const doc of docs) {
+      const qs = Array.isArray(doc.questions) ? doc.questions : [];
+      for (const q of qs) {
+        const key = (q && q.difficulty) ? String(q.difficulty).trim().toLowerCase() : null;
+        if (key === 'easy') easy++;
+        else if (key === 'medium') medium++;
+        else if (key === 'hard') hard++;
+      }
+    }
+
+    const total = easy + medium + hard;
+    console.log('[interview.stats-simple] counts:', { total, easy, medium, hard, docsCount: docs.length });
+
+    return res.json({
+      total,
+      easy: { total: easy },
+      medium: { total: medium },
+      hard: { total: hard }
+    });
+  } catch (err) {
+    console.error('[interview.stats-simple] ERROR:', err && err.stack ? err.stack : err);
+    return res.status(500).json({ error: 'Server error', detail: err?.message ?? String(err) });
+  }
+});
+
 router.get("/:id", authenticateToken, async (req, res) => {
   try {
     const interview = await Interview.findById(req.params.id).lean().exec();
@@ -172,7 +310,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
     }
     res.json(interview);
   } catch (err) {
-    console.error("Error fetching interview:", err);
+    console.error("Error fetching interview by id:", err);
     res.status(500).json({ error: "Server error" });
   }
 });

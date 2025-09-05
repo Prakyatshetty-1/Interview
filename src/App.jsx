@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import MainLanding from './MainLanding';
+import React, { useState, useEffect } from "react";
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import Preference from './pages/Preference';
@@ -13,16 +14,19 @@ import Profile from './pages/Profile';
 import InterviewPortal from './pages/InterviewPortal';
 import ViewProfile from './pages/ViewProfile';
 import Questionfolder from './pages/Questionfolder';
+import Preloader from './components/Preloader';
 import './App.css';
 
+
 function App() {
+
   return (
       <Routes>
         <Route path="/" element={<MainLanding />} />
         <Route path="/signup" element={<Signup />} />
         <Route path='/login' element={<Login/>}/>
         <Route path='/preference' element={<Preference/>}/>
-         <Route path='/dashboard' element={<Welcome/>}/>
+        <Route path='/dashboard' element={<Welcome/>}/>
         <Route path='/interview' element={<InterviewPage/>}/>
         <Route path='/interviews' element={<InterviewsByTag/>}/>
         <Route path='/questionfolder' element={<Questionfolder/>}/>
