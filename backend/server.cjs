@@ -11,7 +11,6 @@ const PORT = 5000;
 const MONGO_URI = process.env.MONGO_URI;
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = process.env.SECRET_KEY;
-const interviewRoutes = require("./interview.cjs");
 const { connectToDb } = require('./db.cjs');
 const { Interview } = require("./db.cjs");
 const aiRoutes = require("./ai.cjs");
@@ -65,8 +64,7 @@ app.use(express.json());
 // ✅ Add AI routes AFTER CORS and body parser
 app.use("/api/ai", aiRoutes);
 
-// ✅ Add other routes (interview router)
-app.use('/api/interviews', interviewRoutes);
+
 
 // ✅ Root route
 app.get('/', (req, res) => {
@@ -103,8 +101,14 @@ mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('MongoDB connected');
 
+    // mount routers AFTER DB connected
+    const interviewsRouter = require('./interview.cjs');
+    app.use('/api/interviews', interviewsRouter);
+    app.use('/api/ai', require('./ai.cjs'));
+
+    app.get('/', (req, res) => res.send('API is working'));
     app.listen(PORT, () => {
-      console.log(`Server is running on port`);
+      console.log(`Server is running on port ${PORT}`);
     });
   })
   .catch(err => {
