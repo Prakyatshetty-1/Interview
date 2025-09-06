@@ -176,15 +176,19 @@ router.get('/stats', async (req, res) => {
 
     // Helper to run aggregation that groups by difficulty
     const runAgg = async (matchFilter = {}) => {
-      const pipeline = [
-        { $match: matchFilter },
-        { $project: { questions: { $ifNull: ['$questions', []] } } },
-        { $unwind: { path: '$questions', preserveNullAndEmptyArrays: false } },
-        // group by lowercased difficulty
-        { $group: { _id: { $toLower: { $ifNull: ['$questions.difficulty', 'unknown'] } }, count: { $sum: 1 } } }
-      ];
-      return Interview.aggregate(pipeline).allowDiskUse(true);
-    };
+  const pipeline = [
+    { $match: matchFilter },
+    // group by interview.difficulty, not per question
+    {
+      $group: {
+        _id: { $toLower: { $ifNull: ['$difficulty', 'unknown'] } },
+        count: { $sum: 1 }
+      }
+    }
+  ];
+  return Interview.aggregate(pipeline).allowDiskUse(true);
+};
+
 
     // If a userId is provided, validate it and compute both user & overall counts
     if (userId) {
@@ -277,14 +281,12 @@ router.get('/stats-simple', async (req, res) => {
 
     let easy = 0, medium = 0, hard = 0;
     for (const doc of docs) {
-      const qs = Array.isArray(doc.questions) ? doc.questions : [];
-      for (const q of qs) {
-        const key = (q && q.difficulty) ? String(q.difficulty).trim().toLowerCase() : null;
-        if (key === 'easy') easy++;
-        else if (key === 'medium') medium++;
-        else if (key === 'hard') hard++;
-      }
-    }
+  const key = doc.difficulty ? String(doc.difficulty).trim().toLowerCase() : null;
+  if (key === 'easy') easy++;
+  else if (key === 'medium') medium++;
+  else if (key === 'hard') hard++;
+}
+
 
     const total = easy + medium + hard;
     console.log('[interview.stats-simple] counts:', { total, easy, medium, hard, docsCount: docs.length });

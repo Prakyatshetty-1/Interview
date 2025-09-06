@@ -6,8 +6,8 @@ import "./Topics.css";
 
 const allTopics = [
   { name: "Full Stack", count: 1944 },
-  { name: "Front End", count: 798 },
-  { name: "Back End", count: 709 },
+  { name: "FrontEnd", count: 798 },
+  { name: "BackEnd", count: 709 },
   { name: "Mobile Dev", count: 600 },
   { name: "Desktop Dev", count: 591 },
   { name: "ML", count: 457 },
