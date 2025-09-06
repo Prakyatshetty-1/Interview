@@ -5,9 +5,9 @@ const jwt = require("jsonwebtoken");
 const { ObjectId } = require("mongodb");
 const { Interview } = require("./db.cjs"); // mongoose model
 const User = require("./User.cjs");
+const mongoose = require("mongoose"); 
 const SECRET_KEY = process.env.SECRET_KEY;
 
-// Middleware to check JWT
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -18,7 +18,7 @@ function authenticateToken(req, res, next) {
     req.user = user;
     next();
   });
-}
+} 
 
 // ✅ Public route - Get ALL interview packs (no login needed)
 router.get("/all", async (req, res) => {
@@ -97,7 +97,7 @@ router.post("/save", authenticateToken, async (req, res) => {
 router.get("/by-tag/:tag", async (req, res) => {
   try {
     const tagParam = decodeURIComponent(req.params.tag).trim().toLowerCase();
-    console.log("Searching for tag:", tagParam);
+    console.log("Searching for tag:", tagParam);  
     
     // Fixed: Use $elemMatch to search within the tags array properly
     const interviews = await Interview.find({
@@ -134,7 +134,7 @@ router.get("/by-tag/:tag", async (req, res) => {
     res.json(interviews);
   } catch (err) {
     console.error("Error fetching interviews by tag:", err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error" });  
   }
 });
 
@@ -163,7 +163,6 @@ router.get("/debug/tags", async (req, res) => {
   }
 });
 
-// ✅ Protected route - Get a single interview by ID
 router.get('/stats', async (req, res) => {
   try {
     console.log('[interview.stats] incoming query:', req.query);

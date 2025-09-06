@@ -36,7 +36,13 @@ async function connectToDb() {
     console.error('Failed to connect to MongoDB:', err);
     throw err;
   }
+  await mongoose.connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  console.log('mongoose connected (readyState):', mongoose.connection.readyState);
 }
+
 
 function getDb() {
   if (!db) {
@@ -54,6 +60,7 @@ const questionSchema = new mongoose.Schema({
   tag: { type: String }
 });
 
+// Interview schema
 const interviewSchema = new mongoose.Schema(
   {
     user: {

@@ -6,11 +6,11 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
   const [animatedSolved, setAnimatedSolved] = useState(0);
   const [animatedAttempting, setAnimatedAttempting] = useState(0);
   const [stats, setStats] = useState({
-    total: 3632,
+    total: 0,
     attempting: 0,
-    easy: { solved: 0, total: 886 },
-    medium: { solved: 0, total: 1889 },
-    hard: { solved: 0, total: 857 }
+    easy: { solved: 0, total: 0 },
+    medium: { solved: 0, total: 0 },
+    hard: { solved: 0, total: 0 }
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -141,7 +141,7 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
     }
   };
   
-  const fetchQuestionTotals = async () => {
+const fetchQuestionTotals = async () => {
   try {
     const basePath = `${API_BASE}/api/interviews`;
     const preferredUrl = `${basePath}/stats${userId ? `?userId=${userId}` : ''}`;
@@ -251,6 +251,7 @@ const LeetcodeMeter = ({ userId = null, isOwnProfile = false }) => {
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
+
 
   // compute solved and stroke
   const solved = (stats.easy.solved || 0) + (stats.medium.solved || 0) + (stats.hard.solved || 0);

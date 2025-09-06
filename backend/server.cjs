@@ -10,6 +10,8 @@ require("dotenv").config();
 const PORT = 5000;
 const MONGO_URI = process.env.MONGO_URI;
 const jwt = require('jsonwebtoken');
+const interviewRoutes = require("./interview.cjs");
+const interviewsRouter = require('./interview.cjs');
 const SECRET_KEY = process.env.SECRET_KEY;
 const { connectToDb } = require('./db.cjs');
 const { Interview } = require("./db.cjs");
@@ -96,11 +98,9 @@ const validateEmail = (email) => {
 };
 
 // ✅ Database connection and server startup
-
 mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('MongoDB connected');
-
     // mount routers AFTER DB connected
     const interviewsRouter = require('./interview.cjs');
     app.use('/api/interviews', interviewsRouter);
@@ -114,6 +114,7 @@ mongoose.connect(MONGO_URI)
   .catch(err => {
     console.error('Error connecting to MongoDB (Mongoose):', err.message);
   });
+
 
 // ✅ Auth routes
 app.post('/login', async (req, res) => {
